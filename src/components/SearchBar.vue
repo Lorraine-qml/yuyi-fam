@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-wrap items-center gap-3 mb-5">
+  <div
+    class="flex flex-wrap items-center gap-3 mb-6 rounded-xl border bg-white p-4 shadow-sm"
+    style="border-color: var(--yw-border)"
+  >
     <slot name="filters"></slot>
     <avue-input v-model="searchKeyword" placeholder="请输入关键词" size="small" class="w-48" />
     <avue-select v-model="searchType" :dic="typeOptions" placeholder="全部板块" size="small" clearable />
@@ -25,7 +28,8 @@ const dateRange = ref([])
 
 const typeOptions = ref([
   { label: '能耗', value: 'energy' },
-  { label: '安全', value: 'security' }
+  { label: '安全', value: 'security' },
+  { label: '食堂', value: 'canteen' }
 ])
 
 const handleSearch = () => {

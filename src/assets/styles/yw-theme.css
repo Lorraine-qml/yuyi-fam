@@ -1,0 +1,87 @@
+/* 禹翼平台主题变量与全局覆盖 */
+:root {
+  --yw-primary: #4f46e5;
+  --yw-primary-light: #6366f1;
+  --yw-primary-dark: #4338ca;
+  --yw-primary-bg: #eef2ff;
+  --yw-success: #10b981;
+  --yw-success-bg: #ecfdf5;
+  --yw-warning: #f59e0b;
+  --yw-warning-bg: #fef3c7;
+  --yw-danger: #ef4444;
+  --yw-danger-bg: #fef2f2;
+  --yw-info: #3b82f6;
+  --yw-info-bg: #eff6ff;
+  --yw-processing: #3b82f6;
+  --yw-text-primary: #1f2937;
+  --yw-text-secondary: #5b6871;
+  --yw-text-placeholder: #9ca3af;
+  --yw-bg-page: #f5f7fb;
+  --yw-bg-card: #ffffff;
+  --yw-border: #eef2f6;
+  --yw-border-light: #e4e7ec;
+  --yw-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --yw-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  /* Element Plus 主色对齐品牌靛蓝 */
+  --el-color-primary: #4f46e5;
+  --el-color-primary-light-3: #818cf8;
+  --el-color-primary-light-5: #a5b4fc;
+  --el-color-primary-light-7: #c7d2fe;
+  --el-color-primary-light-8: #e0e7ff;
+  --el-color-primary-light-9: #eef2ff;
+  --el-color-primary-dark-2: #4338ca;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--yw-bg-page);
+  color: var(--yw-text-primary);
+}
+
+.yw-card {
+  background: var(--yw-bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--yw-border);
+  box-shadow: var(--yw-shadow-sm);
+}
+
+.yw-tag-success {
+  background: var(--yw-success-bg);
+  color: var(--yw-success);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.yw-tag-warning {
+  background: var(--yw-warning-bg);
+  color: var(--yw-warning);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.yw-tag-danger {
+  background: var(--yw-danger-bg);
+  color: var(--yw-danger);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.yw-tag-info {
+  background: var(--yw-primary-bg);
+  color: var(--yw-primary);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.yw-tag-processing {
+  background: var(--yw-info-bg);
+  color: var(--yw-processing);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
