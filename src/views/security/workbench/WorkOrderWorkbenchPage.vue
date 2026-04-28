@@ -892,6 +892,31 @@ function resetFilters() {
   currentPage.value = 1
 }
 
+/**
+ * 从路由 query 应用筛选（风险看板「查看详情/处置」携带 fromRiskBoard=1）。
+ */
+function applyWorkbenchRouteQuery() {
+  const q = route.query
+  if (q.fromRiskBoard !== '1') return
+
+  if (q.category && ['risk', 'repair', 'inspection'].includes(String(q.category))) {
+    filters.value.category = String(q.category)
+  }
+  if ('status' in q) {
+    const s = q.status
+    if (!s) filters.value.status = ''
+    else if (WO_STATUS[s]) filters.value.status = String(s)
+  }
+  if ('keyword' in q) {
+    filters.value.keyword = q.keyword ? String(q.keyword) : ''
+  }
+  const ds = q.start || q.dateStart
+  const de = q.end || q.dateEnd
+  if (ds && de) {
+    filters.value.dateRange = [String(ds), String(de)]
+  }
+}
+
 function applySearch() {
   currentPage.value = 1
 }
@@ -899,7 +924,7 @@ function applySearch() {
 function onWorkbenchTabClick(pane) {
   const name = unref(pane.paneName) ?? pane.props?.name
   if (name != null && name !== route.path) {
-    router.push(String(name))
+    router.push({ path: String(name), query: { ...route.query } }).catch(() => {})
   }
 }
 
@@ -996,10 +1021,11 @@ function calcTableHeight() {
 }
 onMounted(() => {
   allRows.value = cloneWorkOrderList()
+  applyWorkbenchRouteQuery()
   syncDrawerWidth()
   calcTableHeight()
   window.addEventListener('resize', onResizeWorkbenchLayout)
-  tryFocusWoFromQuery()
+  nextTick(() => tryFocusWoFromQuery())
 })
 onUnmounted(() => {
   window.removeEventListener('resize', onResizeWorkbenchLayout)
@@ -1410,9 +1436,10 @@ function urgeOne(row) {
 }
 
 watch(
-  () => route.query.focusWo,
+  () => route.fullPath,
   () => {
-    if (allRows.value.length) tryFocusWoFromQuery()
+    applyWorkbenchRouteQuery()
+    nextTick(() => tryFocusWoFromQuery())
   }
 )
 

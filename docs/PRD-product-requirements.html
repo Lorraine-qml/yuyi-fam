@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>禹翼机管局平台 · PRD · 功能规格说明书</title>
+  <style>
+    @page { size: A4; margin: 14mm 12mm; }
+    * { box-sizing: border-box; }
+    html { font-size: 14px; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+        "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      margin: 0 auto;
+      max-width: 980px;
+      padding: 1.75rem 1.25rem 3rem;
+    }
+    header.doc-header {
+      border-bottom: 2px solid #4f46e5;
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    header.doc-header h1 { margin: 0 0 .35rem 0; font-size: 1.55rem; color: #111827; }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .35rem .75rem;
+      font-size: .88rem;
+      color: #4b5563;
+    }
+    @media (max-width: 640px) { .meta-grid { grid-template-columns: 1fr; } }
+
+    nav.toc {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: .85rem 1rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: .9rem;
+    }
+    nav.toc h2 { margin: 0 0 .5rem 0; font-size: .95rem; color: #334155; }
+    nav.toc ol { margin: 0; padding-left: 1.1rem; }
+    nav.toc li { margin: .2rem 0; }
+    nav.toc a { color: #4338ca; text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 2rem 0 .6rem;
+      padding: .35rem 0 .35rem .6rem;
+      border-left: 4px solid #6366f1;
+      background: linear-gradient(90deg, #eef2ff 0%, transparent 40%);
+    }
+    h3 {
+      font-size: 1.02rem;
+      font-weight: 650;
+      color: #374151;
+      margin: 1.35rem 0 .45rem;
+    }
+    h4 {
+      font-size: .93rem;
+      font-weight: 600;
+      color: #475569;
+      margin: 1rem 0 .35rem;
+    }
+    p { margin: .45rem 0; }
+    ul, ol { margin: .35rem 0 .65rem 1.2rem; }
+    li { margin: .2rem 0; }
+
+    table.fld {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .86rem;
+      margin: .5rem 0 1rem;
+    }
+    table.fld th, table.fld td {
+      border: 1px solid #e5e7eb;
+      padding: .4rem .5rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.fld thead th {
+      background: linear-gradient(#f9fafb, #eef2ff);
+      color: #334155;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    table.fld tbody tr:nth-child(even) { background: #fafafa; }
+    col.attr { width: 14%; }
+    code, .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .85em;
+      background: #f1f5f9;
+      padding: .06em .3em;
+      border-radius: 3px;
+    }
+    pre.flow {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: .82rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: .75rem .9rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: .5rem 0;
+    }
+    .pill {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .1rem .4rem;
+      border-radius: 4px;
+      margin-right: .25rem;
+    }
+    .pill-p0 { background: #fee2e2; color: #991b1b; }
+    .pill-p1 { background: #fef3c7; color: #92400e; }
+    .pill-p2 { background: #e0e7ff; color: #3730a3; }
+    blockquote.note {
+      margin: .65rem 0;
+      padding: .5rem .75rem;
+      border-left: 3px solid #94a3b8;
+      background: #f8fafc;
+      color: #475569;
+      font-size: .9rem;
+    }
+    footer.doc-footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+      font-size: .85rem;
+      color: #6b7280;
+    }
+    @media print {
+      nav.toc { break-inside: avoid; }
+      h2, h3, h4 { break-after: avoid; }
+      table.fld thead { display: table-header-group; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <h1>禹翼机管局平台 · 产品需求文档（PRD）</h1>
+  <div class="meta-grid">
+    <div><strong>应用工程</strong>：<code class="mono">jiguanju-risk-platform</code></div>
+    <div><strong>文档类型</strong>：功能规格 · 研发团队交付版</div>
+    <div><strong>前端栈</strong>：Vue 3 · Vite · Element Plus · Pinia · Axios</div>
+    <div><strong>说明</strong>：字段与交互与当前前端实现对齐；后端契约以接口文档为准。</div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="目录">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#overview">引言与端到端业务流程</a></li>
+    <li><a href="#m-app">应用框架（导航 / 顶栏 / 项目）</a></li>
+    <li><a href="#m-risk-metrics">风险管理 · 风险指标 CRUD</a></li>
+    <li><a href="#m-risk-rules">风险管理 · 风险规则 CRUD</a></li>
+    <li><a href="#m-templates">风险管理 · 规则模板库（项目 / 系统）</a></li>
+    <li><a href="#m-sys-template-admin">系统模板与标准指标（超级管理员）</a></li>
+    <li><a href="#m-security">安全管理 · 实时事件、推送配置与通知方式</a></li>
+    <li><a href="#m-msg">消息中心</a></li>
+    <li><a href="#m-report">风险报告 · 模板 / 导出 / 定时</a></li>
+    <li><a href="#m-workbench">事件工作台 · 工单</a></li>
+    <li><a href="#m-placeholder">占位模块（建设中）</a></li>
+    <li><a href="#m-backend">后端对接（API / JWT / 权限 / 审计）</a></li>
+  </ol>
+</nav>
+
+<section id="overview">
+  <h2>1 · 引言与端到端业务流程</h2>
+  <h3>1.1 产品目标</h3>
+  <p>
+    为机关/园区物业管理场景提供统一门户：<strong>多项目租户隔离</strong>、<strong>风险指标采集与规则告警</strong>、<strong>实时事件与安全运营</strong>、<strong>消息触达与工作台工单</strong>、<strong>风险报告导出</strong>。本文档拆解各功能的界面、字段、交互、流程与验收，便于开发与测试直接落地。
+  </p>
+  <h3>1.2 主线：指标 → 规则 → 事件 → 消息 → 工单（闭环）</h3>
+  <pre class="flow">在项目上下文中：
+   ① 创建/启用「风险指标」并配置数据源 ──► ② 可选「数据源测试」通过
+                      │
+                      ▼
+   ③ 新建「风险规则」（绑定 metricCode + 阈值表达式），runMode=trial/production
+                      │
+        ├─ 试运行 ──► ④「试运行日志」记录命中/未命中摘要
+        └─ 正式运行 ─.rules 触发后生成「实时事件」source=rule
+                      │
+                      ▼
+   ⑤ 推送策略（事件推送配置）决定通知渠道与工单是否生成 / 工单类型
+                      │
+                      ▼
+   ⑥「消息中心」产生未读，用户跳转「实时事件抽屉」查看规则快照与阈值
+                      │
+                      ▼
+   ⑦ 关联工单进入「工作台」各视图跟进，直至办结（closed）</pre>
+  <blockquote class="note">
+    <strong>数据依赖</strong>：平台标准指标类型（SM-*）仅存于<strong>系统模板</strong>语义层；映射到<code>本项目指标编码</code>后才参与真实取值与规则计算。
+  </blockquote>
+</section>
+
+<!-- ========== 应用框架 ========== -->
+<section id="m-app">
+  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">应用框架</h2>
+
+  <h3>需求说明</h3>
+  <p>
+    提供统一壳层：<strong>左侧可折叠导航</strong>（多级子菜单）、<strong>顶部状态栏</strong>（北京时间、全局帮助、用户信息）、<strong>当前项目选择器</strong>（全局过滤数据口径）、面包屑由各页自行决定是否展示。<strong>响应式</strong>：窄屏下侧栏收起、表格横向滚动或使用弹性布局保底。
+  </p>
+
+  <h3>界面布局（文字）</h3>
+  <ul>
+    <li><strong>左侧</strong>：Logo + 收起按钮；纵向滚动的 el-menu（一级菜单可展开二/三级）。底部显示版本号（如 v2.0.0）。</li>
+    <li><strong>顶栏</strong>（主内容顶部固定条）：左侧留空或由子页标题填充；右侧依次「系统时间」「项目下拉」「消息铃铛+未读角标」「帮助」「头像+下拉（个人中心/系统设置/退出）」。</li>
+    <li><strong>主内容区</strong>：白色底，内边距统一；子路由 <code>router-view</code> 渲染。</li>
+  </ul>
+
+  <h4>字段定义 — 项目切换（持久化）</h4>
+  <table class="fld">
+    <thead>
+      <tr>
+        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>currentProjectId</code></td>
+        <td>string</td>
+        <td>是</td>
+        <td>当前选中项目，切换后广播 <code>yuyi-project-changed</code>，各模块按项目拉数</td>
+        <td><code>p-huangpu</code></td>
+      </tr>
+      <tr>
+        <td><code>projectOptions[]</code></td>
+        <td>array</td>
+        <td>是</td>
+        <td>用户有权限的项目列表（后续走接口）</td>
+        <td><code>[{ id, name }]</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li><strong>折叠侧栏</strong>：图标按钮切换 collapsed；菜单仅保留图标或 tooltip 全称。</li>
+    <li><strong>项目切换</strong>：变更写入 localStorage，页面内列表/看板应立即刷新或通过事件总线失效缓存。</li>
+    <li><strong>校验</strong>：无（选择器仅展示合法枚举）。</li>
+    <li><strong>反馈</strong>：无全局 toast（避免打扰）；静默更新数据。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 所有一级路由可由侧栏在 3 次点击内可达（当前「建设中」占位仍保留入口）。</li>
+    <li>✓ 刷新页面后<strong>同一项目 persisted</strong>。</li>
+    <li>✓ 视口宽度 &lt; 768px 时侧栏仍可操作（折叠或可抽屉化，不出现样式塌缩）。</li>
+  </ul>
+</section>
+
+<!-- ========== 风险指标 ========== -->
+<section id="m-risk-metrics">
+  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险管理 · 风险指标 CRUD</h2>
+
+  <h3>需求说明</h3>
+  <p>
+    管理<strong>本项目内可观测度量</strong>：<code>metricCode</code> 由<strong>板块 + 分类 + 三位流水号</strong>自动生成；配置数据源类型（API/JDBC/MQ/Kafka 等占位）、采样频率/Cron；支持<strong>数据源连通性测试</strong>指标拉取试运行；停用指标需提示是否已被规则引用。
+  </p>
+
+  <h3>界面布局</h3>
+  <ul>
+    <li><strong>列表页</strong>：表格列含编码、名称、板块、数据源类型、单位、启用状态、被规则引用次数、操作（编辑 / 停用 / 测试）。</li>
+    <li><strong>表单抽屉</strong>：分左右或上下滚动区——基础信息、数据源配置分段（切换 type 动态展示 API / DB / MQ 字段）。底部「保存」「取消」「测试连接」。</li>
+    <li><strong>测试弹窗</strong>：展示最近一次请求耗时、返回值摘要、断言结果（前端 demo）。</li>
+  </ul>
+
+  <h4>核心字段定义（节选）</h4>
+  <table class="fld">
+    <thead>
+      <tr>
+        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>name</code></td><td>string</td><td>是</td><td>中文名称</td><td>用电实时值</td></tr>
+      <tr><td><code>code</code></td><td>string</td><td>系统自动</td><td>板块-分类-序号</td><td>ENERGY-REALTIME-101</td></tr>
+      <tr><td><code>sector</code></td><td>enum</td><td>是</td><td>能耗/安全/物业/…</td><td><code>ENERGY</code></td></tr>
+      <tr><td><code>metricCategory</code></td><td>enum</td><td>是</td><td>参与编码第二段：REALTIME/RATIO/…</td><td><code>REALTIME</code></td></tr>
+      <tr><td><code>unit</code></td><td>string</td><td>否</td><td>计量单位展示</td><td>kWh</td></tr>
+      <tr><td><code>status</code></td><td>enum</td><td>是</td><td><code>enabled</code>/<code>disabled</code></td><td>enabled</td></tr>
+      <tr><td><code>dataSourceType</code></td><td>enum</td><td>是</td><td>API/DB_MYSQL/DB_DM/MQ_KAFKA …</td><td>API</td></tr>
+      <tr><td><code>apiUrl</code></td><td>url</td><td>条件</td><td>Type=API</td><td>https://api.xxx/kwh</td></tr>
+      <tr><td><code>jdbcUrl</code></td><td>string</td><td>条件</td><td>数据库类</td><td>jdbc:mysql://…</td></tr>
+      <tr><td><code>standardMetricTypeKey</code></td><td>string</td><td>否</td><td>与平台 SM-* 绑定用于模板推荐</td><td><code>SM-ENERGY-RT</code></td></tr>
+      <tr><td><code>collectFreq</code></td><td>string</td><td>否</td><td>30s / 60s / 1m / cron …</td><td>60s</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li>保存前校验：名称非空；数据源字段按类型联动必填。</li>
+    <li>「测试连接」：<strong>不改变</strong>指标正式状态；结果以对话框或结果区 toast。</li>
+    <li>试运行日志页通过时间范围、metricCode、规则 id 检索（参见试运行日志小节）。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 在同一项目内 <code>code</code> 唯一。</li>
+    <li>✓ 停用指标后，已绑定的规则编辑页应展示警告或禁止「仅正式运行」。</li>
+  </ul>
+</section>
+
+<!-- ========== 风险规则 ========== -->
+<section id="m-risk-rules">
+  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险管理 · 风险规则 CRUD</h2>
+
+  <h3>需求说明</h3>
+  <p>
+    将指标与<strong>布尔条件表达式</strong>绑定，支持主条件 + 附加条件（AND/OR）、时间窗、静默期、预警等级、事件分类、是否自动建单及工单类型；<strong>运行模式</strong>试运行/正式；支持<strong>规则测试</strong>（mock 结果）、<strong>版本历史</strong>（至少展示版本号、变更人、时间）、<strong>另存为项目模板</strong>。
+  </p>
+
+  <h3>界面布局</h3>
+  <ul>
+    <li>列表：规则名、指标、等级标签、运行模式、最近触发、操作（编辑/复制/停用/查看版本）。</li>
+    <li>规则抽屉：分区「基础」「条件」「时间窗与静默」「输出与工单」「高级」。</li>
+  </ul>
+
+  <h4>核心字段定义（节选）</h4>
+  <table class="fld">
+    <thead>
+      <tr>
+        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>name</code></td><td>string</td><td>是</td><td>规则名称</td><td>用电量过高</td></tr>
+      <tr><td><code>metricCode</code></td><td>string</td><td>是</td><td>绑定项目指标</td><td>ENERGY-HP-001</td></tr>
+      <tr><td><code>valueType</code></td><td>enum</td><td>是</td><td>number / string</td><td>number</td></tr>
+      <tr><td><code>primaryOp</code></td><td>enum</td><td>是</td><td>&gt; &lt; ≥ ≤ = ≠</td><td>&gt;</td></tr>
+      <tr><td><code>primaryValue</code></td><td>number|string</td><td>是</td><td>阈值</td><td>1500</td></tr>
+      <tr><td><code>primaryUnit</code></td><td>string</td><td>否</td><td>展示单位</td><td>kWh</td></tr>
+      <tr><td><code>expression</code></td><td>string</td><td>系统生成</td><td>引擎使用 <code>{value}</code> 占位</td><td><code>{value} &gt; 1500</code></td></tr>
+      <tr><td><code>level</code></td><td>int</td><td>是</td><td>1红 2橙 3黄 4蓝</td><td>3</td></tr>
+      <tr><td><code>eventCategory</code></td><td>string</td><td>是</td><td>与推送配置分类匹配</td><td>能耗异常</td></tr>
+      <tr><td><code>runMode</code></td><td>enum</td><td>是</td><td>trial / production</td><td>trial</td></tr>
+      <tr><td><code>silenceMinutes</code></td><td>int</td><td>否</td><td>同指标重复告警抑制</td><td>30</td></tr>
+      <tr><td><code>workOrderEnabled</code></td><td>bool</td><td>否</td><td>命中是否自动建单</td><td>true</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li>表达式由表单拼装，<strong>禁止</strong>用户手写任意函数（防注入）；提交前语法校验。</li>
+    <li>「测试」弹窗：输入模拟 value 或拉最近采样，展示是否命中 + 原因。</li>
+    <li>「版本历史」：侧滑或弹层时间线；支持回滚为草稿（可选 P1）。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 试运行规则仅写入试运行日志，不产生正式事件（或 event 标记 trial）。</li>
+    <li>✓ 正式规则命中后事件 <code>source=rule</code> 且可追溯到 <code>ruleId</code> / <code>metricCode</code>。</li>
+  </ul>
+</section>
+
+<!-- ========== 模板库 ========== -->
+<section id="m-templates">
+  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险管理 · 规则模板库</h2>
+
+  <h3>需求说明</h3>
+  <p>
+    <strong>本项目模板</strong>：用户将规则「另存为模板」，仅当前 <code>projectId</code> 可见，列表展示模板名、适用板块、引用指标（含项目编码）。<strong>系统模板</strong>：<code>tenant_id=0</code>，引用<strong>平台标准指标类型</strong>（SM-*），<strong>不直接带项目指标编码</strong>；用户「使用」时在映射弹窗选择本项目指标；支持「另存为项目模板」生成副本。
+  </p>
+
+  <h3>界面布局</h3>
+  <ul>
+    <li>风险规则页双区域：上「本项目模板」卡片栅格 + 操作；下「系统模板」卡片 + 「管理」入口。</li>
+    <li>映射弹窗：首行展示标准类型（平台预置标签）+ 灰色说明平台编码；第二块「本项目指标」下拉仅候选匹配项；底部规则名/等级/运行模式；主按钮「确认使用」。</li>
+  </ul>
+
+  <h4>字段 — 系统模板映射弹窗</h4>
+  <table class="fld">
+    <thead>
+      <tr>
+        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>standardMetricTypeKey</code></td><td>string</td><td>是</td><td>平台字典，只读展示名称</td><td>SM-ENERGY-RT</td></tr>
+      <tr><td><code>selectedMetricCode</code></td><td>string</td><td>是</td><td>本项目指标 value</td><td>ENERGY-HP-001</td></tr>
+      <tr><td><code>ruleName</code></td><td>string</td><td>是</td><td>落地规则名</td><td>用电量过高_副本</td></tr>
+      <tr><td><code>runMode</code></td><td>enum</td><td>是</td><td>默认 trial</td><td>trial</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li>标准类型下拉：仅展示中文名，悬停 tooltip 显示编码、典型单位、数据源类型。</li>
+    <li>单位/数据源不一致时黄色提示，不强制拦截（P0 提示，P1 可配置强校验）。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 项目 A 的模板不会出现在项目 B。</li>
+    <li>✓ 系统模板落地后 <code>metricCode</code> 必为本项目字段，不得残留 SM-* 作为采集编码。</li>
+  </ul>
+</section>
+
+<section id="m-sys-template-admin">
+  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">系统模板与标准指标（超级管理员）</h2>
+  <p>
+    <strong>标准指标类型字典</strong>：平台级枚举（key、名称、默认单位、预期数据源类型）；由运营/超管维护（当前前端为静态资源 + 后续可接管理 API）。<strong>系统模板 CRUD</strong>：仅角色 <code>super_admin</code>（或等价）可见「新增/编辑/删除」；新建表单内标准类型下拉仅展示名称，附文案说明平台预置与项目无关。
+  </p>
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 非超管无法访问系统模板写接口与 UI 按钮（前后端双重校验）。</li>
+    <li>✓ 修改 SM 字典需评估旧系统模板的兼容与迁移策略。</li>
+  </ul>
+</section>
+
+<!-- ========== 安全管理 ========== -->
+<section id="m-security">
+  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">安全管理 · 实时事件与推送配置</h2>
+
+  <h3>实时事件列表</h3>
+  <p>
+    展示统一事件流水：<strong>来源</strong>（规则预警 / 第三方 / 人工）区分样式；支持多维筛选；行操作打开<strong>右侧抽屉详情</strong>（规则快照、阈值、工单摘要、推送日志）。
+  </p>
+  <h4>字段（列表）</h4>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>displayCode</code></td><td>string</td><td>展示</td><td>可读事件号</td><td>EVT-20260427001</td></tr>
+      <tr><td><code>source</code></td><td>enum</td><td>是</td><td><code>rule</code>/<code>third_party</code>/<code>manual</code></td><td>rule</td></tr>
+      <tr><td><code>level</code></td><td>string</td><td>是</td><td>high/medium/low</td><td>high</td></tr>
+      <tr><td><code>status</code></td><td>string</td><td>是</td><td>待处理/处理中/关闭</td><td>pending</td></tr>
+      <tr><td><code>ruleId</code></td><td>string</td><td>否</td><td>来源为规则时有值</td><td>rule-energy-001</td></tr>
+    </tbody>
+  </table>
+
+  <h3>事件推送配置</h3>
+  <p>
+    按<strong>事件分类 + 等级 + 适用来源</strong>维度配置：通知渠道（钉钉/短信/邮件占位）、工单是否生成、工单类型、生效时间窗、启停开关。
+  </p>
+  <h4>字段（编辑弹窗 — 节选）</h4>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>category</code></td><td>string</td><td>是</td><td>事件分类</td><td>能耗异常</td></tr>
+      <tr><td><code>level</code></td><td>enum</td><td>是</td><td>high/medium/low</td><td>high</td></tr>
+      <tr><td><code>applicableSource</code></td><td>enum</td><td>是</td><td>all / rule_only / third_party_only / manual_only</td><td>rule_only</td></tr>
+      <tr><td><code>method</code></td><td>string</td><td>是</td><td>通知方式描述</td><td>钉钉+短信</td></tr>
+      <tr><td><code>workOrderAction</code></td><td>string</td><td>否</td><td>生成工单 / 仅通知等</td><td>生成标准工单</td></tr>
+      <tr><td><code>enabled</code></td><td>bool</td><td>是</td><td>行内开关</td><td>true</td></tr>
+    </tbody>
+  </table>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 同一 (category, level, applicableSource) 组合在启用状态下不产生冲突覆盖（或由优先级字段决定，产品上需明说）。</li>
+  </ul>
+
+  <h3>通知方式配置（独立页）</h3>
+  <p>
+    维护各渠道（钉钉机器人、短信网关、邮件 SMTP、企业微信等）的<strong>连接参数与连通性测试结果</strong>；与「推送配置」区别：本页管<strong>管道是否可用</strong>，推送配置管<strong>业务路由规则</strong>。
+  </p>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>channelType</code></td><td>enum</td><td>是</td><td>钉钉/邮件/短信/…</td><td>钉钉</td></tr>
+      <tr><td><code>endpoint</code></td><td>string</td><td>条件</td><td>Webhook 或网关地址（脱敏展示）</td><td>https://oapi...</td></tr>
+      <tr><td><code>lastTestStatus</code></td><td>enum</td><td>展示</td><td>success/fail/pending</td><td>success</td></tr>
+    </tbody>
+  </table>
+  <h4>交互规则</h4>
+  <ul>
+    <li>「测试连通」不改变生产流量，返回延迟与简要响应体摘要。</li>
+    <li>密钥类字段仅存服务端，前端回显占位符 ****。</li>
+  </ul>
+</section>
+
+<!-- ========== 消息 ========== -->
+<section id="m-msg">
+  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">消息中心</h2>
+
+  <h3>界面布局</h3>
+  <p>
+    顶栏铃铛展示<strong>未读角标（上限 99+）</strong>；点击右侧抽屉：<strong>筛选条</strong>（全部/未读/处理中/已闭环 × 等级 × 来源 × 搜索）+<strong>无限滚动列表</strong>；每条卡片展示摘要、时间、badge「规则触发」等；右上角「全部标为已读」。
+  </p>
+
+  <h4>字段（消息记录 — 节选）</h4>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>string</td><td>是</td><td>消息主键</td><td>n-001</td></tr>
+      <tr><td><code>title</code></td><td>string</td><td>是</td><td>展示标题</td><td>[高]用电超限</td></tr>
+      <tr><td><code>read</code></td><td>bool</td><td>是</td><td>已读标记</td><td>false</td></tr>
+      <tr><td><code>eventId</code></td><td>string</td><td>否</td><td>跳转事件详情</td><td>evt-xxx</td></tr>
+      <tr><td><code>workOrderId</code></td><td>string</td><td>否</td><td>跳转工单</td><td>WO-yyy</td></tr>
+      <tr><td><code>source</code></td><td>string</td><td>否</td><td>与事件来源一致</td><td>rule</td></tr>
+    </tbody>
+  </table>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li>点击条目：标记已读 + 若含 <code>eventId</code> 则打开事件详情（抽屉或路由 <code>/event/detail/:id</code>）。</li>
+    <li>API 失败：toast 错误，角标不扣减。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ Mock 与环境变量切换到真实接口后<strong>语义不变</strong>。</li>
+  </ul>
+</section>
+
+<!-- ========== 报告 ========== -->
+<section id="m-report">
+  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险报告</h2>
+
+  <h3>需求说明</h3>
+  <p>
+    支持按项目输出风险运营类报告：<strong>模板</strong>定义章节结构、占位符与导出格式；<strong>报告生成</strong>为一次性任务，产生文件与状态；<strong>定时任务</strong>按 Cron 周期自动触达并可选邮件推送链接。所有数据按当前 <code>projectId</code> 过滤。
+  </p>
+
+  <h3>界面布局</h3>
+  <ul>
+    <li><strong>模板管理</strong>：表格列（模板名、类型、更新人、更新时间、操作）；抽屉表单含「基本信息」「变量声明」「导出设置」。</li>
+    <li><strong>报告中心</strong>：筛选（模板/时间/状态）+ 表格（批次号、模板、生成时间、状态、操作下载/重试）。</li>
+    <li><strong>定时任务</strong>：表格 + 弹窗配置 Cron 表达式、下一次执行预览、失败告警邮箱。</li>
+  </ul>
+
+  <h4>字段 — 报告模板（节选）</h4>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>name</code></td><td>string</td><td>是</td><td>模板名称</td><td>能耗风险月报</td></tr>
+      <tr><td><code>reportType</code></td><td>enum</td><td>是</td><td>统计/明细/混合</td><td>统计</td></tr>
+      <tr><td><code>outputFormat</code></td><td>enum</td><td>是</td><td>PDF/XLSX/DOCX</td><td>PDF</td></tr>
+      <tr><td><code>variableSchema</code></td><td>json</td><td>否</td><td>占位符与绑定字段</td><td><code>{"period":"2026-04"}</code></td></tr>
+    </tbody>
+  </table>
+
+  <h4>字段 — 定时任务（节选）</h4>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>templateId</code></td><td>string</td><td>是</td><td>关联模板</td><td>rtpl-01</td></tr>
+      <tr><td><code>cronExpr</code></td><td>string</td><td>是</td><td>调度表达式</td><td><code>0 8 1 * *</code></td></tr>
+      <tr><td><code>notifyEmails</code></td><td>string[]</td><td>否</td><td>完成通知</td><td>ops@xxx.gov</td></tr>
+      <tr><td><code>enabled</code></td><td>bool</td><td>是</td><td>启停</td><td>true</td></tr>
+    </tbody>
+  </table>
+
+  <h4>业务流程</h4>
+  <pre class="flow">选择模板 → 预览变量 → 触发「立即生成」→ 异步任务写入报告中心 → 成功可下载 / 失败可重试
+定时：Cron 触发 → 同生成链路 → 可选邮件带签名下载链接（短期有效）</pre>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li>长时间生成：按钮 loading + 轮询或 WebSocket 进度（P1）。</li>
+    <li>Cron 合法性：保存前服务端解析，前端展示「下次 5 次执行时间」预览。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 模板删除前检查是否被定时任务引用。</li>
+    <li>✓ 导出文件带水印或机构标识（按安全要求）。</li>
+    <li>✓ 报告仅含当前项目数据，无交叉泄漏。</li>
+  </ul>
+</section>
+
+<!-- ========== 工作台 ========== -->
+<section id="m-workbench">
+  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">事件工作台 · 工单</h2>
+
+  <h3>需求说明</h3>
+  <p>
+    同源组件多路由：<strong>报修工单</strong>（全量）、<strong>我的待办</strong>、<strong>我发起的</strong>、<strong>我的已办</strong>、<strong>办结事宜</strong>。支持筛选、排序、单条「接单/转派/完成」类弹窗、<strong>批量选择 + 批量转派/关闭</strong>（权限控制）；行内打开<strong>工单详情抽屉</strong>（时间线、评论、关联事件跳转）。
+  </p>
+
+  <h4>字段（工单 — 节选）</h4>
+  <table class="fld">
+    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>string</td><td>是</td><td>工单号</td><td>WO-20260427001</td></tr>
+      <tr><td><code>category</code></td><td>enum</td><td>是</td><td>risk/repair/inspection</td><td>risk</td></tr>
+      <tr><td><code>status</code></td><td>enum</td><td>是</td><td>pending/processing/done/closed</td><td>pending</td></tr>
+      <tr><td><code>assigneeId</code></td><td>string|null</td><td>否</td><td>责任人</td><td>u-zhang</td></tr>
+      <tr><td><code>eventId</code></td><td>string|null</td><td>否</td><td>风险类关联事件</td><td>evt-xxx</td></tr>
+    </tbody>
+  </table>
+
+  <h4>业务流程（简）</h4>
+  <pre class="flow">待办打开工单 → 接单 → 处理中上传凭证/备注 → 完成 →（可选复核）→ 办结归档
+批量：勾选多条 → 批量转派（选人弹窗）→ 确认 → 成功/失败分项 toast</pre>
+
+  <h4>交互规则</h4>
+  <ul>
+    <li>单条操作：根据状态机灰显非法操作（如已完成不可再「接单」）。</li>
+    <li>批量：至少选 1 条；部分失败时列表刷新并展示失败原因列。</li>
+    <li>详情抽屉：Tab「概况 / 时间轴 / 关联事件」；关联事件点击跳转事件详情。</li>
+  </ul>
+
+  <h4>验收标准</h4>
+  <ul>
+    <li>✓ 待办视图仅包含「本人为当前责任人」且未完成单据。</li>
+    <li>✓ 批量操作需二次确认并展示影响条数。</li>
+    <li>✓ 「我发起的」含用户手工发起及规则自动生成但需跟踪的工单（与业务定义一致）。</li>
+  </ul>
+</section>
+
+<section id="m-placeholder">
+  <span class="pill pill-p2">P2</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">占位模块（建设中）</h2>
+  <p>
+    资产管理、物业管理、运营管理、能源管理、系统设置（用户/角色/日志）、个人中心、工单详情深链路等：统一采用<strong>模块占位页</strong>——标题 + 副标题说明规划能力 + 图标；禁止空白路由；侧栏保持可进入以体现信息架构完整。
+  </p>
+  <h4>验收标准</h4>
+  <ul><li>✓ 不出现 404；文案明确「建设中」。</li></ul>
+</section>
+
+<section id="m-backend">
+  <span class="pill pill-p2">P2</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">后端对接</h2>
+  <table class="fld">
+    <thead><tr><th>主题</th><th>要求</th><th>验收</th></tr></thead>
+    <tbody>
+      <tr><td>REST API</td><td>统一前缀、错误码、分页结构 <code>{ code, data, message }</code></td><td>联调清单与 Postman 集合对齐</td></tr>
+      <tr><td>JWT</td><td>Access + Refresh；过期无感刷新或登出重登</td><td>401 统一拦截跳转登录页</td></tr>
+      <tr><td>权限</td><td>RBAC：菜单、按钮、数据范围（项目）</td><td>非授权接口 403 + 前端隐藏入口</td></tr>
+      <tr><td>审计</td><td>关键写操作落库：用户、时间、资源、diff</td><td>支持按资源 id 追溯</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="trial-logs">
+  <h2>附 · 试运行日志（与指标/规则联动）</h2>
+  <p>
+    独立页：筛选项目、时间、规则、指标、命中结果；支持导出 CSV；与「仅试运行」规则关联，用于上线前压测与误报分析。
+  </p>
+  <h4>验收标准</h4>
+  <ul><li>✓ 至少保留 30 天数据或按产品策略归档（技术故事）。</li></ul>
+</section>
+
+<footer class="doc-footer">
+  <p><strong>文档版本</strong>：V2.0（功能规格增强版）· 结构面向研发拆分任务与测试用例。</p>
+  <p><strong>维护</strong>：产品负责人 · 若与实现不一致，以评审会结论更新本页并升版号。</p>
+</footer>
+
+</body>
+</html>

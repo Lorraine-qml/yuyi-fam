@@ -338,6 +338,21 @@ export function filterWorkOrders(rows, view, opts = {}) {
   return list
 }
 
+export function findWorkOrderByEventId(eventId) {
+  if (!eventId) return null
+  return getWorkOrderSeed().find((x) => x.eventId === eventId) || null
+}
+
+/** 由事件 ID 查找关联工单号（用于风险看板「处置」跳转） */
+export function findWorkOrderIdByEventId(eventId) {
+  return findWorkOrderByEventId(eventId)?.id || null
+}
+
+export function findWorkOrderById(id) {
+  if (!id) return null
+  return getWorkOrderSeed().find((r) => r.id === id) || null
+}
+
 export function getEventContextForOrder(eventId) {
   if (!eventId) return null
   return getRealtimeEventById(eventId) || null

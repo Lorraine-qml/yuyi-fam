@@ -331,7 +331,7 @@
                 type="primary"
                 size="small"
                 link
-                @click="onDispose(ev)"
+                @click="onDisposeLatestEvent(ev)"
               >
                 处置
               </el-button>
@@ -378,6 +378,7 @@ import { ElMessage } from 'element-plus'
 import { eventSourceLabel } from '@/constants/eventSource'
 import { useEventDetailStore } from '@/stores/eventDetail'
 import ChartContainer from '@/components/ChartContainer.vue'
+import { findWorkOrderById, findWorkOrderIdByEventId } from '@/data/workOrderMock'
 import {
   buildDeptEfficiencyBarOption,
   buildLevelPieOption,
@@ -472,15 +473,46 @@ const drillVisible = ref(false)
 const drillTitle = ref('')
 const drillHint = ref('')
 const drillRows = ref([])
+/** KPI / 图表下钻类型，跳转工单台筛选用 */
+const drillKind = ref('')
 
 const DRILL_MOCK = [
-  { id: '#R240424001', content: '用电量突增32%', location: '1号楼配电房' },
-  { id: '#R240424002', content: '烟感探测器报警', location: 'B1层' },
-  { id: '#R240424003', content: '晨检不合格', location: '食堂' }
+  {
+    id: '#R240424001',
+    content: '用电量突增32%',
+    location: '1号楼配电房',
+    eventId: 'evt-240424001',
+    workOrderId: 'WO-20260427001'
+  },
+  {
+    id: '#R240424002',
+    content: '烟感探测器报警',
+    location: 'B1层',
+    eventId: 'evt-240424018',
+    workOrderId: 'WO-20260427003'
+  },
+  {
+    id: '#R240424003',
+    content: '晨检不合格',
+    location: '食堂',
+    eventId: 'evt-240425011',
+    workOrderId: 'WO-20260427002'
+  }
+]
+
+const CLOSED_DRILL_MOCK = [
+  {
+    id: '#R240424099',
+    content: '地下车库CO浓度偏高（已办结演示）',
+    location: 'B2 车库',
+    eventId: 'evt-240425002',
+    workOrderId: 'WO-20260427005'
+  }
 ]
 
 function openDrill(title, type) {
   drillTitle.value = title
+  drillKind.value = type
   const hints = {
     pending: '筛选条件：状态 = 未处置',
     overdue: '筛选条件：未处置且已超过处置时限',
@@ -491,14 +523,17 @@ function openDrill(title, type) {
     latest: '按时间倒序的实时事件'
   }
   drillHint.value = hints[type] || '演示数据'
-  drillRows.value =
-    type === 'hotspots'
-      ? TOP_HOTSPOTS_MOCK.map((h, i) => ({
-          id: `TOP-${i + 1}`,
-          content: h.name,
-          location: '—'
-        }))
-      : [...DRILL_MOCK]
+  if (type === 'hotspots') {
+    drillRows.value = TOP_HOTSPOTS_MOCK.map((h, i) => ({
+      id: `TOP-${i + 1}`,
+      content: h.name,
+      location: '—'
+    }))
+  } else if (type === 'closed') {
+    drillRows.value = [...CLOSED_DRILL_MOCK]
+  } else {
+    drillRows.value = [...DRILL_MOCK]
+  }
   drillVisible.value = true
 }
 
@@ -515,6 +550,7 @@ const trendChartEvents = {
     drillTitle.value = `${day} 风险事件`
     drillHint.value = '下钻：当日风险事件列表'
     drillRows.value = [...DRILL_MOCK]
+    drillKind.value = 'trendDrill'
     drillVisible.value = true
   }
 }
@@ -525,6 +561,7 @@ const pieChartEvents = {
       drillTitle.value = `${params.name}风险事件列表`
       drillHint.value = `筛选条件：等级 = ${params.name}`
       drillRows.value = [...DRILL_MOCK]
+      drillKind.value = 'levelDrill'
       drillVisible.value = true
     }
   }
@@ -537,6 +574,7 @@ const sectorChartEvents = {
       drillTitle.value = `板块：${name}`
       drillHint.value = '该板块风险事件列表（演示）'
       drillRows.value = [...DRILL_MOCK]
+      drillKind.value = 'sectorDrill'
       drillVisible.value = true
     }
   }
@@ -573,8 +611,54 @@ function deltaClass(d) {
   return 'text-gray-400'
 }
 
+/** 跳转事件工作台 · 报修工单列表，带风险类筛选并尽量打开对应工单抽屉 */
+function goToRiskWorkbenchForDispose(row) {
+  const woId = row.workOrderId || findWorkOrderIdByEventId(row.eventId)
+
+  const query = { fromRiskBoard: '1', category: 'risk' }
+
+  const kind = drillKind.value
+  if (kind === 'new') {
+    const d = new Date()
+    const y = d.getFullYear()
+    const mo = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const today = `${y}-${mo}-${day}`
+    query.start = today
+    query.end = today
+  } else if (kind === 'processing') {
+    query.status = 'processing'
+  } else if (kind === 'pending' || kind === 'overdue') {
+    query.status = 'pending'
+  }
+
+  let path = '/security/workbench/repair'
+  if (woId) {
+    query.focusWo = woId
+    const meta = findWorkOrderById(woId)
+    if (meta?.status === 'done' || meta?.status === 'closed') {
+      path = '/security/workbench/closed'
+    }
+  } else if (kind === 'closed') {
+    path = '/security/workbench/closed'
+  }
+
+  drillVisible.value = false
+  router.push({ path, query }).catch(() => {})
+
+  if (!woId && kind !== 'closed') {
+    ElMessage.info('暂未关联到具体工单，已打开风险类工单列表（可按编号检索）')
+  }
+}
+
 function onDispose(row) {
-  ElMessage.success(`打开处置工单（演示）：${row.id || row.title || ''}`)
+  goToRiskWorkbenchForDispose(row)
+}
+
+/** 最新风险事件列表内「处置」（无 KPI 下钻上下文） */
+function onDisposeLatestEvent(ev) {
+  drillKind.value = 'latestEvent'
+  goToRiskWorkbenchForDispose(ev)
 }
 
 function onEventDetail(row) {
