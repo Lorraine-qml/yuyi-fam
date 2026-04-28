@@ -315,6 +315,15 @@
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-xs text-gray-400 w-10">{{ ev.time }}</span>
               <span class="text-xs font-mono text-indigo-600">#{{ ev.id }}</span>
+              <el-tag
+                v-if="ev.source"
+                size="small"
+                effect="light"
+                :class="sourceBadgeClass(ev.source)"
+                class="!border-0"
+              >
+                <span v-if="ev.source === 'rule'">⚡</span>{{ sourceLabel(ev.source) }}
+              </el-tag>
               <span class="text-sm font-medium text-gray-800 flex-1 min-w-[120px]">{{ ev.title }}</span>
               <el-tag :type="levelTagType(ev.level)" size="small" effect="light">{{ levelLabel(ev.level) }}</el-tag>
               <el-button
@@ -351,53 +360,23 @@
         <el-button @click="drillVisible = false">返回看板</el-button>
       </div>
     </el-drawer>
-
-    <!-- 高风险右下角提醒（演示） -->
-    <transition name="el-fade-in">
-      <div
-        v-if="highRiskAlert.visible"
-        class="fixed z-[100] right-4 bottom-4 left-4 sm:left-auto w-auto sm:w-[360px] max-w-[calc(100vw-2rem)]"
-        role="alert"
-      >
-        <div
-          class="rounded-xl border-2 shadow-lg p-4 bg-white"
-          style="border-color: #fecaca; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.15)"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-lg" aria-hidden="true">🔴</span>
-              <span class="font-semibold text-gray-900">高风险告警</span>
-            </div>
-            <el-button text circle size="small" :icon="Close" aria-label="关闭" @click="highRiskAlert.visible = false" />
-          </div>
-          <p class="text-sm font-medium text-gray-800 mt-3">{{ highRiskAlert.title }}</p>
-          <dl class="mt-2 text-xs text-gray-600 space-y-1">
-            <div class="flex justify-between gap-2"><dt>当前值</dt><dd>{{ highRiskAlert.current }}</dd></div>
-            <div class="flex justify-between gap-2"><dt>阈值</dt><dd>{{ highRiskAlert.threshold }}</dd></div>
-            <div class="flex justify-between gap-2"><dt>发生时间</dt><dd>{{ highRiskAlert.time }}</dd></div>
-          </dl>
-          <div class="flex gap-2 mt-4">
-            <el-button size="small" @click="onEventDetail({ id: highRiskAlert.eventId })">查看详情</el-button>
-            <el-button type="danger" size="small" plain @click="onDispose({ id: highRiskAlert.eventId })">立即处置</el-button>
-          </div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
   CircleCheck,
-  Close,
   Loading,
   Plus,
   Refresh,
   TrendCharts,
   Warning
 } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { eventSourceLabel } from '@/constants/eventSource'
+import { useEventDetailStore } from '@/stores/eventDetail'
 import ChartContainer from '@/components/ChartContainer.vue'
 import {
   buildDeptEfficiencyBarOption,
@@ -414,6 +393,9 @@ import {
   TOP_HOTSPOTS_MOCK,
   trendSummaryStats
 } from '@/data/riskDashboardMock'
+
+const router = useRouter()
+const eventDetailStore = useEventDetailStore()
 
 const timeRange = ref('today')
 const customRange = ref(null)
@@ -560,6 +542,15 @@ const sectorChartEvents = {
   }
 }
 
+function sourceLabel(s) {
+  return eventSourceLabel(s)
+}
+
+function sourceBadgeClass(s) {
+  if (s === 'rule') return 'bg-indigo-100 !text-indigo-800'
+  return 'bg-gray-100 !text-gray-600'
+}
+
 function levelLabel(lv) {
   const m = { high: '高', medium: '中', low: '低' }
   return m[lv] || lv
@@ -587,22 +578,15 @@ function onDispose(row) {
 }
 
 function onEventDetail(row) {
-  ElMessage.info(`事件详情（演示）：${row.id}`)
+  const eid = row.eventId
+  if (eid) {
+    eventDetailStore.openById(eid)
+  } else {
+    ElMessage.info(`事件详情（演示）：${row.id}`)
+  }
 }
 
-const highRiskAlert = reactive({
-  visible: false,
-  title: '1号楼用电量突增32%',
-  current: '1320kWh',
-  threshold: '1000kWh',
-  time: '14:32:05',
-  eventId: 'R240424001'
-})
-
 onMounted(() => {
-  setTimeout(() => {
-    highRiskAlert.visible = true
-  }, 1200)
   autoTimer.value = window.setInterval(autoRefreshTick, 30_000)
 })
 

@@ -67,7 +67,13 @@
                       :key="t.value"
                       :label="t.label"
                       :value="t.value"
-                    />
+                    >
+                      <div v-if="t.desc" class="py-0.5">
+                        <div>{{ t.label }}</div>
+                        <div class="text-xs text-gray-400 leading-tight max-w-sm">{{ t.desc }}</div>
+                      </div>
+                      <span v-else>{{ t.label }}</span>
+                    </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item v-else label="指标分类">
@@ -399,7 +405,9 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   mode: { type: String, default: 'create' },
   record: { type: Object, default: null },
-  existingCodes: { type: Array, default: () => [] }
+  existingCodes: { type: Array, default: () => [] },
+  /** 从系统标准类型「快速创建」时预填名称、单位、数据源等 */
+  metricPrefill: { type: Object, default: null }
 })
 
 const emit = defineEmits(['update:visible', 'saved'])
@@ -682,6 +690,14 @@ watch(
     if (props.record) rowToForm(props.record)
     else {
       Object.assign(form, createEmptyMetricForm())
+      const pf = props.metricPrefill
+      if (pf) {
+        if (pf.name) form.name = pf.name
+        if (pf.unit) form.unit = pf.unit
+        if (pf.dataSourceType) form.dataSourceType = pf.dataSourceType
+        if (pf.sector) form.sector = pf.sector
+        if (pf.description) form.description = pf.description
+      }
       autoCode()
     }
     await nextTick()

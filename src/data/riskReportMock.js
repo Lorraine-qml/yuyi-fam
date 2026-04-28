@@ -8,7 +8,10 @@ export const PERIOD_OPTIONS = [
   { label: '年报', value: 'year' }
 ]
 
-export const CHART_THEME_OPTIONS = [{ label: '禹翼主题', value: 'yuyi' }]
+export const CHART_THEME_OPTIONS = [
+  { label: '禹翼主题', value: 'yuyi' },
+  { label: '简约主题', value: 'simple' }
+]
 export const CHART_SIZE_OPTIONS = [
   { label: '小', value: 'sm' },
   { label: '中', value: 'md' },
@@ -39,10 +42,13 @@ function sid() {
   return `rsch-${_sid}`
 }
 
-export function seedReportTemplates() {
+/** 平台预置系统模板 tenant_id=0，固定 id 供任务引用 */
+export function getSystemReportTemplates() {
   return [
     {
-      id: tid(),
+      id: 'sys-rtpl-day',
+      tenant_id: 0,
+      isSystem: true,
       name: '标准日报模板',
       periodType: 'day',
       status: 'enabled',
@@ -53,7 +59,9 @@ export function seedReportTemplates() {
       sections: { ...DEFAULT_SECTIONS(), ruleStats: false }
     },
     {
-      id: tid(),
+      id: 'sys-rtpl-week',
+      tenant_id: 0,
+      isSystem: true,
       name: '标准周报模板',
       periodType: 'week',
       status: 'enabled',
@@ -64,7 +72,9 @@ export function seedReportTemplates() {
       sections: { ...DEFAULT_SECTIONS() }
     },
     {
-      id: tid(),
+      id: 'sys-rtpl-month',
+      tenant_id: 0,
+      isSystem: true,
       name: '标准月报模板',
       periodType: 'month',
       status: 'enabled',
@@ -80,6 +90,11 @@ export function seedReportTemplates() {
       }
     }
   ]
+}
+
+/** @deprecated 使用 getSystemReportTemplates */
+export function seedReportTemplates() {
+  return getSystemReportTemplates()
 }
 
 export function seedReportHistory(templates) {
@@ -273,5 +288,14 @@ export function buildTrendWeeksOption() {
 export const CYCLE_OPTIONS = [
   { label: '每日', value: 'daily' },
   { label: '每周一', value: 'weekly_mon' },
-  { label: '每月1日', value: 'monthly_1' }
+  { label: '每月1日', value: 'monthly_1' },
+  { label: '自定义 Cron', value: 'cron' }
 ]
+
+/** 任务周期 → 报告模板 periodType，用于校验「定时任务周期与模板类型一致」 */
+export function cycleToPeriodType(cycle) {
+  if (cycle === 'daily') return 'day'
+  if (cycle === 'weekly_mon') return 'week'
+  if (cycle === 'monthly_1') return 'month'
+  return null
+}

@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import { ElInfiniteScroll } from 'element-plus'
 import 'element-plus/dist/index.css'
 import './assets/styles/yw-theme.css'
 import Avue from '@smallwei/avue'
@@ -14,5 +15,6 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
+app.use(ElInfiniteScroll)
 app.use(Avue)
 app.mount('#app')

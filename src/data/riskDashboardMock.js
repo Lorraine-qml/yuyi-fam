@@ -325,6 +325,8 @@ export const TOP_HOTSPOTS_MOCK = [
 export const LATEST_EVENTS_MOCK = [
   {
     id: 'R240424001',
+    eventId: 'evt-240424001',
+    source: 'rule',
     time: '10:23',
     title: '1号楼用电量突增32%',
     summary: '当前值1320kWh，环比上升38%，超过阈值30%',
@@ -333,6 +335,8 @@ export const LATEST_EVENTS_MOCK = [
   },
   {
     id: 'R240424002',
+    eventId: 'evt-240424018',
+    source: 'third_party',
     time: '09:45',
     title: 'B1层烟感探测器报警',
     summary: '火警确认中，消防值班室已接收',
@@ -341,6 +345,8 @@ export const LATEST_EVENTS_MOCK = [
   },
   {
     id: 'R240424003',
+    eventId: 'evt-240425011',
+    source: 'manual',
     time: '08:15',
     title: '食堂晨检不合格',
     summary: '晨检记录异常，请检查当日晨检数据',
@@ -349,6 +355,8 @@ export const LATEST_EVENTS_MOCK = [
   },
   {
     id: 'R240424004',
+    eventId: 'evt-240421003',
+    source: 'third_party',
     time: '07:50',
     title: '电表离线(3号楼总电表)',
     summary: '电表离线超10分钟，请检查通信链路',
@@ -357,6 +365,8 @@ export const LATEST_EVENTS_MOCK = [
   },
   {
     id: 'R240424005',
+    eventId: 'evt-240423004',
+    source: 'rule',
     time: '06:30',
     title: '夜间用水异常',
     summary: '凌晨2:00-4:00持续用水，疑似漏水',

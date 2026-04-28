@@ -1,18 +1,21 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useCurrentProject } from '@/composables/useCurrentProject'
+import { loadReportState, saveReportState } from '@/data/riskReportProjectState'
 import {
   buildPieOption,
   buildPreviewMeta,
   buildTrendWeeksOption,
-  PERIOD_OPTIONS,
-  seedReportHistory,
-  seedReportTemplates,
-  seedScheduleTasks
+  getSystemReportTemplates,
+  PERIOD_OPTIONS
 } from '@/data/riskReportMock'
 
-const templates = ref(seedReportTemplates())
-const schedules = ref(seedScheduleTasks(templates.value))
-const myReports = ref(seedReportHistory(templates.value))
+const { currentProjectId, currentProject } = useCurrentProject()
+
+const systemTemplates = getSystemReportTemplates()
+const projectTemplates = ref([])
+const schedules = ref([])
+const myReports = ref([])
 
 const quick = reactive({
   period: 'week',
@@ -20,6 +23,7 @@ const quick = reactive({
 })
 
 const previewRefId = ref('')
+const previewLoading = ref(false)
 const previewMeta = ref(buildPreviewMeta('week'))
 const pieOption = ref(buildPieOption(true))
 const trendOption = ref(buildTrendWeeksOption())
@@ -62,15 +66,15 @@ const pushDialog = ref(false)
 const pushChannels = reactive({ email: true, ding: true, wecom: false })
 const pushTargets = ref('leader@example.com')
 
-const visibleTemplates = computed(() => templates.value.filter((t) => !t.deleted))
+const allTemplates = computed(() => [...systemTemplates, ...projectTemplates.value])
+
+const visibleTemplates = computed(() => allTemplates.value.filter((t) => !t.deleted))
 
 const filteredTemplates = computed(() =>
-  visibleTemplates.value.filter((t) => t.periodType === quick.period)
+  visibleTemplates.value.filter((t) => t.periodType === quick.period && t.status === 'enabled')
 )
 
-const activeTemplate = computed(() =>
-  visibleTemplates.value.find((t) => t.id === quick.templateId)
-)
+const activeTemplate = computed(() => visibleTemplates.value.find((t) => t.id === quick.templateId))
 
 const activeSections = computed(() => {
   const s = activeTemplate.value?.sections
@@ -93,7 +97,7 @@ const activeSections = computed(() => {
 const periodTitle = computed(() => PERIOD_OPTIONS.find((p) => p.value === quick.period)?.label || '')
 
 const timeRangeText = computed(() => {
-  if (quick.period === 'day') return '2026年04月24日'
+  if (quick.period === 'day') return '2026年04月24日（昨日·演示）'
   if (quick.period === 'week') return '第16周（04月14日 - 04月20日）'
   if (quick.period === 'month') return '2026年04月'
   if (quick.period === 'quarter') return '2026年第2季度'
@@ -126,6 +130,27 @@ function periodLabel(pt) {
   return PERIOD_OPTIONS.find((p) => p.value === pt)?.label || pt
 }
 
+function persist() {
+  saveReportState(currentProjectId.value, {
+    projectTemplates: projectTemplates.value,
+    schedules: schedules.value,
+    myReports: myReports.value
+  })
+}
+
+function loadState() {
+  const st = loadReportState(currentProjectId.value, getSystemReportTemplates())
+  projectTemplates.value = st.projectTemplates
+  schedules.value = st.schedules
+  myReports.value = st.myReports
+  syncQuickTemplate()
+  refreshPreview()
+}
+
+export function reloadReportState() {
+  loadState()
+}
+
 function syncQuickTemplate() {
   const list = filteredTemplates.value
   if (!list.length) {
@@ -154,13 +179,7 @@ watch(
   }
 )
 
-watch(
-  visibleTemplates,
-  () => {
-    syncQuickTemplate()
-  },
-  { deep: true }
-)
+watch(visibleTemplates, () => syncQuickTemplate(), { deep: true })
 
 function onPeriodChange() {
   syncQuickTemplate()
@@ -171,26 +190,35 @@ function refreshPreview() {
   previewMeta.value = buildPreviewMeta(quick.period)
 }
 
+/** 业务规则：单次查询时间范围不宜过大（演示：超过 1 年提示） */
+const MAX_REPORT_RANGE_DAYS = 90
+
 function generateReport() {
   if (!quick.templateId) {
-    ElMessage.warning('请选择报告模板')
+    ElMessage.warning('请选择与周期匹配的已启用模板')
     return
   }
-  const tpl = activeTemplate.value
-  const pt = periodLabel(quick.period)
-  const title = `${nowText.value.slice(0, 10)} ${pt}`
-  const id = `rh-${Date.now()}`
-  myReports.value.unshift({
-    id,
-    title,
-    periodType: quick.period,
-    templateId: tpl?.id,
-    templateName: tpl?.name,
-    generatedAt: nowText.value
-  })
-  previewRefId.value = id
-  refreshPreview()
-  ElMessage.success('报告已生成（模拟），已加入「我的报告」')
+  previewLoading.value = true
+  window.setTimeout(() => {
+    const tpl = activeTemplate.value
+    const pt = periodLabel(quick.period)
+    const title = `${nowText.value.slice(0, 10)} ${pt}`
+    const id = `rh-${Date.now()}`
+    myReports.value.unshift({
+      id,
+      title,
+      periodType: quick.period,
+      templateId: tpl?.id,
+      templateName: tpl?.name,
+      generatedAt: nowText.value,
+      projectId: currentProjectId.value
+    })
+    previewRefId.value = id
+    refreshPreview()
+    previewLoading.value = false
+    persist()
+    ElMessage.success('报告已生成（模拟），已加入「我的报告」')
+  }, 450)
 }
 
 function loadHistoryReport(r) {
@@ -200,31 +228,47 @@ function loadHistoryReport(r) {
   refreshPreview()
 }
 
+function buildExportFileName(fmt) {
+  const proj = (currentProject.value?.name || '项目').replace(/[/\\?%*:|"<>]/g, '_')
+  const typeShort = periodLabel(quick.period).replace('报', '')
+  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const ext = fmt === 'excel' ? 'xlsx' : fmt === 'word' ? 'docx' : 'pdf'
+  return `${proj}_${typeShort}_${dateStr}.${ext}`
+}
+
 function exportCurrent(fmt) {
-  ElMessage.success(`已导出 ${fmt.toUpperCase()}（模拟下载）`)
+  const name = buildExportFileName(fmt)
+  ElMessage.success({
+    message: `已准备导出：${name}（模拟下载）`,
+    duration: 3500
+  })
 }
 
 function exportProjectConfig() {
   const payload = {
-    version: '2.0',
-    project: '机管局',
+    version: '3.0',
+    tenant_id: currentProjectId.value,
+    project: currentProject.value?.name,
     exportTime: nowText.value,
-    reportTemplates: visibleTemplates.value.map(({ deleted, ...t }) => t),
-    schedules: schedules.value
+    systemTemplates: getSystemReportTemplates(),
+    projectTemplates: projectTemplates.value,
+    schedules: schedules.value,
+    myReports: myReports.value
   }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `risk-report-config-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `risk-report-config-${currentProjectId.value}-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
-  ElMessage.success('配置已导出')
+  ElMessage.success('配置已导出（含本项目模板与任务）')
 }
 
 function confirmPush() {
   pushDialog.value = false
-  ElMessage.success('推送任务已提交（模拟）')
+  const subj = `【风险报告】${currentProject.value?.name || ''} ${periodTitle.value}（演示）`
+  ElMessage.success(`推送任务已提交（模拟）。主题示例：${subj}`)
 }
 
 function openTemplateCreate() {
@@ -239,29 +283,65 @@ function openTemplateEdit(row) {
   tplDialogVisible.value = true
 }
 
+function copySystemTemplate(row) {
+  projectTemplates.value.push({
+    id: `rtpl-${Date.now()}`,
+    tenant_id: currentProjectId.value,
+    isSystem: false,
+    name: `${row.name}（项目副本）`,
+    periodType: row.periodType,
+    status: 'enabled',
+    deleted: false,
+    chartTheme: row.chartTheme || 'yuyi',
+    chartSize: row.chartSize || 'md',
+    showDataLabel: row.showDataLabel !== false,
+    sections: { ...(row.sections || {}) }
+  })
+  persist()
+  syncQuickTemplate()
+  ElMessage.success('已复制为项目模板，可在列表中编辑')
+}
+
 async function removeTemplate(row) {
+  if (row.isSystem || row.tenant_id === 0) {
+    await ElMessageBox.alert(
+      '系统预置模板不可删除。可点击「复制为项目」生成本项目副本后再调整。',
+      '提示',
+      { type: 'info' }
+    )
+    return
+  }
   try {
-    await ElMessageBox.confirm('确认删除该模板？', '删除', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该项目模板？', '删除', { type: 'warning' })
   } catch {
     return
   }
   row.deleted = true
   syncQuickTemplate()
+  persist()
   ElMessage.success('已删除')
 }
 
 function onTemplateSaved(payload) {
+  const tid = currentProjectId.value
   if (tplDialogMode.value === 'create') {
-    templates.value.push({
+    projectTemplates.value.push({
       id: `rtpl-${Date.now()}`,
+      tenant_id: tid,
+      isSystem: false,
       status: 'enabled',
       deleted: false,
       ...payload
     })
   } else if (editingTemplate.value) {
+    if (editingTemplate.value.isSystem || editingTemplate.value.tenant_id === 0) {
+      ElMessage.warning('系统模板不可直接编辑，请先「复制为项目」')
+      return
+    }
     Object.assign(editingTemplate.value, payload)
   }
   syncQuickTemplate()
+  persist()
 }
 
 function openScheduleCreate() {
@@ -286,6 +366,7 @@ function onScheduleSaved(payload) {
   } else if (editingSchedule.value) {
     Object.assign(editingSchedule.value, payload)
   }
+  persist()
 }
 
 async function removeSchedule(row) {
@@ -296,28 +377,37 @@ async function removeSchedule(row) {
   }
   const i = schedules.value.indexOf(row)
   if (i !== -1) schedules.value.splice(i, 1)
+  persist()
   ElMessage.success('已删除')
 }
 
 function runScheduleOnce(row) {
   row.lastRunAt = nowText.value
-  ElMessage.success(`已触发「${row.name}」（模拟）`)
+  persist()
+  ElMessage.success({
+    message: '任务已提交，报告生成后将推送至接收人（模拟）',
+    duration: 4000
+  })
 }
 
 function onScheduleToggle(row) {
+  persist()
   ElMessage.success(row.enabled ? `已启用「${row.name}」` : `已停用「${row.name}」`)
 }
 
 refreshPreview()
+loadState()
 
 export function useRiskReportShared() {
   return {
+    systemTemplates,
+    projectTemplates,
     PERIOD_OPTIONS,
-    templates,
     schedules,
     myReports,
     quick,
     previewRefId,
+    previewLoading,
     previewMeta,
     pieOption,
     trendOption,
@@ -331,6 +421,8 @@ export function useRiskReportShared() {
     pushDialog,
     pushChannels,
     pushTargets,
+    currentProject,
+    currentProjectId,
     visibleTemplates,
     filteredTemplates,
     activeTemplate,
@@ -341,6 +433,7 @@ export function useRiskReportShared() {
     overviewCards,
     nowText,
     periodLabel,
+    MAX_REPORT_RANGE_DAYS,
     onPeriodChange,
     refreshPreview,
     generateReport,
@@ -350,6 +443,7 @@ export function useRiskReportShared() {
     confirmPush,
     openTemplateCreate,
     openTemplateEdit,
+    copySystemTemplate,
     removeTemplate,
     onTemplateSaved,
     openScheduleCreate,
@@ -357,6 +451,8 @@ export function useRiskReportShared() {
     onScheduleSaved,
     removeSchedule,
     runScheduleOnce,
-    onScheduleToggle
+    onScheduleToggle,
+    persist,
+    reloadReportState
   }
 }

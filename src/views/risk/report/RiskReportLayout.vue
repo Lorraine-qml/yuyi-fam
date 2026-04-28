@@ -1,12 +1,42 @@
 <template>
   <div class="risk-report-layout">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-      <h1 class="text-2xl font-bold text-gray-800">{{ pageTitle }}</h1>
-      <div class="flex flex-wrap gap-2">
-        <el-button @click="exportProjectConfig">
-          <el-icon class="mr-1"><FolderOpened /></el-icon>
-          导出报告配置
-        </el-button>
+    <div class="flex flex-col gap-3 mb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">{{ pageTitle }}</h1>
+          <p class="text-sm text-gray-500 mt-1">
+            当前项目：<span class="font-medium text-indigo-700">{{ currentProject?.name || '—' }}</span>
+            · 报告模板、定时任务与历史均按项目隔离
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <el-button @click="exportProjectConfig">
+            <el-icon class="mr-1"><FolderOpened /></el-icon>
+            导出报告配置
+          </el-button>
+        </div>
+      </div>
+      <div
+        class="inline-flex flex-wrap gap-1 p-1 rounded-lg bg-gray-100/80"
+        role="tablist"
+        aria-label="风险报告子模块"
+      >
+        <router-link
+          v-for="tab in subTabs"
+          :key="tab.name"
+          :to="{ name: tab.name }"
+          custom
+          v-slot="{ navigate, isActive }"
+        >
+          <el-button
+            :type="isActive ? 'primary' : 'default'"
+            size="small"
+            class="!border-0"
+            @click="navigate"
+          >
+            {{ tab.label }}
+          </el-button>
+        </router-link>
       </div>
     </div>
 
@@ -42,14 +72,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { FolderOpened } from '@element-plus/icons-vue'
+import { useCurrentProject } from '@/composables/useCurrentProject'
 import RiskReportScheduleDialog from '@/components/risk/RiskReportScheduleDialog.vue'
 import RiskReportTemplateDialog from '@/components/risk/RiskReportTemplateDialog.vue'
-import { useRiskReportShared } from './riskReportShared'
+import { useRiskReportShared, reloadReportState } from './riskReportShared'
 
 const route = useRoute()
+const { currentProject } = useCurrentProject()
 
 const {
   tplDialogVisible,
@@ -68,8 +100,19 @@ const {
   onScheduleSaved
 } = useRiskReportShared()
 
+const subTabs = [
+  { name: 'RiskReportCenter', label: '报告中心' },
+  { name: 'RiskReportTemplates', label: '模板管理' },
+  { name: 'RiskReportSchedules', label: '定时任务' }
+]
+
 const pageTitle = computed(() => {
   const leaf = route.matched.filter((r) => r.meta?.title).pop()
   return leaf?.meta?.title || '风险报告'
 })
+
+watch(
+  () => currentProject.value?.id,
+  () => reloadReportState()
+)
 </script>

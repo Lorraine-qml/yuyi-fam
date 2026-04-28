@@ -4,29 +4,40 @@
       <div class="header-spacer" />
 
       <div class="header-right">
-        <el-input
-          ref="searchInputRef"
-          v-model="searchKeyword"
-          placeholder="搜索菜单、工单、资产…"
-          :prefix-icon="Search"
-          size="small"
-          clearable
-          class="global-search hidden md:block"
-          @keyup.enter="handleSearch"
-        />
+        <div class="header-time" title="系统时间">
+          {{ dateTimeDisplay }}
+        </div>
 
-        <el-tooltip content="搜索（Ctrl+K）" placement="bottom">
-          <el-button
-            :icon="Search"
-            circle
+        <div class="flex items-center gap-1 shrink-0" title="当前项目（切换后全站按项目过滤数据）">
+          <span class="text-base leading-none" aria-hidden="true">🌐</span>
+          <el-select
+            :model-value="currentProjectId"
             size="small"
-            class="header-icon-btn md:hidden"
-            @click="focusMobileSearch"
-          />
-        </el-tooltip>
+            class="project-select"
+            placeholder="选择项目"
+            filterable
+            @update:model-value="setCurrentProjectId"
+          >
+            <el-option
+              v-for="p in projectOptions"
+              :key="p.id"
+              :label="p.name"
+              :value="p.id"
+            />
+          </el-select>
+        </div>
 
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
-          <el-button :icon="Bell" circle size="small" class="header-icon-btn" @click="openNotice" />
+          <el-tooltip content="预警消息" placement="bottom">
+            <el-button
+              :icon="Bell"
+              circle
+              size="small"
+              class="header-icon-btn"
+              aria-label="消息中心"
+              @click="messageDrawerVisible = true"
+            />
+          </el-tooltip>
         </el-badge>
 
         <el-tooltip content="帮助" placement="bottom">
@@ -53,38 +64,35 @@
       </div>
     </div>
   </header>
+  <MessageCenterDrawer v-model="messageDrawerVisible" />
 </template>
 
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { ArrowDown, Bell, QuestionFilled, Search } from '@element-plus/icons-vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { ArrowDown, Bell, QuestionFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { useCurrentProject } from '@/composables/useCurrentProject'
+import { unreadCount } from '@/composables/useNotificationCenter'
+import MessageCenterDrawer from './MessageCenterDrawer.vue'
 
 defineProps({
   collapsed: { type: Boolean, default: false }
 })
 
 const router = useRouter()
-const searchInputRef = ref(null)
-const searchKeyword = ref('')
-const unreadCount = ref(3)
+const { projectOptions, currentProjectId, setCurrentProjectId } = useCurrentProject()
+const messageDrawerVisible = ref(false)
 
-const handleSearch = () => {
-  if (!searchKeyword.value.trim()) {
-    ElMessage.info('请输入搜索关键词')
-    return
-  }
-  ElMessage.success(`搜索：${searchKeyword.value}`)
-}
-
-const focusMobileSearch = () => {
-  ElMessage.info('请使用顶部搜索框或加宽窗口')
-}
-
-const openNotice = () => {
-  ElMessage.info('通知中心（演示）')
-}
+const now = ref(new Date())
+let timeTimer = null
+const pad2 = (n) => String(n).padStart(2, '0')
+const dateTimeDisplay = computed(() => {
+  const d = now.value
+  const date = `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())}`
+  const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+  return `${date} ${time}`
+})
 
 const openHelp = () => {
   window.open('https://element-plus.org/', '_blank')
@@ -104,15 +112,14 @@ const handleUserCommand = (command) => {
   }
 }
 
-const onGlobalKeydown = (e) => {
-  if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault()
-    nextTick(() => searchInputRef.value?.focus?.())
-  }
-}
-
-onMounted(() => window.addEventListener('keydown', onGlobalKeydown))
-onUnmounted(() => window.removeEventListener('keydown', onGlobalKeydown))
+onMounted(() => {
+  timeTimer = window.setInterval(() => {
+    now.value = new Date()
+  }, 1000)
+})
+onUnmounted(() => {
+  if (timeTimer != null) clearInterval(timeTimer)
+})
 </script>
 
 <style scoped>
@@ -134,6 +141,40 @@ onUnmounted(() => window.removeEventListener('keydown', onGlobalKeydown))
   justify-content: flex-end;
   padding: 0 24px;
   max-width: 100%;
+  gap: 16px;
+}
+
+.project-select {
+  width: 200px;
+}
+
+.project-select :deep(.el-input__wrapper) {
+  border-radius: 8px;
+  border: 1px solid var(--yw-border);
+  box-shadow: none;
+  background-color: #fff;
+}
+
+.project-select :deep(.el-input__inner) {
+  color: var(--yw-text-primary);
+  font-size: 13px;
+}
+
+.project-select :deep(.el-input__wrapper:hover),
+.project-select :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--yw-primary);
+  box-shadow: none;
+}
+
+.header-time {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  user-select: none;
+  color: #000000;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .header-spacer {
@@ -146,26 +187,6 @@ onUnmounted(() => window.removeEventListener('keydown', onGlobalKeydown))
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
-}
-
-.global-search {
-  width: 260px;
-}
-
-.global-search :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  border: 1px solid var(--yw-border);
-  box-shadow: none;
-  background-color: #fff;
-}
-
-.global-search :deep(.el-input__wrapper:hover) {
-  border-color: var(--yw-primary);
-}
-
-.global-search :deep(.el-input__wrapper.is-focus) {
-  border-color: var(--yw-primary);
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
 }
 
 .header-icon-btn {

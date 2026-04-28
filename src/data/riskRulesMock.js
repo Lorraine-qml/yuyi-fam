@@ -1,5 +1,20 @@
 /** 风险规则模拟数据、等级、模板 */
 
+import { SECTOR_OPTIONS } from './riskMetricsMock'
+
+/** 指标编码前缀（如 ENERGY-POWER-001）→ 板块代码 */
+export function sectorCodeForMetricCode(metricCode) {
+  const p = String(metricCode || '').split('-')[0]
+  return p || ''
+}
+
+/** 指标编码 → 所属板块展示名（与指标业务板块一致） */
+export function sectorLabelForMetricCode(metricCode) {
+  const code = sectorCodeForMetricCode(metricCode)
+  if (!code) return '—'
+  return SECTOR_OPTIONS.find((s) => s.value === code)?.label || code
+}
+
 export const RULE_LEVEL_OPTIONS = [
   { label: '严重(红色)', value: 1, tag: 'danger', labelShort: '红色' },
   { label: '重要(橙色)', value: 2, tag: 'warning', labelShort: '橙色' },
@@ -290,11 +305,14 @@ export const RULE_TEMPLATES = [
 
 export function seedRiskRules() {
   const rules = []
-  RULE_TEMPLATES.slice(0, 8).forEach((t) => {
+  RULE_TEMPLATES.slice(0, 8).forEach((t, idx) => {
     const lm = levelMeta(t.level)
     rules.push({
-      id: rid(),
+      /** 首条规则与实时事件 mock 的 ruleId 对齐，便于「查看规则详情」跳转 */
+      id: idx === 0 ? 'rule-energy-001' : rid(),
       name: t.name,
+      sector: sectorCodeForMetricCode(t.metricCode),
+      sectorLabel: sectorLabelForMetricCode(t.metricCode),
       metricCode: t.metricCode,
       metricName: t.metricName,
       expression: t.expression,
@@ -322,7 +340,8 @@ export function seedRiskRules() {
       workOrderType: '简要工单处理',
       extraConditions: [],
       eventPreview: t.eventPreview || '',
-      deleted: false
+      deleted: false,
+      versionHistory: []
     })
   })
 
@@ -330,6 +349,8 @@ export function seedRiskRules() {
   rules.push({
     id: rid(),
     name: '晨检不合格',
+    sector: 'CANTEEN',
+    sectorLabel: sectorLabelForMetricCode('CANTEEN-CHECK-001'),
     metricCode: 'CANTEEN-CHECK-001',
     metricName: '晨检不合格次数',
     expression: "{value} == '不合格'",
@@ -357,53 +378,11 @@ export function seedRiskRules() {
     workOrderType: '简要工单处理',
     extraConditions: [],
     eventPreview: '食堂晨检不合格',
-    deleted: false
+    deleted: false,
+    versionHistory: []
   })
 
   return rules
-}
-
-export function expandRulesTo32(base) {
-  const out = [...base]
-  let n = out.length
-  while (out.length < 32) {
-    const t = RULE_TEMPLATES[n % RULE_TEMPLATES.length]
-    const lm = levelMeta(t.level)
-    out.push({
-      id: rid(),
-      name: `${t.name}（副本${n}）`,
-      metricCode: t.metricCode,
-      metricName: t.metricName,
-      expression: t.expression,
-      expressionDisplay: t.expression,
-      level: t.level,
-      levelLabel: lm.labelShort,
-      levelTag: lm.tag,
-      status: n % 9 === 0 ? 'disabled' : 'enabled',
-      runMode: n % 11 === 0 ? 'trial' : 'production',
-      lifecycleStatus: n % 11 === 0 ? 'trial' : 'production',
-      version: 1 + (n % 3),
-      versionLabel: `v${1 + (n % 3)}`,
-      eventCategory: t.eventCategory,
-      description: t.description,
-      primaryOp: t.primaryOp,
-      primaryValue: t.primaryValue,
-      primaryUnit: t.primaryUnit || '',
-      valueType: t.valueType || 'number',
-      silenceMinutes: 30,
-      conditionLogic: 'AND',
-      timeWindow: 'none',
-      dailyStart: '09:00',
-      dailyEnd: '18:00',
-      workOrderEnabled: true,
-      workOrderType: '简要工单处理',
-      extraConditions: [],
-      eventPreview: t.eventPreview || '',
-      deleted: false
-    })
-    n += 1
-  }
-  return out
 }
 
 export function ruleToForm(rule) {
@@ -458,8 +437,12 @@ export function formToRulePayload(form, metricOptions) {
   })
   const expressionDisplay = displayExpr(exprParts)
   const lm = levelMeta(form.level)
+  const sector = sectorCodeForMetricCode(form.metricCode)
+  const sectorLabel = sectorLabelForMetricCode(form.metricCode)
   return {
     name: (form.name || '').trim(),
+    sector,
+    sectorLabel,
     metricCode: form.metricCode,
     metricName,
     description: form.description,

@@ -84,7 +84,9 @@ import {
   Box,
   Clock,
   DataAnalysis,
+  CircleCheck,
   FolderOpened,
+  Promotion,
   TrendCharts,
   Document,
   Expand,
@@ -94,8 +96,11 @@ import {
   Lightning,
   List,
   Lock,
+  Message,
+  Monitor,
   OfficeBuilding,
   Setting,
+  Tickets,
   User,
   View,
   Warning
@@ -112,7 +117,35 @@ const menuList = [
   { id: 'property', name: '物业管理', path: '/property', icon: OfficeBuilding, children: [] },
   { id: 'operation', name: '运营管理', path: '/operation', icon: DataAnalysis, children: [] },
   { id: 'energy', name: '能源管理', path: '/energy', icon: Lightning, children: [] },
-  { id: 'security', name: '安全管理', path: '/security', icon: Lock, children: [] },
+  {
+    id: 'security',
+    name: '安全管理',
+    icon: Lock,
+    children: [
+      {
+        id: 'security-event',
+        name: '事件管理',
+        icon: List,
+        children: [
+          { id: 'sec-evt-rt', name: '实时事件', path: '/security/events/realtime', icon: Monitor },
+          { id: 'sec-evt-push', name: '事件推送配置', path: '/security/events/push-config', icon: Document },
+          { id: 'sec-evt-ntf', name: '通知方式配置', path: '/security/events/notify-method', icon: Message }
+        ]
+      },
+      {
+        id: 'security-workbench',
+        name: '事件工作台',
+        icon: List,
+        children: [
+          { id: 'sec-wb-repair', name: '报修工单', path: '/security/workbench/repair', icon: Tickets },
+          { id: 'sec-wb-todo', name: '我的待办', path: '/security/workbench/todo', icon: List },
+          { id: 'sec-wb-initiated', name: '我发起的', path: '/security/workbench/initiated', icon: Promotion },
+          { id: 'sec-wb-done', name: '我的已办', path: '/security/workbench/done', icon: CircleCheck },
+          { id: 'sec-wb-closed', name: '办结事宜', path: '/security/workbench/closed', icon: Document }
+        ]
+      }
+    ]
+  },
   {
     id: 'risk',
     name: '风险管理',
@@ -150,6 +183,15 @@ const defaultOpeneds = computed(() => {
   const open = []
   if (route.path.startsWith('/risk')) open.push('risk')
   if (route.path.startsWith('/risk/report')) open.push('risk-report')
+  if (route.path.startsWith('/security')) {
+    open.push('security')
+    if (route.path.startsWith('/security/events') || route.path === '/security') {
+      open.push('security-event')
+    }
+    if (route.path.startsWith('/security/workbench')) {
+      open.push('security-workbench')
+    }
+  }
   if (route.path.startsWith('/system')) open.push('system')
   return open
 })

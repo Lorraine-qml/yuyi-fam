@@ -8,6 +8,7 @@
     align-center
     :lock-scroll="true"
     @update:model-value="(v) => emit('update:visible', v)"
+    @opened="onMetricTestDialogOpened"
   >
     <div v-if="metric" class="metric-test-body space-y-4">
       <div class="flex flex-wrap items-center gap-2">
@@ -117,46 +118,42 @@
             <span aria-hidden="true">📈</span>
             历史数据预览
           </h4>
-          <el-select v-model="historyRange" size="small" class="w-full sm:w-40" @change="onHistoryRangeChange">
-            <el-option
-              v-for="o in HISTORY_RANGE_OPTIONS"
-              :key="o.value"
-              :label="o.label"
-              :value="o.value"
-            />
-          </el-select>
+          <span class="text-sm text-gray-600 w-full sm:w-auto">最近24小时</span>
         </div>
         <div
           class="rounded-lg border mb-4 p-2"
           style="border-color: var(--yw-border); background: var(--yw-bg-page)"
         >
-          <p class="text-xs text-gray-500 mb-2 px-1">{{ historyChartSubtitle }}</p>
-          <ChartContainer :option="historyChartOption" height="220px" />
+          <p class="history-chart-caption text-xs text-gray-500 mb-2 px-1">
+            {{ historyChartCaption }}
+          </p>
+          <ChartContainer :key="historyChartKey" :option="historyChartOption" height="220px" />
         </div>
         <el-table :data="historyRows" border size="small" class="w-full">
-          <el-table-column prop="time" label="时间" min-width="168" />
-          <el-table-column :label="historyValueColumnLabel" min-width="100">
-            <template #default="{ row }">{{ formatNum(row.value) }}</template>
+          <el-table-column label="时间" min-width="188">
+            <template #default="{ row }">
+              <span class="metric-history-time">{{ row.time }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="historyValueColumnLabel" min-width="120">
+            <template #default="{ row }">
+              <span class="metric-history-value">{{ formatPreciseValue(row.value) }}</span>
+            </template>
           </el-table-column>
         </el-table>
-        <div class="flex flex-wrap justify-end gap-2 mt-3">
-          <el-button size="small" @click="onViewMoreHistory">查看更多</el-button>
-          <el-button size="small" type="primary" plain @click="exportHistoryData">导出历史数据</el-button>
-        </div>
       </div>
     </div>
 
     <template #footer>
       <div class="flex flex-wrap justify-end gap-2">
-        <el-button @click="emit('update:visible', false)">关闭</el-button>
-        <el-button type="primary" @click="exportTestReport">导出测试报告</el-button>
+        <el-button @click="emit('update:visible', false)">取消</el-button>
       </div>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import ChartContainer from '@/components/ChartContainer.vue'
 
@@ -167,20 +164,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible'])
 
-const HISTORY_RANGE_OPTIONS = [
-  { label: '最近2小时', value: '2h' },
-  { label: '最近6小时', value: '6h' },
-  { label: '最近24小时', value: '24h' }
-]
-
 const testMode = ref('live')
 const manualValue = ref(1382)
 const manualResult = ref(null)
 const liveValue = ref(1471)
 const liveTime = ref('')
 const liveDisplay = ref('1,471')
-const historyRange = ref('2h')
 const historyRows = ref([])
+const historyChartKey = ref(0)
 
 const historyChartOption = reactive({
   color: ['#4F46E5'],
@@ -189,7 +180,20 @@ const historyChartOption = reactive({
     backgroundColor: '#fff',
     borderColor: '#EEF2F6',
     borderWidth: 1,
-    textStyle: { color: '#1F2937' }
+    textStyle: { color: '#1F2937' },
+    formatter(params) {
+      const arr = Array.isArray(params) ? params : [params]
+      if (!arr.length) return ''
+      const fmt = (v) =>
+        typeof v === 'number'
+          ? v.toFixed(8).replace(/0+$/, '').replace(/\.$/, '')
+          : String(v)
+      const head = arr[0].axisValueLabel ?? arr[0].name ?? ''
+      const body = arr
+        .map((p) => `${p.marker}${p.seriesName}: ${fmt(p.value)}`)
+        .join('<br/>')
+      return `${head}<br/>${body}`
+    }
   },
   grid: { left: '3%', right: '4%', bottom: '10%', top: '12%', containLabel: true },
   xAxis: {
@@ -242,9 +246,10 @@ const dataSourceDisplay = computed(() => {
   return `https://api.energy.com/v1/${code.replace(/-/g, '/').toLowerCase()}/realtime`
 })
 
-const historyChartSubtitle = computed(() => {
-  const labels = { '2h': '近2小时', '6h': '近6小时', '24h': '近24小时' }
-  return `${labels[historyRange.value] || ''}数据趋势`
+const historyChartCaption = computed(() => {
+  const u = props.metric?.unit
+  const unitPart = u ? `值(${u})` : '值'
+  return `近24小时数据趋势 ${unitPart}`
 })
 
 const historyValueColumnLabel = computed(() => {
@@ -258,8 +263,12 @@ const currentTestValue = computed(() =>
 
 const ruleVerifyRows = computed(() => buildRuleVerifyRows(props.metric, currentTestValue.value, historyRows.value))
 
-function formatNum(n) {
-  return typeof n === 'number' ? n.toLocaleString() : n
+function formatPreciseValue(n) {
+  if (typeof n !== 'number' || !Number.isFinite(n)) return '—'
+  return n
+    .toFixed(8)
+    .replace(/0+$/, '')
+    .replace(/\.$/, '')
 }
 
 function buildRuleVerifyRows(metric, currentVal, history) {
@@ -311,35 +320,39 @@ function buildRuleVerifyRows(metric, currentVal, history) {
   ]
 }
 
-function buildHistory(base, range) {
-  const cfg = {
-    '2h': { steps: 6, minutesStep: 20 },
-    '6h': { steps: 8, minutesStep: 45 },
-    '24h': { steps: 12, minutesStep: 120 }
-  }
-  const { steps, minutesStep } = cfg[range] || cfg['2h']
+function buildHistory(base) {
+  const count = 25
+  const minutesStep = 60
   const now = new Date()
   const rows = []
   const pad = (x) => String(x).padStart(2, '0')
-  for (let i = steps - 1; i >= 0; i -= 1) {
+  for (let i = count - 1; i >= 0; i -= 1) {
     const t = new Date(now.getTime() - i * minutesStep * 60 * 1000)
-    const str = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())}`
-    const noise = (steps - i) * 18 + Math.round(Math.random() * 12)
-    rows.push({ time: str, value: Math.round(base - noise) })
+    const str = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`
+    const progress = (count - 1 - i) / (count - 1 || 1)
+    const noise = progress * 28 + Math.random() * 6
+    const raw = base - noise + (Math.random() * 0.18 - 0.09)
+    rows.push({ time: str, value: Number(raw.toFixed(8)) })
   }
-  rows[rows.length - 1].value = Math.round(base)
+  if (rows.length) {
+    const lastJitter = (Math.random() * 0.00012 - 0.00006)
+    rows[rows.length - 1] = { ...rows[rows.length - 1], value: Number((base + lastJitter).toFixed(8)) }
+  }
   return rows
 }
 
 function updateHistoryChart(rows, unit) {
   const shortTime = (full) => {
-    const parts = full.split(' ')
-    if (parts.length < 2) return full
-    return parts[1].slice(0, 5)
+    const d = String(full).split(' ')[0] || ''
+    const t = String(full).split(' ')[1] || ''
+    if (!d || !t) return full
+    const dayPart = d.slice(5)
+    const hms = t.slice(0, 5)
+    return `${dayPart} ${hms}`
   }
   historyChartOption.xAxis.data = rows.map((r) => shortTime(r.time))
   historyChartOption.series[0].data = rows.map((r) => r.value)
-  historyChartOption.yAxis.name = unit ? `(${unit})` : ''
+  historyChartOption.yAxis.name = ''
 }
 
 function fetchLive() {
@@ -350,15 +363,9 @@ function fetchLive() {
   const d = new Date()
   const pad = (x) => String(x).padStart(2, '0')
   liveTime.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-  historyRows.value = buildHistory(base, historyRange.value)
+  historyRows.value = buildHistory(base)
   updateHistoryChart(historyRows.value, props.metric.unit)
   ElMessage.success('已获取最新数据（模拟）')
-}
-
-function onHistoryRangeChange() {
-  if (!props.metric) return
-  historyRows.value = buildHistory(liveValue.value, historyRange.value)
-  updateHistoryChart(historyRows.value, props.metric.unit)
 }
 
 function runManualTest() {
@@ -366,7 +373,7 @@ function runManualTest() {
     ok: manualValue.value >= 0,
     msg: manualValue.value >= 0 ? '模拟值格式与范围校验通过' : '数值无效'
   }
-  historyRows.value = buildHistory(manualValue.value, historyRange.value)
+  historyRows.value = buildHistory(manualValue.value)
   updateHistoryChart(historyRows.value, props.metric?.unit)
 }
 
@@ -379,48 +386,11 @@ function copySourceUrl() {
   }
 }
 
-function onViewMoreHistory() {
-  ElMessage.info('完整历史可在指标详情或数据仓库中查询（演示）')
-}
-
-function exportHistoryData() {
-  if (!props.metric || !historyRows.value.length) {
-    ElMessage.warning('暂无历史数据')
-    return
-  }
-  const u = props.metric.unit || ''
-  const header = `时间,值${u ? `(${u})` : ''}\n`
-  const lines = historyRows.value.map((r) => `${r.time},${r.value}`).join('\n')
-  const blob = new Blob([header + lines], { type: 'text/csv;charset=utf-8' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = `metric-history-${props.metric.code || 'export'}-${Date.now()}.csv`
-  a.click()
-  URL.revokeObjectURL(a.href)
-  ElMessage.success('历史数据已导出')
-}
-
-function exportTestReport() {
-  if (!props.metric) return
-  const payload = {
-    metricName: props.metric.name,
-    metricCode: props.metric.code,
-    testMode: testMode.value,
-    testTime: liveTime.value || new Date().toISOString(),
-    currentValue: currentTestValue.value,
-    unit: props.metric.unit,
-    dataSource: dataSourceDisplay.value,
-    historyRange: historyRange.value,
-    ruleResults: ruleVerifyRows.value,
-    historySample: historyRows.value.slice(-10)
-  }
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = `metric-test-report-${props.metric.code || 'report'}-${Date.now()}.json`
-  a.click()
-  URL.revokeObjectURL(a.href)
-  ElMessage.success('测试报告已导出')
+function onMetricTestDialogOpened() {
+  nextTick(() => {
+    historyChartKey.value += 1
+    window.dispatchEvent(new Event('resize'))
+  })
 }
 
 watch(
@@ -436,7 +406,7 @@ watch(
 
 watch(testMode, (m) => {
   if (m === 'manual' && props.metric && props.visible) {
-    historyRows.value = buildHistory(manualValue.value, historyRange.value)
+    historyRows.value = buildHistory(manualValue.value)
     updateHistoryChart(historyRows.value, props.metric.unit)
   } else if (m === 'live' && props.metric && props.visible) {
     fetchLive()
@@ -447,6 +417,21 @@ watch(testMode, (m) => {
 <style scoped>
 .metric-test-body :deep(.el-radio) {
   margin-right: 16px;
+}
+
+.metric-history-time {
+  color: #000000;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-history-value {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace;
+}
+
+.history-chart-caption {
+  white-space: nowrap;
+  overflow-x: auto;
 }
 </style>
 

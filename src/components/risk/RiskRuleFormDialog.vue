@@ -166,7 +166,6 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
 import {
   createEmptyRuleForm,
   EVENT_CATEGORY_OPTIONS,
@@ -252,8 +251,13 @@ async function submit() {
   } catch {
     return
   }
+  /** 由父级校验（重名、同指标唯一启用）通过后关闭并提示 */
   emit('saved', formToRulePayload(form, props.metricOptions))
-  emit('update:visible', false)
-  ElMessage.success(isEdit.value ? '已保存，版本号已更新' : '已新增规则')
 }
+
+function setRuleName(n) {
+  if (n != null) form.name = n
+}
+
+defineExpose({ setRuleName })
 </script>

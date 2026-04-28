@@ -21,7 +21,7 @@
         </el-select>
       </el-form-item>
 
-      <div class="text-sm font-semibold text-gray-800 mb-2">模板结构</div>
+      <div class="text-sm font-semibold text-gray-800 mb-2">包含内容（多选）</div>
       <div
         class="rounded-lg border p-4 space-y-2 mb-4"
         style="border-color: var(--yw-border); background: var(--yw-bg-page)"
@@ -59,7 +59,10 @@
         </el-select>
       </el-form-item>
       <el-form-item label="显示数据标签">
-        <el-switch v-model="form.showDataLabel" />
+        <el-select v-model="form.showDataLabel" class="w-40">
+          <el-option label="是" :value="true" />
+          <el-option label="否" :value="false" />
+        </el-select>
       </el-form-item>
     </el-form>
 

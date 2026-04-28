@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
@@ -15,8 +15,18 @@ const props = defineProps({
 
 const chartRef = ref(null)
 let chart = null
+let resizeObserver = null
 
 const resize = () => chart?.resize()
+
+function afterChartLayout() {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      chart?.resize()
+      setTimeout(() => chart?.resize(), 100)
+    })
+  })
+}
 
 function bindChartEvents() {
   if (!chart || !props.chartEvents) return
@@ -32,15 +42,23 @@ function unbindChartEvents() {
 
 onMounted(() => {
   chart = echarts.init(chartRef.value)
-  chart.setOption(props.option)
+  chart.setOption(props.option, { notMerge: true })
   bindChartEvents()
   window.addEventListener('resize', resize)
+  if (typeof ResizeObserver !== 'undefined' && chartRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      chart?.resize()
+    })
+    resizeObserver.observe(chartRef.value)
+  }
+  afterChartLayout()
 })
 
 watch(
   () => props.option,
   (newOpt) => {
-    chart?.setOption(newOpt, true)
+    chart?.setOption(newOpt, { notMerge: true })
+    afterChartLayout()
   },
   { deep: true }
 )
@@ -55,6 +73,8 @@ watch(
 )
 
 onUnmounted(() => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
   window.removeEventListener('resize', resize)
   unbindChartEvents()
   chart?.dispose()

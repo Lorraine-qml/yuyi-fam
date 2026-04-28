@@ -10,15 +10,22 @@
         </transition>
       </router-view>
     </div>
+
+    <EventDetailDrawer />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import LeftMenu from '@/components/layout/LeftMenu.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
+import EventDetailDrawer from '@/components/event/EventDetailDrawer.vue'
+import { startNotificationHub } from '@/composables/useNotificationCenter'
 
 const menuCollapsed = ref(false)
+onMounted(() => {
+  startNotificationHub()
+})
 </script>
 
 <style scoped>

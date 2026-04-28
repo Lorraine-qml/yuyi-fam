@@ -121,6 +121,7 @@
       :mode="formMode"
       :record="editingRecord"
       :existing-codes="existingCodes"
+      :metric-prefill="metricPrefill"
       @saved="onFormSaved"
     />
 
@@ -138,8 +139,9 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getStandardMetricTypeByKey } from '@/data/riskStandardMetrics'
 import { Download, Plus, Upload } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import RiskMetricDeleteSuccessDialog from '@/components/risk/RiskMetricDeleteSuccessDialog.vue'
@@ -153,6 +155,8 @@ import {
 } from '@/data/riskMetricsMock'
 
 const router = useRouter()
+const route = useRoute()
+const metricPrefill = ref(null)
 
 const list = ref(expandMockRows(seedRiskMetrics()))
 
@@ -207,7 +211,35 @@ function resetFilters() {
   page.value = 1
 }
 
+function tryOpenFromStandardQuery() {
+  const k = route.query.standardMetricKey
+  if (!k) return
+  const std = getStandardMetricTypeByKey(String(k))
+  if (!std) {
+    router.replace({ path: route.path, query: {} })
+    return
+  }
+  metricPrefill.value = {
+    name: std.name,
+    unit: std.defaultUnit,
+    dataSourceType: std.defaultDataSourceType
+  }
+  formMode.value = 'create'
+  editingRecord.value = null
+  formVisible.value = true
+  router.replace({ path: route.path, query: {} })
+}
+
+watch(
+  () => route.query.standardMetricKey,
+  (k) => {
+    if (k) tryOpenFromStandardQuery()
+  },
+  { immediate: true }
+)
+
 function openCreate() {
+  metricPrefill.value = null
   formMode.value = 'create'
   editingRecord.value = null
   formVisible.value = true
@@ -237,6 +269,7 @@ function openTrialLog(row) {
 
 function onFormSaved(payload) {
   if (formMode.value === 'view') return
+  metricPrefill.value = null
   if (formMode.value === 'create') {
     list.value.unshift({
       id: `rm-${Date.now()}`,
@@ -282,7 +315,11 @@ async function onDelete(row) {
       ? `确认删除指标「${row.name}」？关联的 ${linked} 条规则将自动停用。（软删除，可从备份恢复）`
       : `确认删除该指标？（软删除，可从备份恢复）`
   try {
-    await ElMessageBox.confirm(msg, '删除', { type: 'warning' })
+    await ElMessageBox.confirm(msg, '删除', {
+      type: 'warning',
+      confirmButtonText: '确认删除',
+      cancelButtonText: '取消'
+    })
   } catch {
     return
   }

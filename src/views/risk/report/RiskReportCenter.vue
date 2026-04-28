@@ -57,7 +57,7 @@
             <div class="text-xs text-gray-400 mt-0.5">{{ r.generatedAt }}</div>
           </li>
         </ul>
-        <el-button link type="primary" class="mt-2 !px-0" @click="scrollToPreview">查看预览区</el-button>
+        <el-button link type="primary" class="mt-2 !px-0" @click="scrollToPreview">查看全部 / 定位预览</el-button>
       </div>
 
       <div
@@ -65,10 +65,22 @@
         style="border-color: var(--yw-border)"
       >
         <h3 class="text-sm font-semibold text-gray-800 mb-3">定时任务</h3>
-        <ul class="space-y-2 text-sm text-gray-600 mb-3">
-          <li v-for="s in schedules.slice(0, 3)" :key="s.id" class="flex justify-between gap-2">
-            <span class="truncate">{{ s.name }}</span>
-            <el-tag :type="s.enabled ? 'success' : 'info'" size="small">{{ s.cycleLabel }}</el-tag>
+        <ul class="space-y-2.5 text-sm text-gray-600 mb-3">
+          <li
+            v-for="s in schedules.slice(0, 3)"
+            :key="s.id"
+            class="flex flex-col gap-0.5 border-b border-gray-100 pb-2 last:border-0 last:pb-0"
+          >
+            <div class="flex justify-between gap-2 items-start">
+              <span class="truncate font-medium text-gray-800">{{ s.name }}</span>
+              <el-tag :type="s.enabled ? 'success' : 'info'" size="small" effect="plain">
+                {{ s.enabled ? '启用' : '停用' }}
+              </el-tag>
+            </div>
+            <div class="text-xs text-gray-500">
+              {{ s.cycleLabel }} · {{ s.runTime }}
+              <span v-if="s.cycle === 'cron' && s.cronExpr" class="ml-1 font-mono">({{ s.cronExpr }})</span>
+            </div>
           </li>
         </ul>
         <el-button type="primary" plain class="w-full" @click="goSchedules">管理任务</el-button>
@@ -77,11 +89,15 @@
 
     <div
       ref="previewRef"
-      class="rounded-xl border bg-white p-5 shadow-sm mb-4"
+      v-loading="previewLoading"
+      element-loading-text="正在生成预览…"
+      class="rounded-xl border bg-white p-5 shadow-sm mb-4 min-h-[120px]"
       style="border-color: var(--yw-border)"
     >
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">【{{ periodTitle }}预览】{{ previewMeta.subtitle }}</h2>
+        <h2 class="text-lg font-semibold text-gray-800">
+          【{{ periodTitle }}预览】{{ previewMeta.subtitle }}
+        </h2>
         <div class="flex flex-wrap gap-2">
           <el-button size="small" @click="exportCurrent('pdf')">导出 PDF</el-button>
           <el-button size="small" @click="exportCurrent('excel')">导出 Excel</el-button>
@@ -122,12 +138,40 @@
       </template>
 
       <template v-if="activeSections.regionTable">
-        <h3 class="text-sm font-semibold text-gray-800 mb-3">四、高风险区域 TOP5</h3>
-        <ol class="list-decimal list-inside text-sm text-gray-700 space-y-1 mb-6">
-          <li v-for="(r, i) in previewMeta.topRegions" :key="i">
-            {{ r.name }}（{{ r.count }}次）
-          </li>
-        </ol>
+        <h3 class="text-sm font-semibold text-gray-800 mb-1">四、高风险区域 TOP5</h3>
+        <p class="text-xs text-gray-500 mb-4">按本周期内风险事件次数降序；条长表示相对最高频区域的占比。</p>
+        <div class="region-top5-wrap mb-6">
+          <div
+            v-for="(row, i) in topRegionBars"
+            :key="`${row.name}-${i}`"
+            class="region-top5-item"
+          >
+            <div
+              class="region-top5-rank"
+              :data-rank="i + 1"
+            >
+              {{ i + 1 }}
+            </div>
+            <div class="region-top5-body">
+              <div class="region-top5-head">
+                <span class="region-top5-name" :title="row.name">{{ row.name }}</span>
+                <div class="region-top5-meta">
+                  <span class="region-top5-count">{{ row.count }}<small>次</small></span>
+                  <span v-if="row.sharePct != null" class="region-top5-pct">占 {{ row.sharePct }}%</span>
+                </div>
+              </div>
+              <div class="region-top5-track" aria-hidden="true">
+                <div
+                  class="region-top5-fill"
+                  :style="{
+                    width: `${row.barWidthPct}%`,
+                    background: row.barGradient
+                  }"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
 
       <template v-if="activeSections.openRisksTable">
@@ -163,7 +207,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ChartContainer from '@/components/ChartContainer.vue'
 import {
@@ -181,6 +225,7 @@ const {
   myReports,
   quick,
   previewRefId,
+  previewLoading,
   previewMeta,
   pieOption,
   trendOption,
@@ -200,6 +245,28 @@ const {
   exportCurrent
 } = useRiskReportShared()
 
+const RANK_BAR_GRADIENTS = [
+  'linear-gradient(90deg, #DC2626 0%, #FCA5A5 100%)',
+  'linear-gradient(90deg, #EA580C 0%, #FDBA74 100%)',
+  'linear-gradient(90deg, #CA8A04 0%, #FDE047 100%)',
+  'linear-gradient(90deg, #65A30D 0%, #BEF264 100%)',
+  'linear-gradient(90deg, #0D9488 0%, #5EEAD4 100%)'
+]
+
+const topRegionBars = computed(() => {
+  const list = previewMeta.value?.topRegions || []
+  if (!list.length) return []
+  const max = Math.max(...list.map((r) => r.count), 1)
+  const total = list.reduce((s, r) => s + r.count, 0) || 1
+  return list.map((r, i) => ({
+    name: r.name,
+    count: r.count,
+    barWidthPct: Math.round((r.count / max) * 1000) / 10,
+    sharePct: Math.round((r.count / total) * 1000) / 10,
+    barGradient: RANK_BAR_GRADIENTS[Math.min(i, RANK_BAR_GRADIENTS.length - 1)]
+  }))
+})
+
 function scrollToPreview() {
   previewRef.value?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
 }
@@ -208,3 +275,129 @@ function goSchedules() {
   router.push({ name: 'RiskReportSchedules' })
 }
 </script>
+
+<style scoped>
+.region-top5-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.region-top5-item {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .region-top5-item {
+    gap: 1rem;
+  }
+}
+
+.region-top5-rank {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.region-top5-rank[data-rank='1'] {
+  background: linear-gradient(135deg, #e11d48, #f43f5e);
+}
+.region-top5-rank[data-rank='2'] {
+  background: linear-gradient(135deg, #ea580c, #fb7185);
+}
+.region-top5-rank[data-rank='3'] {
+  background: linear-gradient(135deg, #d97706, #fbbf24);
+}
+.region-top5-rank[data-rank='4'] {
+  background: linear-gradient(135deg, #4f46e5, #818cf8);
+}
+.region-top5-rank[data-rank='5'] {
+  background: linear-gradient(135deg, #0d9488, #2dd4bf);
+}
+
+.region-top5-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%);
+  border: 1px solid var(--yw-border, #e5e7eb);
+}
+
+.region-top5-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.region-top5-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+}
+
+.region-top5-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.region-top5-count {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4f46e5;
+  font-variant-numeric: tabular-nums;
+}
+
+.region-top5-count small {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-left: 0.125rem;
+}
+
+.region-top5-pct {
+  color: #9ca3af;
+  font-variant-numeric: tabular-nums;
+}
+
+.region-top5-track {
+  height: 0.625rem;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  overflow: hidden;
+  width: 100%;
+}
+
+.region-top5-fill {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 9999px;
+  transition: width 0.5s ease-out;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+</style>

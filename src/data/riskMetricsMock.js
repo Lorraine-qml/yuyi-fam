@@ -23,7 +23,22 @@ export const METRIC_CATEGORY_OPTIONS = [
   { label: '实时值', value: 'REALTIME' },
   { label: '比率值', value: 'RATIO' },
   { label: '累计值', value: 'CUMULATIVE' },
-  { label: '状态值', value: 'STATE' }
+  { label: '状态值', value: 'STATE' },
+  {
+    label: '计数型',
+    value: 'COUNT',
+    desc: '可数的事件次数，如 报警次数、报修次数、访客人数'
+  },
+  {
+    label: '时长型',
+    value: 'DURATION',
+    desc: '时间长度，如 响应时长、处置时长、运行时长'
+  },
+  {
+    label: '排名型',
+    value: 'RANK',
+    desc: '序数或排名，如 能耗排名、风险排名'
+  }
 ]
 
 /** 旧编码中段 → 指标分类（用于编辑回显） */
@@ -36,7 +51,10 @@ export const LEGACY_METRIC_TYPE_TO_CATEGORY = {
   REALTIME: 'REALTIME',
   RATIO: 'RATIO',
   CUMULATIVE: 'CUMULATIVE',
-  STATE: 'STATE'
+  STATE: 'STATE',
+  COUNT: 'COUNT',
+  DURATION: 'DURATION',
+  RANK: 'RANK'
 }
 
 export const DATA_SOURCE_TYPE_OPTIONS = [
@@ -195,6 +213,7 @@ export function seedRiskMetrics() {
       'enabled',
       2,
       {
+        standardMetricTypeKey: 'SM-ENERGY-RT',
         description: '监测各配电室实时用电量',
         apiUrl: 'https://api.energy.com/v1',
         apiPath: '/realtime',
@@ -212,6 +231,7 @@ export function seedRiskMetrics() {
       'enabled',
       1,
       {
+        standardMetricTypeKey: 'SM-ENERGY-RATE',
         apiUrl: 'https://api.energy.com/v1',
         responsePath: '$.data.spikeRate',
         collectFreq: '1m'
@@ -227,6 +247,7 @@ export function seedRiskMetrics() {
       'enabled',
       0,
       {
+        standardMetricTypeKey: 'SM-FIRE-OFF',
         jdbcUrl: 'jdbc:mysql://db.internal:3306/fire',
         sqlText: 'SELECT offline_rate FROM device_stats WHERE id=1',
         collectFreq: '5m'
@@ -242,6 +263,7 @@ export function seedRiskMetrics() {
       'enabled',
       0,
       {
+        standardMetricTypeKey: 'SM-CANTEEN-CHK',
         apiUrl: 'https://api.canteen.internal/check',
         responsePath: '$.data.failCount',
         collectFreq: '1h'
@@ -257,6 +279,7 @@ export function seedRiskMetrics() {
       'disabled',
       0,
       {
+        standardMetricTypeKey: 'SM-WO-OPEN',
         jdbcUrl: 'jdbc:mysql://db.internal:3306/property',
         sqlText: 'SELECT COUNT(*) FROM wo WHERE status="open"',
         collectFreq: '5m'
@@ -302,6 +325,13 @@ export function getMetricSelectOptions() {
     label: `${m.name} (${m.code})`,
     value: m.code,
     name: m.name,
-    unit: m.unit || ''
+    unit: m.unit || '',
+    dataSourceType: m.dataSourceType,
+    standardMetricTypeKey: m.standardMetricTypeKey
   }))
+}
+
+/** 与规则/模板一致，含 datasource、标准类型键（用于系统模板指标映射与匹配度） */
+export function getRuleMetricOptions() {
+  return getMetricSelectOptions()
 }

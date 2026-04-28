@@ -11,6 +11,11 @@ import RiskReportCenter from '@/views/risk/report/RiskReportCenter.vue'
 import RiskReportTemplatesPage from '@/views/risk/report/RiskReportTemplatesPage.vue'
 import RiskReportSchedulesPage from '@/views/risk/report/RiskReportSchedulesPage.vue'
 import RiskTrialLogsPage from '@/views/risk/trial-logs/RiskTrialLogsPage.vue'
+import RealtimeEventsPage from '@/views/security/RealtimeEventsPage.vue'
+import EventPushConfigPage from '@/views/security/EventPushConfigPage.vue'
+import NotificationMethodConfigPage from '@/views/security/NotificationMethodConfigPage.vue'
+import EventDetailDeepLink from '@/views/security/EventDetailDeepLink.vue'
+import WorkOrderWorkbenchPage from '@/views/security/workbench/WorkOrderWorkbenchPage.vue'
 
 const routes = [
   {
@@ -50,9 +55,78 @@ const routes = [
       },
       {
         path: 'security',
-        name: 'Security',
-        component: ModulePlaceholder,
-        meta: { title: '安全管理', subtitle: '消防、安防、监控（建设中）' }
+        component: RouterPass,
+        redirect: { name: 'SecurityRealtimeEvents' },
+        children: [
+          {
+            path: 'events/realtime',
+            name: 'SecurityRealtimeEvents',
+            component: RealtimeEventsPage,
+            meta: { title: '实时事件', subtitle: '事件列表、统计与处理' }
+          },
+          {
+            path: 'events/push-config',
+            name: 'SecurityEventPushConfig',
+            component: EventPushConfigPage,
+            meta: { title: '事件推送配置', subtitle: '分类、等级与通知方式' }
+          },
+          {
+            path: 'events/notify-method',
+            name: 'SecurityNotificationMethod',
+            component: NotificationMethodConfigPage,
+            meta: { title: '通知方式配置', subtitle: '渠道与连通性' }
+          },
+          {
+            path: 'workbench/repair',
+            name: 'SecurityWorkbenchRepair',
+            component: WorkOrderWorkbenchPage,
+            meta: {
+              title: '报修工单',
+              subtitle: '全量工单、筛选与调度',
+              workOrderView: 'all'
+            }
+          },
+          {
+            path: 'workbench/todo',
+            name: 'SecurityWorkbenchTodo',
+            component: WorkOrderWorkbenchPage,
+            meta: {
+              title: '我的待办',
+              subtitle: '待接单/处理中',
+              workOrderView: 'todo'
+            }
+          },
+          {
+            path: 'workbench/initiated',
+            name: 'SecurityWorkbenchInitiated',
+            component: WorkOrderWorkbenchPage,
+            meta: {
+              title: '我发起的',
+              subtitle: '本人发起与规则跟踪',
+              workOrderView: 'initiated'
+            }
+          },
+          {
+            path: 'workbench/done',
+            name: 'SecurityWorkbenchDone',
+            component: WorkOrderWorkbenchPage,
+            meta: {
+              title: '我的已办',
+              subtitle: '已处理未完全办结',
+              workOrderView: 'done'
+            }
+          },
+          {
+            path: 'workbench/closed',
+            name: 'SecurityWorkbenchClosed',
+            component: WorkOrderWorkbenchPage,
+            meta: {
+              title: '办结事宜',
+              subtitle: '已完成/已关闭归档',
+              workOrderView: 'closed'
+            }
+          }
+        ]
       },
       {
         path: 'system',
@@ -84,6 +158,18 @@ const routes = [
         name: 'Profile',
         component: ModulePlaceholder,
         meta: { title: '个人中心', subtitle: '账号与偏好设置（建设中）' }
+      },
+      {
+        path: 'event/detail/:id',
+        name: 'EventDetail',
+        component: EventDetailDeepLink,
+        meta: { title: '实时事件详情', subtitle: '抽屉展示，不占用全页' }
+      },
+      {
+        path: 'workorder/detail/:id',
+        name: 'WorkorderDetail',
+        component: ModulePlaceholder,
+        meta: { title: '工单详情', subtitle: '工单处理与流转（建设中，由消息中心跳转）' }
       },
       {
         path: 'risk',
