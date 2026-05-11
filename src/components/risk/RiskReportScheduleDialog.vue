@@ -2,11 +2,13 @@
   <el-dialog
     :model-value="visible"
     :title="isEdit ? '编辑定时任务' : '新增定时任务'"
-    width="580px"
+    width="760px"
+    class="schedule-task-dialog"
+    align-center
     destroy-on-close
     @update:model-value="(v) => emit('update:visible', v)"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="108px">
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="132px" class="schedule-task-form">
       <el-form-item label="任务名称" prop="name">
         <el-input v-model="form.name" maxlength="80" show-word-limit placeholder="如：每日风险日报推送" />
       </el-form-item>
@@ -24,7 +26,11 @@
         </p>
       </el-form-item>
       <el-form-item label="执行周期" required>
-        <el-radio-group v-model="form.cycle" class="flex flex-col gap-2 items-start" @change="onCycleChange">
+        <el-radio-group
+          v-model="form.cycle"
+          class="flex flex-row flex-wrap gap-x-6 gap-y-2 items-center"
+          @change="onCycleChange"
+        >
           <el-radio value="daily">每日</el-radio>
           <el-radio value="weekly_mon">每周一</el-radio>
           <el-radio value="monthly_1">每月 1 日</el-radio>
@@ -48,19 +54,59 @@
           class="font-mono text-sm"
         />
       </el-form-item>
-      <el-form-item label="推送方式">
-        <el-checkbox v-model="form.channelEmail">邮件</el-checkbox>
-        <el-checkbox v-model="form.channelDing">钉钉</el-checkbox>
-        <el-checkbox v-model="form.channelWecom">企业微信</el-checkbox>
-      </el-form-item>
-      <el-form-item label="接收人" prop="recipients">
-        <el-input
-          v-model="form.recipients"
-          type="textarea"
-          :rows="2"
-          placeholder="多个邮箱或账号用分号分隔"
-        />
-      </el-form-item>
+
+      <div
+        class="schedule-push-block rounded-lg border p-4 mb-1 -mx-1"
+        style="border-color: var(--yw-border); background: rgba(249, 250, 251, 0.9)"
+      >
+        <div class="text-sm font-semibold text-gray-800 pb-3 border-b mb-3" style="border-color: var(--yw-border)">
+          📤 推送设置
+        </div>
+        <el-form-item label="通知方式" prop="notifyMethodIds" class="push-form-item push-form-item--notify">
+          <p class="text-xs text-gray-500 m-0 mb-2 w-full leading-normal">
+            从「通知方式配置」读取已启用渠道，可多选；SMTP / Webhook 在配置中维护。
+          </p>
+          <el-checkbox-group v-model="form.notifyMethodIds" class="notify-checkbox-group w-full min-w-0">
+            <el-checkbox v-for="m in pushMethodOptions" :key="m.id" :label="m.id" class="notify-checkbox">
+              <span class="align-middle">{{ m.name }}</span>
+              <span class="text-gray-400 text-xs ml-0.5 align-middle">（{{ NOTIFY_TYPE_META[m.type]?.label || m.type }}）</span>
+            </el-checkbox>
+          </el-checkbox-group>
+          <p v-if="!pushMethodOptions.length" class="text-xs text-amber-600 mb-0 mt-1">
+            暂无可用的钉钉 / 邮件 / 企业微信渠道，请先到「通知方式配置」维护。
+          </p>
+          <p
+            class="text-xs text-indigo-900/85 bg-indigo-50 border border-indigo-100/80 rounded px-2.5 py-1.5 mt-2 mb-0 leading-relaxed"
+          >
+            💡 通知方式的 SMTP、钉钉/企微 Webhook 请在「通知方式配置」中维护；此处按渠道填写收件人即可。
+          </p>
+        </el-form-item>
+        <el-form-item v-show="recipientShow.mail" label="收件人（邮件）" prop="recipientsMail" class="push-form-item">
+          <el-input
+            v-model="form.recipientsMail"
+            clearable
+            class="push-recipient-input"
+            placeholder="多个邮箱用英文分号分隔，如 a@x.com; b@x.com"
+          />
+        </el-form-item>
+        <el-form-item v-show="recipientShow.ding" label="收件人（钉钉）" prop="recipientsDing" class="push-form-item">
+          <el-input
+            v-model="form.recipientsDing"
+            clearable
+            class="push-recipient-input"
+            placeholder="可选：@所有人 或手机号 / 用户 ID"
+          />
+        </el-form-item>
+        <el-form-item v-show="recipientShow.wework" label="收件人（企微）" prop="recipientsWework" class="push-form-item !mb-0">
+          <el-input
+            v-model="form.recipientsWework"
+            clearable
+            class="push-recipient-input"
+            placeholder="可选：企微 @ 相关标识"
+          />
+        </el-form-item>
+      </div>
+
       <el-form-item label="状态">
         <el-radio-group v-model="form.enabled">
           <el-radio :label="true">启用</el-radio>
@@ -80,6 +126,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { cycleToPeriodType, PERIOD_OPTIONS } from '@/data/riskReportMock'
+import { NOTIFY_TYPE_META, getNotificationMethod, listMethodsForSchedulePush } from '@/data/notificationMethodMock'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -98,14 +145,55 @@ const form = reactive({
   runTime: '09:00',
   cronExpr: '0 9 * * *',
   templateId: '',
-  channelEmail: true,
-  channelDing: true,
-  channelWecom: false,
-  recipients: '',
+  notifyMethodIds: [],
+  recipientsMail: '',
+  recipientsDing: '',
+  recipientsWework: '',
   enabled: true
 })
 
 const isEdit = computed(() => props.mode === 'edit')
+
+const pushMethodOptions = computed(() => listMethodsForSchedulePush())
+
+function inferNotifyMethodIds(record) {
+  if (!record) return []
+  const existing = Array.isArray(record.notifyMethodIds) ? record.notifyMethodIds : []
+  if (existing.length) {
+    const allowed = new Set(pushMethodOptions.value.map((m) => m.id))
+    return existing.filter((id) => allowed.has(id))
+  }
+  const ids = []
+  const pushable = listMethodsForSchedulePush()
+  if (record.channelEmail) {
+    const m = pushable.find((x) => x.type === 'mail')
+    if (m) ids.push(m.id)
+  }
+  if (record.channelDing) {
+    const m = pushable.find((x) => x.type === 'ding')
+    if (m) ids.push(m.id)
+  }
+  if (record.channelWecom) {
+    const m = pushable.find((x) => x.type === 'wework')
+    if (m) ids.push(m.id)
+  }
+  return ids
+}
+
+const selectedRecipientTypes = computed(() => {
+  const s = new Set()
+  for (const id of form.notifyMethodIds) {
+    const m = getNotificationMethod(id)
+    if (m?.type) s.add(m.type)
+  }
+  return s
+})
+
+const recipientShow = computed(() => ({
+  mail: selectedRecipientTypes.value.has('mail'),
+  ding: selectedRecipientTypes.value.has('ding'),
+  wework: selectedRecipientTypes.value.has('wework')
+}))
 
 const expectedPeriod = computed(() => {
   if (form.cycle === 'cron') return null
@@ -120,9 +208,32 @@ const templateChoices = computed(() => {
   return list.filter((t) => t.periodType === ep)
 })
 
+function channelFlagsFromMethods(ids) {
+  let channelEmail = false
+  let channelDing = false
+  let channelWecom = false
+  for (const id of ids) {
+    const m = getNotificationMethod(id)
+    if (!m) continue
+    if (m.type === 'mail') channelEmail = true
+    else if (m.type === 'ding') channelDing = true
+    else if (m.type === 'wework') channelWecom = true
+  }
+  return { channelEmail, channelDing, channelWecom }
+}
+
 const rules = {
   name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
   templateId: [{ required: true, message: '请选择模板', trigger: 'change' }],
+  notifyMethodIds: [
+    {
+      validator: (_r, v, cb) => {
+        if (!Array.isArray(v) || !v.length) return cb(new Error('请至少选择一种通知方式'))
+        cb()
+      },
+      trigger: 'change'
+    }
+  ],
   runTime: [
     {
       validator: (_r, v, cb) => {
@@ -143,7 +254,16 @@ const rules = {
       trigger: 'blur'
     }
   ],
-  recipients: [{ required: true, message: '请填写接收人', trigger: 'blur' }]
+  recipientsMail: [
+    {
+      validator: (_r, v, cb) => {
+        if (!recipientShow.value.mail) return cb()
+        if (!v || !String(v).trim()) return cb(new Error('勾选邮件时需填写收件人邮箱'))
+        cb()
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 function periodLabel(pt) {
@@ -172,6 +292,16 @@ function onCycleChange() {
   }
 }
 
+function defaultNotifyIds() {
+  const list = pushMethodOptions.value
+  const ids = []
+  const ding = list.find((m) => m.type === 'ding')
+  const mail = list.find((m) => m.type === 'mail')
+  if (mail) ids.push(mail.id)
+  if (ding) ids.push(ding.id)
+  return ids
+}
+
 function resetForm() {
   form.name = ''
   form.cycle = 'daily'
@@ -179,32 +309,48 @@ function resetForm() {
   form.runTime = '09:00'
   form.cronExpr = '0 9 * * *'
   form.templateId = templateChoices.value[0]?.id || ''
-  form.channelEmail = true
-  form.channelDing = true
-  form.channelWecom = false
-  form.recipients = ''
+  form.notifyMethodIds = defaultNotifyIds()
+  form.recipientsMail = ''
+  form.recipientsDing = ''
+  form.recipientsWework = ''
   form.enabled = true
+}
+
+function loadRecord(record) {
+  form.name = record.name
+  form.cycle = record.cycle || 'daily'
+  form.cycleLabel = record.cycleLabel || cycleToLabel(form.cycle)
+  form.runTime = record.runTime || '09:00'
+  form.cronExpr = record.cronExpr || '0 9 * * *'
+  form.templateId = record.templateId
+  form.enabled = record.enabled !== false
+
+  let ids = inferNotifyMethodIds(record)
+  if (!ids.length) ids = defaultNotifyIds()
+  form.notifyMethodIds = ids
+
+  const rm = record.recipientsMail?.trim?.() ? record.recipientsMail : ''
+  const legacyRc = record.recipients?.trim?.() ? record.recipients : ''
+  form.recipientsMail =
+    rm || (record.channelEmail && legacyRc ? legacyRc : '')
+  form.recipientsDing = record.recipientsDing ?? ''
+  form.recipientsWework = record.recipientsWework ?? ''
 }
 
 watch(
   () => props.visible,
   (v) => {
     if (!v) return
-    if (props.record) {
-      form.name = props.record.name
-      form.cycle = props.record.cycle || 'daily'
-      form.cycleLabel = props.record.cycleLabel || cycleToLabel(form.cycle)
-      form.runTime = props.record.runTime || '09:00'
-      form.cronExpr = props.record.cronExpr || '0 9 * * *'
-      form.templateId = props.record.templateId
-      form.channelEmail = props.record.channelEmail
-      form.channelDing = props.record.channelDing
-      form.channelWecom = props.record.channelWecom
-      form.recipients = props.record.recipients
-      form.enabled = props.record.enabled
-    } else resetForm()
+    if (props.record) loadRecord(props.record)
+    else resetForm()
   }
 )
+
+watch(pushMethodOptions, () => {
+  if (!props.visible) return
+  const ok = new Set(pushMethodOptions.value.map((m) => m.id))
+  form.notifyMethodIds = form.notifyMethodIds.filter((id) => ok.has(id))
+})
 
 watch(templateChoices, () => {
   if (props.visible && form.templateId && !templateChoices.value.some((t) => t.id === form.templateId)) {
@@ -224,6 +370,7 @@ async function submit() {
     return
   }
   syncCycleLabel()
+  const channels = channelFlagsFromMethods(form.notifyMethodIds)
   emit('saved', {
     name: form.name.trim(),
     cycle: form.cycle,
@@ -232,13 +379,54 @@ async function submit() {
     cronExpr: form.cycle === 'cron' ? form.cronExpr.trim() : '',
     templateId: form.templateId,
     templateName: tpl?.name || '',
-    channelEmail: form.channelEmail,
-    channelDing: form.channelDing,
-    channelWecom: form.channelWecom,
-    recipients: form.recipients.trim(),
-    enabled: form.enabled
+    notifyMethodIds: [...form.notifyMethodIds],
+    recipientsMail: form.recipientsMail.trim(),
+    recipientsDing: form.recipientsDing.trim(),
+    recipientsWework: form.recipientsWework.trim(),
+    ...channels,
+    recipients: form.recipientsMail.trim()
   })
   emit('update:visible', false)
   ElMessage.success('任务已保存')
 }
 </script>
+
+<style scoped>
+/* 弹窗内表单：标签不换行，与输入同一行对齐 */
+.schedule-task-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+}
+
+.schedule-push-block :deep(.el-form-item__content) {
+  min-width: 0;
+}
+
+/* 通知方式：横向排列，固定行高 */
+.notify-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.25rem;
+  line-height: 1.5;
+}
+
+.notify-checkbox-group :deep(.el-checkbox) {
+  margin-right: 0;
+  height: auto;
+  white-space: nowrap;
+}
+
+.push-form-item {
+  margin-bottom: 14px;
+}
+
+.push-form-item--notify {
+  margin-bottom: 16px;
+}
+
+/* 收件人单行占满内容区 */
+.push-recipient-input {
+  width: 100%;
+  max-width: 100%;
+}
+</style>

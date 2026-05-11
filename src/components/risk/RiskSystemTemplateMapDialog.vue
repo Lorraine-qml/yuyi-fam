@@ -101,19 +101,17 @@
           <el-form-item label="规则名称" prop="name">
             <el-input v-model="form.name" maxlength="80" show-word-limit placeholder="规则名称" />
           </el-form-item>
+          <el-form-item label="事件分类" prop="eventCategory">
+            <EventCategoryField v-model="form.eventCategory" />
+          </el-form-item>
           <el-form-item label="预警等级" prop="level">
             <el-select v-model="form.level" class="w-full">
               <el-option
-                v-for="l in RULE_LEVEL_OPTIONS"
+                v-for="l in levelOptionsForCategory"
                 :key="l.value"
                 :label="l.label"
                 :value="l.value"
               />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="事件分类" prop="eventCategory">
-            <el-select v-model="form.eventCategory" class="w-full" filterable>
-              <el-option v-for="e in EVENT_CATEGORY_OPTIONS" :key="e.value" :label="e.label" :value="e.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="运行模式">
@@ -147,12 +145,16 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import EventCategoryField from '@/components/risk/EventCategoryField.vue'
+import { normalizeEventCategoryId } from '@/data/eventCategories'
 import {
   createEmptyRuleForm,
-  EVENT_CATEGORY_OPTIONS,
-  formToRulePayload,
-  RULE_LEVEL_OPTIONS
+  formToRulePayload
 } from '@/data/riskRulesMock'
+import {
+  getRuleLevelOptionsForCategory,
+  coerceRuleLevelValueForCategory
+} from '@/utils/eventCategoryRuleLevels'
 import { getStandardMetricTypeByKey, normalizeStandardMetricKey } from '@/data/riskStandardMetrics'
 import { DATA_SOURCE_TYPE_OPTIONS } from '@/data/riskMetricsMock'
 
@@ -231,6 +233,15 @@ const dsMatch = computed(() => {
 
 const canSubmit = computed(() => !!selectedMetricCode.value && !!selectedMetric.value)
 
+const levelOptionsForCategory = computed(() => getRuleLevelOptionsForCategory(form.eventCategory))
+
+watch(
+  () => form.eventCategory,
+  () => {
+    form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
+  }
+)
+
 function dataSourceLabel(v) {
   return DATA_SOURCE_TYPE_OPTIONS.find((x) => x.value === v)?.label || v || '—'
 }
@@ -257,7 +268,7 @@ function mergeTemplateToForm() {
     primaryValue: t.primaryValue,
     primaryUnit: t.primaryUnit || '',
     level: t.level,
-    eventCategory: t.eventCategory,
+    eventCategory: normalizeEventCategoryId(t.eventCategory || 'ec-energy-anomaly'),
     runMode: 'trial'
   })
   form.extraConditions = []
@@ -265,6 +276,7 @@ function mergeTemplateToForm() {
   form.timeWindow = 'none'
   form.silenceMinutes = 30
   saveForm.name = `${t.name}_副本`
+  form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
 }
 
 function applySelectedMetricToForm() {

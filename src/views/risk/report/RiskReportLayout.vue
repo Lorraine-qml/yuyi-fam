@@ -1,20 +1,12 @@
 <template>
   <div class="risk-report-layout">
     <div class="flex flex-col gap-3 mb-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-800">{{ pageTitle }}</h1>
-          <p class="text-sm text-gray-500 mt-1">
-            当前项目：<span class="font-medium text-indigo-700">{{ currentProject?.name || '—' }}</span>
-            · 报告模板、定时任务与历史均按项目隔离
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <el-button @click="exportProjectConfig">
-            <el-icon class="mr-1"><FolderOpened /></el-icon>
-            导出报告配置
-          </el-button>
-        </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">{{ pageTitle }}</h1>
+        <p class="text-sm text-gray-500 mt-1">
+          当前项目：<span class="font-medium text-indigo-700">{{ currentProject?.name || '—' }}</span>
+          · 报告模板、定时任务与历史均按项目隔离
+        </p>
       </div>
       <div
         class="inline-flex flex-wrap gap-1 p-1 rounded-lg bg-gray-100/80"
@@ -74,7 +66,6 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { FolderOpened } from '@element-plus/icons-vue'
 import { useCurrentProject } from '@/composables/useCurrentProject'
 import RiskReportScheduleDialog from '@/components/risk/RiskReportScheduleDialog.vue'
 import RiskReportTemplateDialog from '@/components/risk/RiskReportTemplateDialog.vue'
@@ -94,7 +85,6 @@ const {
   pushDialog,
   pushChannels,
   pushTargets,
-  exportProjectConfig,
   confirmPush,
   onTemplateSaved,
   onScheduleSaved

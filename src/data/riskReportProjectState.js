@@ -1,16 +1,19 @@
 /**
- * 风险报告数据按项目持久化：模板（仅项目自建部分）、定时任务、我的报告
+ * 风险报告数据按项目持久化：模板（仅项目自建部分）、定时任务、我的报告、任务执行日志
  * 系统级模板从 getSystemReportTemplates 注入，不写入本存储
  */
 import { seedReportHistory, seedScheduleTasks } from './riskReportMock'
+import { seedScheduleExecutionLogs } from './scheduleExecutionMock'
 
 const KEY = (projectId) => `yuyi-risk-report-proj-${projectId}`
 
 function defaultState(systemTemplates) {
+  const schedules = seedScheduleTasks(systemTemplates)
   return {
     projectTemplates: [],
-    schedules: seedScheduleTasks(systemTemplates),
-    myReports: seedReportHistory(systemTemplates)
+    schedules,
+    myReports: seedReportHistory(systemTemplates),
+    scheduleExecutionLogs: seedScheduleExecutionLogs(schedules)
   }
 }
 
@@ -25,10 +28,16 @@ export function loadReportState(projectId, systemTemplates) {
     }
     const o = JSON.parse(raw)
     if (!o || typeof o !== 'object') return defaultState(systemTemplates)
+
+    const schedules = Array.isArray(o.schedules) ? o.schedules : seedScheduleTasks(systemTemplates)
+
     return {
       projectTemplates: Array.isArray(o.projectTemplates) ? o.projectTemplates : [],
-      schedules: Array.isArray(o.schedules) ? o.schedules : seedScheduleTasks(systemTemplates),
-      myReports: Array.isArray(o.myReports) ? o.myReports : seedReportHistory(systemTemplates)
+      schedules,
+      myReports: Array.isArray(o.myReports) ? o.myReports : seedReportHistory(systemTemplates),
+      scheduleExecutionLogs: Array.isArray(o.scheduleExecutionLogs)
+        ? o.scheduleExecutionLogs
+        : []
     }
   } catch {
     return defaultState(systemTemplates)
@@ -43,7 +52,8 @@ export function saveReportState(projectId, state) {
       JSON.stringify({
         projectTemplates: state.projectTemplates,
         schedules: state.schedules,
-        myReports: state.myReports
+        myReports: state.myReports,
+        scheduleExecutionLogs: state.scheduleExecutionLogs
       })
     )
   } catch {

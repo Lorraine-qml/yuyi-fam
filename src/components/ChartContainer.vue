@@ -41,17 +41,21 @@ function unbindChartEvents() {
 }
 
 onMounted(() => {
-  chart = echarts.init(chartRef.value)
-  chart.setOption(props.option, { notMerge: true })
-  bindChartEvents()
-  window.addEventListener('resize', resize)
-  if (typeof ResizeObserver !== 'undefined' && chartRef.value) {
-    resizeObserver = new ResizeObserver(() => {
-      chart?.resize()
-    })
-    resizeObserver.observe(chartRef.value)
+  try {
+    chart = echarts.init(chartRef.value)
+    chart.setOption(props.option, { notMerge: true })
+    bindChartEvents()
+    window.addEventListener('resize', resize)
+    if (typeof ResizeObserver !== 'undefined' && chartRef.value) {
+      resizeObserver = new ResizeObserver(() => {
+        chart?.resize()
+      })
+      resizeObserver.observe(chartRef.value)
+    }
+    afterChartLayout()
+  } catch (e) {
+    console.error('[ChartContainer] echarts init failed', e)
   }
-  afterChartLayout()
 })
 
 watch(

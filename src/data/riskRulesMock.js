@@ -1,6 +1,7 @@
 /** 风险规则模拟数据、等级、模板 */
 
 import { SECTOR_OPTIONS } from './riskMetricsMock'
+import { normalizeEventCategoryId } from './eventCategories'
 
 /** 指标编码前缀（如 ENERGY-POWER-001）→ 板块代码 */
 export function sectorCodeForMetricCode(metricCode) {
@@ -31,19 +32,23 @@ export const OP_OPTIONS = [
   { label: '≠', value: '!=' }
 ]
 
-export const EVENT_CATEGORY_OPTIONS = [
-  { label: '能耗异常', value: '能耗异常' },
-  { label: '安全告警', value: '安全告警' },
-  { label: '食堂安全', value: '食堂安全' },
-  { label: '物业运维', value: '物业运维' },
-  { label: '消防专项', value: '消防专项' }
-]
-
 export const WORK_ORDER_TYPE_OPTIONS = [
   { label: '简要工单处理', value: '简要工单处理' },
   { label: '标准工单', value: '标准工单' },
   { label: '紧急抢修', value: '紧急抢修' }
 ]
+
+/** 将存储的版本标签显示为中文（兼容历史形如 v1 的数据） */
+export function humanizeRuleVersionLabel(versionLabel, versionNum) {
+  if (versionLabel != null && String(versionLabel).trim() !== '') {
+    const s = String(versionLabel).trim()
+    const m = s.match(/^v(\d+)$/i)
+    if (m) return `第 ${m[1]} 版`
+    return s
+  }
+  const n = Number(versionNum)
+  return Number.isFinite(n) && n >= 1 ? `第 ${n} 版` : ''
+}
 
 let _rid = 0
 function rid() {
@@ -98,7 +103,7 @@ export function createEmptyRuleForm() {
     dailyEnd: '18:00',
     silenceMinutes: 30,
     level: 2,
-    eventCategory: '能耗异常',
+    eventCategory: 'ec-energy-anomaly',
     workOrderEnabled: true,
     workOrderType: '简要工单处理',
     effectiveFrom: '',
@@ -115,7 +120,7 @@ export const RULE_TEMPLATES = [
     metricName: '用电实时值',
     expression: '{value} > 1500',
     level: 3,
-    eventCategory: '能耗异常',
+    eventCategory: 'ec-energy-anomaly',
     description: '瞬时用电超限',
     primaryOp: '>',
     primaryValue: 1500,
@@ -129,7 +134,7 @@ export const RULE_TEMPLATES = [
     metricName: '用电突增率',
     expression: '{value} > 30',
     level: 2,
-    eventCategory: '能耗异常',
+    eventCategory: 'ec-energy-anomaly',
     description: '环比上升超30%',
     primaryOp: '>',
     primaryValue: 30,
@@ -143,7 +148,7 @@ export const RULE_TEMPLATES = [
     metricName: '用电实时值',
     expression: '{value} == 0',
     level: 1,
-    eventCategory: '能耗异常',
+    eventCategory: 'ec-device-offline',
     description: '电表离线超5分钟（演示绑定指标）',
     primaryOp: '==',
     primaryValue: 0,
@@ -157,7 +162,7 @@ export const RULE_TEMPLATES = [
     metricName: '用电实时值',
     expression: '{value} > 0.5',
     level: 3,
-    eventCategory: '能耗异常',
+    eventCategory: 'ec-energy-anomaly',
     description: '凌晨0-5点用水（演示）',
     primaryOp: '>',
     primaryValue: 0.5,
@@ -171,7 +176,7 @@ export const RULE_TEMPLATES = [
     metricName: '消防设备离线率',
     expression: '{value} >= 1',
     level: 1,
-    eventCategory: '消防专项',
+    eventCategory: 'ec-fire-special',
     description: '出现任何消防报警（演示阈值）',
     primaryOp: '>=',
     primaryValue: 1,
@@ -185,7 +190,7 @@ export const RULE_TEMPLATES = [
     metricName: '消防设备离线率',
     expression: '{value} > 5',
     level: 2,
-    eventCategory: '安全告警',
+    eventCategory: 'ec-safety-alert',
     description: '离线率超5%',
     primaryOp: '>',
     primaryValue: 5,
@@ -199,7 +204,7 @@ export const RULE_TEMPLATES = [
     metricName: '消防设备离线率',
     expression: '{value} > 7',
     level: 3,
-    eventCategory: '安全告警',
+    eventCategory: 'ec-safety-alert',
     description: '隐患超过7天未改（演示）',
     primaryOp: '>',
     primaryValue: 7,
@@ -213,7 +218,7 @@ export const RULE_TEMPLATES = [
     metricName: '消防设备离线率',
     expression: '{value} == 0',
     level: 2,
-    eventCategory: '安全告警',
+    eventCategory: 'ec-safety-alert',
     description: '监控离线超10分钟（演示）',
     primaryOp: '==',
     primaryValue: 0,
@@ -226,7 +231,7 @@ export const RULE_TEMPLATES = [
     metricName: '晨检不合格次数',
     expression: "{value} == '不合格'",
     level: 2,
-    eventCategory: '食堂安全',
+    eventCategory: 'ec-canteen-morning',
     description: '晨检未通过',
     primaryOp: '==',
     primaryValue: '不合格',
@@ -241,7 +246,7 @@ export const RULE_TEMPLATES = [
     metricName: '晨检不合格次数',
     expression: "{value} != '正常'",
     level: 1,
-    eventCategory: '食堂安全',
+    eventCategory: 'ec-canteen-safety',
     description: '留样菜异常',
     primaryOp: '!=',
     primaryValue: '正常',
@@ -254,7 +259,7 @@ export const RULE_TEMPLATES = [
     metricName: '晨检不合格次数',
     expression: '{value} == 0',
     level: 3,
-    eventCategory: '食堂安全',
+    eventCategory: 'ec-canteen-safety',
     description: '闭餐后未执行（演示）',
     primaryOp: '==',
     primaryValue: 0,
@@ -267,7 +272,7 @@ export const RULE_TEMPLATES = [
     metricName: '待处理工单数',
     expression: '{value} > 10',
     level: 3,
-    eventCategory: '物业运维',
+    eventCategory: 'ec-property-ops',
     description: '工单积压超限',
     primaryOp: '>',
     primaryValue: 10,
@@ -281,7 +286,7 @@ export const RULE_TEMPLATES = [
     metricName: '待处理工单数',
     expression: '{value} > 4',
     level: 2,
-    eventCategory: '物业运维',
+    eventCategory: 'ec-property-ops',
     description: '超4小时未处理（演示）',
     primaryOp: '>',
     primaryValue: 4,
@@ -295,7 +300,7 @@ export const RULE_TEMPLATES = [
     metricName: '待处理工单数',
     expression: 'consecutive({value} >= 3, 7d)',
     level: 3,
-    eventCategory: '物业运维',
+    eventCategory: 'ec-property-ops',
     description: '7天内报修≥3次',
     primaryOp: '>=',
     primaryValue: 3,
@@ -324,7 +329,7 @@ export function seedRiskRules() {
       runMode: 'production',
       lifecycleStatus: 'production',
       version: 1,
-      versionLabel: 'v1',
+      versionLabel: '第 1 版',
       eventCategory: t.eventCategory,
       description: t.description,
       primaryOp: t.primaryOp,
@@ -362,8 +367,8 @@ export function seedRiskRules() {
     runMode: 'trial',
     lifecycleStatus: 'trial',
     version: 1,
-    versionLabel: 'v1',
-    eventCategory: '食堂安全',
+    versionLabel: '第 1 版',
+    eventCategory: 'ec-canteen-morning',
     description: '试运行：晨检未通过',
     primaryOp: '==',
     primaryValue: '不合格',
@@ -403,7 +408,7 @@ export function ruleToForm(rule) {
     dailyEnd: rule.dailyEnd || '18:00',
     silenceMinutes: rule.silenceMinutes ?? 30,
     level: rule.level,
-    eventCategory: rule.eventCategory,
+    eventCategory: normalizeEventCategoryId(rule.eventCategory),
     workOrderEnabled: rule.workOrderEnabled !== false,
     workOrderType: rule.workOrderType || '简要工单处理',
     effectiveFrom: rule.effectiveFrom || '',
@@ -470,4 +475,12 @@ export function formToRulePayload(form, metricOptions) {
     expressionDisplay,
     extraConditions: extras
   }
+}
+
+/** 全站共用一份运行时规则数组（风险规则页与分类统计共用，避免数据漂移） */
+let _sharedRiskRules = null
+
+export function getSharedRiskRules() {
+  if (!_sharedRiskRules) _sharedRiskRules = seedRiskRules()
+  return _sharedRiskRules
 }

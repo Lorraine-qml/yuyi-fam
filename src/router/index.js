@@ -1,21 +1,54 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
 import RouterPass from '@/layouts/RouterPass.vue'
-import HomeDashboard from '@/views/HomeDashboard.vue'
 import ModulePlaceholder from '@/views/ModulePlaceholder.vue'
-import RiskDashboard from '@/views/risk/RiskDashboard.vue'
-import RiskMetricsPage from '@/views/risk/metrics/RiskMetricsPage.vue'
-import RiskRulesPage from '@/views/risk/rules/RiskRulesPage.vue'
-import RiskReportLayout from '@/views/risk/report/RiskReportLayout.vue'
-import RiskReportCenter from '@/views/risk/report/RiskReportCenter.vue'
-import RiskReportTemplatesPage from '@/views/risk/report/RiskReportTemplatesPage.vue'
-import RiskReportSchedulesPage from '@/views/risk/report/RiskReportSchedulesPage.vue'
-import RiskTrialLogsPage from '@/views/risk/trial-logs/RiskTrialLogsPage.vue'
-import RealtimeEventsPage from '@/views/security/RealtimeEventsPage.vue'
-import EventPushConfigPage from '@/views/security/EventPushConfigPage.vue'
-import NotificationMethodConfigPage from '@/views/security/NotificationMethodConfigPage.vue'
-import EventDetailDeepLink from '@/views/security/EventDetailDeepLink.vue'
-import WorkOrderWorkbenchPage from '@/views/security/workbench/WorkOrderWorkbenchPage.vue'
+
+/** 按路由懒加载页面，避免某一页依赖或初始化异常拖垮整站白屏 */
+const load = (loader) => () => loader().then((m) => m.default || m)
+
+const SECURITY_WORKBENCH_META = {
+  all: {
+    title: '报修工单',
+    subtitle: '全量工单、筛选与调度',
+    workOrderView: 'all'
+  },
+  todo: {
+    title: '我的待办',
+    subtitle: '待接单/处理中',
+    workOrderView: 'todo'
+  },
+  initiated: {
+    title: '我发起的',
+    subtitle: '本人发起与规则跟踪',
+    workOrderView: 'initiated'
+  },
+  done: {
+    title: '我的已办',
+    subtitle: '已处理未完全办结',
+    workOrderView: 'done'
+  },
+  closed: {
+    title: '办结事宜',
+    subtitle: '已完成/已关闭归档',
+    workOrderView: 'closed'
+  }
+}
+
+function guardSecurityWorkbench(to, _from, next) {
+  const key = String(to.params.view ?? '')
+  const metaPatch = SECURITY_WORKBENCH_META[key]
+  if (!metaPatch) {
+    next({
+      path: '/security/workbench/all',
+      query: to.query,
+      hash: to.hash,
+      replace: true
+    })
+    return
+  }
+  Object.assign(to.meta, metaPatch)
+  next()
+}
 
 const routes = [
   {
@@ -26,7 +59,7 @@ const routes = [
       {
         path: 'dashboard',
         name: 'HomeDashboard',
-        component: HomeDashboard,
+        component: load(() => import('@/views/HomeDashboard.vue')),
         meta: { title: '首页' }
       },
       {
@@ -61,69 +94,46 @@ const routes = [
           {
             path: 'events/realtime',
             name: 'SecurityRealtimeEvents',
-            component: RealtimeEventsPage,
+            component: load(() => import('@/views/security/RealtimeEventsPage.vue')),
             meta: { title: '实时事件', subtitle: '事件列表、统计与处理' }
           },
           {
             path: 'events/push-config',
             name: 'SecurityEventPushConfig',
-            component: EventPushConfigPage,
+            component: load(() => import('@/views/security/EventPushConfigPage.vue')),
             meta: { title: '事件推送配置', subtitle: '分类、等级与通知方式' }
           },
           {
             path: 'events/notify-method',
             name: 'SecurityNotificationMethod',
-            component: NotificationMethodConfigPage,
+            component: load(() => import('@/views/security/NotificationMethodConfigPage.vue')),
             meta: { title: '通知方式配置', subtitle: '渠道与连通性' }
           },
           {
             path: 'workbench/repair',
-            name: 'SecurityWorkbenchRepair',
-            component: WorkOrderWorkbenchPage,
+            redirect: (to) => ({
+              path: '/security/workbench/all',
+              query: to.query,
+              hash: to.hash
+            })
+          },
+          {
+            path: 'workbench',
+            redirect: (to) => ({
+              path: '/security/workbench/all',
+              query: to.query,
+              hash: to.hash
+            })
+          },
+          {
+            path: 'workbench/:view',
+            name: 'SecurityWorkbench',
+            component: load(() => import('@/views/security/workbench/WorkOrderWorkbenchPage.vue')),
+            beforeEnter: guardSecurityWorkbench,
             meta: {
-              title: '报修工单',
-              subtitle: '全量工单、筛选与调度',
+              title: '事件工作台',
+              subtitle: '',
               workOrderView: 'all'
-            }
-          },
-          {
-            path: 'workbench/todo',
-            name: 'SecurityWorkbenchTodo',
-            component: WorkOrderWorkbenchPage,
-            meta: {
-              title: '我的待办',
-              subtitle: '待接单/处理中',
-              workOrderView: 'todo'
-            }
-          },
-          {
-            path: 'workbench/initiated',
-            name: 'SecurityWorkbenchInitiated',
-            component: WorkOrderWorkbenchPage,
-            meta: {
-              title: '我发起的',
-              subtitle: '本人发起与规则跟踪',
-              workOrderView: 'initiated'
-            }
-          },
-          {
-            path: 'workbench/done',
-            name: 'SecurityWorkbenchDone',
-            component: WorkOrderWorkbenchPage,
-            meta: {
-              title: '我的已办',
-              subtitle: '已处理未完全办结',
-              workOrderView: 'done'
-            }
-          },
-          {
-            path: 'workbench/closed',
-            name: 'SecurityWorkbenchClosed',
-            component: WorkOrderWorkbenchPage,
-            meta: {
-              title: '办结事宜',
-              subtitle: '已完成/已关闭归档',
-              workOrderView: 'closed'
             }
           }
         ]
@@ -150,6 +160,10 @@ const routes = [
             name: 'SystemLog',
             component: ModulePlaceholder,
             meta: { title: '操作日志', subtitle: '审计与追溯（建设中）' }
+          },
+          {
+            path: 'event-categories',
+            redirect: '/risk/event-categories'
           }
         ]
       },
@@ -162,7 +176,7 @@ const routes = [
       {
         path: 'event/detail/:id',
         name: 'EventDetail',
-        component: EventDetailDeepLink,
+        component: load(() => import('@/views/security/EventDetailDeepLink.vue')),
         meta: { title: '实时事件详情', subtitle: '抽屉展示，不占用全页' }
       },
       {
@@ -172,6 +186,14 @@ const routes = [
         meta: { title: '工单详情', subtitle: '工单处理与流转（建设中，由消息中心跳转）' }
       },
       {
+        path: 'risk-rules',
+        redirect: (to) => ({
+          path: '/risk/rules',
+          query: to.query,
+          hash: to.hash
+        })
+      },
+      {
         path: 'risk',
         component: RouterPass,
         redirect: { name: 'RiskDashboard' },
@@ -179,43 +201,49 @@ const routes = [
           {
             path: 'dashboard',
             name: 'RiskDashboard',
-            component: RiskDashboard,
+            component: load(() => import('@/views/risk/RiskDashboard.vue')),
             meta: { title: '风险看板' }
           },
           {
             path: 'metrics',
             name: 'RiskMetrics',
-            component: RiskMetricsPage,
+            component: load(() => import('@/views/risk/metrics/RiskMetricsPage.vue')),
             meta: { title: '风险指标', subtitle: '指标定义、数据源与测试' }
           },
           {
             path: 'rules',
             name: 'RiskRules',
-            component: RiskRulesPage,
+            component: load(() => import('@/views/risk/rules/RiskRulesPage.vue')),
             meta: { title: '风险规则', subtitle: '规则配置、试运行与版本' }
           },
           {
+            path: 'event-categories',
+            name: 'RiskEventCategories',
+            component: load(() => import('@/views/system/EventCategoryManagePage.vue')),
+            meta: { title: '事件分类', subtitle: '分类维护及关联统计（仅超级管理员）', requiresSystemAdmin: true }
+          },
+          {
             path: 'report',
-            component: RiskReportLayout,
+            component: load(() => import('@/views/risk/report/RiskReportLayout.vue')),
             redirect: { name: 'RiskReportCenter' },
             meta: { title: '风险报告', subtitle: '模板、生成、定时任务与导出推送' },
             children: [
               {
                 path: 'center',
                 name: 'RiskReportCenter',
-                component: RiskReportCenter,
+                component: load(() => import('@/views/risk/report/RiskReportCenter.vue')),
                 meta: { title: '报告中心' }
               },
               {
                 path: 'templates',
                 name: 'RiskReportTemplates',
-                component: RiskReportTemplatesPage,
+                component: load(() => import('@/views/risk/report/RiskReportTemplatesPage.vue')),
                 meta: { title: '模板管理' }
               },
               {
                 path: 'schedules',
                 name: 'RiskReportSchedules',
-                component: RiskReportSchedulesPage,
+                component: load(() => import('@/views/risk/report/RiskReportSchedulesPage.vue')),
                 meta: { title: '定时任务' }
               }
             ]
@@ -223,7 +251,7 @@ const routes = [
           {
             path: 'trial-logs',
             name: 'RiskTrialLogs',
-            component: RiskTrialLogsPage,
+            component: load(() => import('@/views/risk/trial-logs/RiskTrialLogsPage.vue')),
             meta: { title: '试运行日志', subtitle: '全局筛选、对比与批量导出' }
           }
         ]

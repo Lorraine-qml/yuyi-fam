@@ -4,6 +4,7 @@
  */
 import { reactive } from 'vue'
 import { RULE_TEMPLATES } from './riskRulesMock'
+import { normalizeEventCategoryId } from './eventCategories'
 import { getStandardMetricTypeByName, getStandardMetricTypeByKey, resolveStandardMetricKey } from './riskStandardMetrics'
 
 const LS_KEY = 'yuyi-system-templates-admin-v1'
@@ -35,13 +36,17 @@ function seedPresetList() {
 }
 
 function migrateSystemTemplateStoredRow(row) {
-  if (!row || row.standardMetricTypeKey !== 'SM-ENERGY-SPIKE') return row
-  const st = getStandardMetricTypeByKey('SM-ENERGY-RATE')
-  return {
-    ...row,
-    standardMetricTypeKey: 'SM-ENERGY-RATE',
-    standardMetricTypeName: st?.name || row.standardMetricTypeName || '用电突增率'
+  if (!row) return row
+  let next = { ...row }
+  if (next.standardMetricTypeKey === 'SM-ENERGY-SPIKE') {
+    const st = getStandardMetricTypeByKey('SM-ENERGY-RATE')
+    next = {
+      ...next,
+      standardMetricTypeKey: 'SM-ENERGY-RATE',
+      standardMetricTypeName: st?.name || next.standardMetricTypeName || '用电突增率'
+    }
   }
+  return { ...next, eventCategory: normalizeEventCategoryId(next.eventCategory) }
 }
 
 function readStoredList() {

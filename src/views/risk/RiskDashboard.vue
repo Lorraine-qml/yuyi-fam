@@ -174,7 +174,7 @@
           </div>
           <p class="text-xs text-gray-500 mt-2">{{ kpi.closeRateHint }}</p>
           <el-progress
-            :percentage="kpi.closeRate"
+            :percentage="closeRatePercent"
             :stroke-width="10"
             :color="['#4F46E5', '#6366F1']"
             class="mt-3"
@@ -407,6 +407,11 @@ const refreshing = ref(false)
 const autoTimer = ref(null)
 
 const kpi = computed(() => getKpiSnapshot(timeRange.value === 'custom' ? 'week' : timeRange.value))
+const closeRatePercent = computed(() => {
+  const n = Number(kpi.value?.closeRate)
+  if (Number.isFinite(n)) return Math.min(100, Math.max(0, n))
+  return 0
+})
 const trendStats = computed(() => trendSummaryStats())
 const sectorHead = computed(() => sectorSummaryLine())
 const effKpi = EFFICIENCY_KPI_MOCK
@@ -632,7 +637,7 @@ function goToRiskWorkbenchForDispose(row) {
     query.status = 'pending'
   }
 
-  let path = '/security/workbench/repair'
+  let path = '/security/workbench/all'
   if (woId) {
     query.focusWo = woId
     const meta = findWorkOrderById(woId)

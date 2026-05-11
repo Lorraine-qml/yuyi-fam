@@ -53,3 +53,13 @@ export function saveProjectTemplates(projectId, list) {
   all[projectId] = list
   writeAll(all)
 }
+
+/** 所有项目下的规则模板（扁平），供引用统计等使用 */
+export function listAllProjectTemplatesAcrossProjects() {
+  const all = readAll()
+  const rows = []
+  Object.values(all).forEach((arr) => {
+    if (Array.isArray(arr)) rows.push(...arr)
+  })
+  return rows
+}

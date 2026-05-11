@@ -72,19 +72,17 @@
       <el-form-item label="表达式">
         <el-input :model-value="exprPreview" type="textarea" :rows="2" readonly />
       </el-form-item>
+      <el-form-item label="事件分类" prop="eventCategory">
+        <EventCategoryField v-model="form.eventCategory" />
+      </el-form-item>
       <el-form-item label="预警等级" prop="level">
         <el-select v-model="form.level" class="w-full" placeholder="等级">
           <el-option
-            v-for="l in RULE_LEVEL_OPTIONS"
+            v-for="l in levelOptionsForCategory"
             :key="l.value"
             :label="`${l.labelShort}（${l.label}）`"
             :value="l.value"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="事件分类" prop="eventCategory">
-        <el-select v-model="form.eventCategory" class="w-full" filterable>
-          <el-option v-for="e in EVENT_CATEGORY_OPTIONS" :key="e.value" :label="e.label" :value="e.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="描述">
@@ -112,7 +110,13 @@ import {
   systemTemplateCategoryDisplay,
   upsertSystemTemplate
 } from '@/data/riskSystemTemplates'
-import { EVENT_CATEGORY_OPTIONS, OP_OPTIONS, RULE_LEVEL_OPTIONS } from '@/data/riskRulesMock'
+import EventCategoryField from '@/components/risk/EventCategoryField.vue'
+import { normalizeEventCategoryId } from '@/data/eventCategories'
+import { OP_OPTIONS } from '@/data/riskRulesMock'
+import {
+  getRuleLevelOptionsForCategory,
+  coerceRuleLevelValueForCategory
+} from '@/utils/eventCategoryRuleLevels'
 
 const CATEGORY_OPTIONS = ['能耗', '安全', '食堂', '物业', '资产']
 
@@ -140,7 +144,7 @@ const form = reactive({
   primaryValue: 0,
   primaryUnit: '',
   level: 3,
-  eventCategory: '能耗异常',
+  eventCategory: 'ec-energy-anomaly',
   description: ''
 })
 
@@ -177,6 +181,15 @@ const dialogTitle = computed(() => (props.mode === 'edit' ? '编辑系统模板'
 
 const exprPreview = computed(() => buildSystemTemplateExpression(form))
 
+const levelOptionsForCategory = computed(() => getRuleLevelOptionsForCategory(form.eventCategory))
+
+watch(
+  () => form.eventCategory,
+  () => {
+    form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
+  }
+)
+
 function onStdMetricChange() {
   const t = stdSelectOptions.value.find((x) => x.key === form.standardMetricTypeKey)
   if (t?.defaultUnit) form.primaryUnit = t.defaultUnit
@@ -193,10 +206,11 @@ function resetEmpty() {
     primaryValue: 0,
     primaryUnit: '',
     level: 3,
-    eventCategory: '能耗异常',
+    eventCategory: 'ec-energy-anomaly',
     description: ''
   })
   onStdMetricChange()
+  form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
 }
 
 function applyRecord(r) {
@@ -215,12 +229,13 @@ function applyRecord(r) {
     primaryValue: r.primaryValue ?? 0,
     primaryUnit: r.primaryUnit || '',
     level: r.level ?? 3,
-    eventCategory: r.eventCategory || '能耗异常',
+    eventCategory: normalizeEventCategoryId(r.eventCategory || 'ec-energy-anomaly'),
     description: r.description || ''
   })
   if (!form.standardMetricTypeKey && STANDARD_METRIC_TYPES[0]) {
     form.standardMetricTypeKey = STANDARD_METRIC_TYPES[0].key
   }
+  form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
 }
 
 watch(

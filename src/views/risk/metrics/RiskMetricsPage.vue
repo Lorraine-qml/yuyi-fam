@@ -7,21 +7,10 @@
           <el-icon class="mr-1"><Plus /></el-icon>
           新增指标
         </el-button>
-        <el-button @click="triggerImport">
-          <el-icon class="mr-1"><Upload /></el-icon>
-          导入
-        </el-button>
         <el-button @click="exportJson">
           <el-icon class="mr-1"><Download /></el-icon>
           导出
         </el-button>
-        <input
-          ref="fileInputRef"
-          type="file"
-          accept="application/json,.json"
-          class="hidden"
-          @change="onImportFile"
-        />
       </div>
     </div>
 
@@ -142,7 +131,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getStandardMetricTypeByKey } from '@/data/riskStandardMetrics'
-import { Download, Plus, Upload } from '@element-plus/icons-vue'
+import { Download, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import RiskMetricDeleteSuccessDialog from '@/components/risk/RiskMetricDeleteSuccessDialog.vue'
 import RiskMetricFormDialog from '@/components/risk/RiskMetricFormDialog.vue'
@@ -166,7 +155,6 @@ const filterStatus = ref('')
 const page = ref(1)
 const pageSize = ref(20)
 const selection = ref([])
-const fileInputRef = ref(null)
 
 const formVisible = ref(false)
 const formMode = ref('create')
@@ -332,46 +320,6 @@ async function onDelete(row) {
 
 function onViewRulesAfterDelete() {
   router.push({ name: 'RiskRules' })
-}
-
-function triggerImport() {
-  fileInputRef.value?.click()
-}
-
-function onImportFile(e) {
-  const file = e.target.files?.[0]
-  e.target.value = ''
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result)
-      const arr = Array.isArray(data) ? data : data.metrics
-      if (!Array.isArray(arr)) throw new Error('格式应为指标数组或 { metrics: [] }')
-      let n = 0
-      arr.forEach((item) => {
-        if (!item.code || !item.name) return
-        if (list.value.some((r) => r.code === item.code && !r.deleted)) return
-        list.value.unshift({
-          id: `rm-${Date.now()}-${n}`,
-          sector: item.sector || 'ENERGY',
-          sectorLabel:
-            SECTOR_OPTIONS.find((s) => s.value === (item.sector || 'ENERGY'))?.label || '能耗管理',
-          dataSourceName: item.dataSourceName || '导入',
-          dataSourceType: item.dataSourceType || 'API',
-          referencedByRules: 0,
-          deleted: false,
-          ...item
-        })
-        n += 1
-      })
-      ElMessage.success(`已导入 ${n} 条指标`)
-      page.value = 1
-    } catch (err) {
-      ElMessage.error('JSON 解析失败，请检查文件格式')
-    }
-  }
-  reader.readAsText(file, 'UTF-8')
 }
 
 function exportJson() {

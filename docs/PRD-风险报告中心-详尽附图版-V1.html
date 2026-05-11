@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风险报告中心 PRD · 详尽附图版 V1 · HTML</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof mermaid !== 'undefined') mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    });
+  </script>
+  <style>
+    html { scroll-behavior: smooth; font-size: 14px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.62; color: #1f2937; margin: 0 auto; max-width: 980px; padding: 1.75rem 1.25rem 3rem; }
+    header.doc-h { border-bottom: 2px solid #6366f1; padding-bottom: 1rem; margin-bottom: 1rem; }
+    header.doc-h h1 { margin: 0; font-size: 1.5rem; }
+    nav.toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: .92rem; }
+    nav.toc ol { margin: 0; padding-left: 1.2rem; }
+    nav.toc a { color: #4338ca; text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    h2 { font-size: 1.2rem; font-weight: 700; color: #111827; margin: 2rem 0 .6rem; padding: .35rem 0 .35rem .6rem;
+      border-left: 4px solid #6366f1; background: linear-gradient(90deg, #eef2ff 0%, transparent 40%); }
+    h3 { font-size: 1.03rem; font-weight: 650; color: #374151; margin: 1.35rem 0 .45rem; }
+    h4 { font-size: .93rem; font-weight: 600; color: #475569; margin: 1rem 0 .35rem; }
+    hr.sep { border: none; border-top: 1px solid #e5e7eb; margin: 1.75rem 0; }
+    p { margin: .45rem 0; }
+    ul { margin: .4rem 0 .7rem 1.2rem; }
+    blockquote.note { margin: .65rem 0; padding: .5rem .75rem; border-left: 3px solid #94a3b8; background: #f8fafc; color: #475569; font-size: .9rem; }
+    blockquote.rule { margin: .5rem 0; padding: .45rem .7rem .45rem .9rem; border-left: 3px solid #4f46e5; background: #eef2ff; color: #334155; font-size: .9rem; }
+    table.fld { width: 100%; border-collapse: collapse; font-size: .86rem; margin: .55rem 0 1rem; }
+    table.fld th, table.fld td { border: 1px solid #e5e7eb; padding: .4rem .5rem; vertical-align: top; text-align: left; }
+    table.fld thead th { background: linear-gradient(#f9fafb, #eef2ff); font-weight: 600; }
+    table.fld tbody tr:nth-child(even) { background: #fafafa; }
+    code, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em; background: #f1f5f9; padding: .06em .32em; border-radius: 3px; }
+    pre.flow { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: .75rem .9rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+    figure.fig-ph { margin: .75rem 0 1rem; padding: 0; }
+    figure.fig-ph img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: #f3f4f6; border: 1px dashed #94a3b8; border-radius: 6px; }
+    figure.fig-ph figcaption { font-size: .82rem; color: #64748b; margin-top: .35rem; }
+    .mermaid { margin: 1rem 0; padding: 1rem; background: #fafafa; border-radius: 8px; border: 1px solid #e5e7eb; }
+    footer.doc-f { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; font-size: .85rem; color: #6b7280; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body>
+
+<header class="doc-h">
+  <h1>风险报告中心 PRD（详尽版 · 含图片占位）</h1>
+  <p class="mono" style="margin:.35rem 0 0;font-size:.88rem;">HTML 副本 · 与 <code class="mono">PRD-风险报告中心-详尽附图版-V1.md</code> 同步维护</p>
+</header>
+
+<blockquote class="note">
+  <strong>读前说明</strong>：下图占位路径为 <code class="mono">.attachments/*.png</code>（相对本 HTML 所在目录 <code class="mono">docs/</code>）。将截图放入 <code class="mono">docs/.attachments/</code> 即可在浏览器中显示。<br>
+  代码路径以 <code class="mono">src/views/risk/report/*</code> 为准；前端路由 <code class="mono">/risk/report/center|templates|schedules</code>；API 建议 <code class="mono">/api/report/*</code>。
+</blockquote>
+
+<nav class="toc no-print" aria-label="目录">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#s1">模块概述</a></li>
+    <li><a href="#s2">报告模板管理</a>（2.1–2.4）</li>
+    <li><a href="#s3">定时任务管理</a>（3.1–3.3）</li>
+    <li><a href="#s4">推送方式整合</a></li>
+    <li><a href="#s5">权限矩阵</a></li>
+    <li><a href="#s6">异常与错误码</a></li>
+    <li><a href="#s7">API 清单</a></li>
+    <li><a href="#s8">DDL 示例</a></li>
+    <li><a href="#s9">全局业务规则汇总</a></li>
+    <li><a href="#s10">文档变更</a></li>
+  </ol>
+</nav>
+
+<!-- ========== 1 ========== -->
+<section id="s1">
+  <h2>1. 模块概述</h2>
+  <figure class="fig-ph">
+    <img src=".attachments/report-layout-tabs.png" alt="界面截图：风险报告顶栏与子路由 Tab" />
+    <figcaption>界面占位：<code class="mono">report-layout-tabs.png</code></figcaption>
+  </figure>
+  <p><strong>界面描述</strong>：大标题「风险报告」；副标题展示当前项目名；三个 Tab：报告中心、模板管理、定时任务；下方 <code class="mono">router-view</code>；布局挂载模板 Dialog、任务 Dialog、推送 Dialog。</p>
+  <p><strong>一句话</strong>：项目上下文维护模板，在报告中心快速生成/导出，或通过定时任务经通知渠道推送；历史与执行日志可追溯。</p>
+
+  <h3>1.1 状态流转（Mermaid）</h3>
+  <p>模板 <code class="mono">status</code>：<code class="mono">enabled</code> ↔ <code class="mono">disabled</code>；任务 <code class="mono">enabled</code>：Switch 即 <code class="mono">persist()</code>；执行日志 <code class="mono">success|partial|fail</code>。</p>
+  <pre class="mermaid">stateDiagram-v2
+  [*] --> enabled: 模板/任务创建
+  enabled --> disabled: 停用
+  disabled --> enabled: 启用
+  state 执行一次手动或定时 {
+    [*] --> Running: execute
+    Running --> success: 全渠道 OK
+    Running --> partial: 部分渠道失败
+    Running --> fail: 无成功/校验失败
+  }</pre>
+  <p class="note no-print" style="font-size:.85rem;color:#64748b;">若下图未渲染，请检查网络（Mermaid 自 CDN 加载）或直接阅读 Markdown 源文件。</p>
+
+  <h3>1.2 业务规则（模块级）</h3>
+  <blockquote class="rule"><strong>规则 M-1</strong>：切换项目时 <code class="mono">reloadReportState()</code> 从 <code class="mono">yuyi-risk-report-proj-{projectId}</code> 重载，数据不串项。</blockquote>
+  <blockquote class="rule"><strong>规则 M-2</strong>：系统模板 <code class="mono">tenant_id===0</code> 且 <code class="mono">isSystem===true</code>：不可删除、不可直接保存编辑。</blockquote>
+  <blockquote class="rule"><strong>规则 M-3</strong>：快速生成候选模板 = <code class="mono">!deleted && status==='enabled' && periodType===quick.period</code>。</blockquote>
+
+  <h3>1.3 交互流程</h3>
+  <ol>
+    <li>菜单进入风险管理 › 风险报告 → 默认 <code class="mono">/risk/report/center</code>。</li>
+    <li>点模板管理 → <code class="mono">/risk/report/templates</code>（SPA）。</li>
+    <li>点定时任务 → <code class="mono">/risk/report/schedules</code>。</li>
+    <li>切换顶栏项目 → 报告数据整体重载。</li>
+  </ol>
+
+  <h3>1.4 验收标准（≥5）</h3>
+  <table class="fld">
+    <thead><tr><th>ID</th><th>Given</th><th>When</th><th>Then</th></tr></thead>
+    <tbody>
+      <tr><td>OV-01</td><td>有项目上下文</td><td>打开 center</td><td>三列栅格 + 预览区</td></tr>
+      <tr><td>OV-02</td><td>两项目数据</td><td>切换项目</td><td>数据切换无串项</td></tr>
+      <tr><td>OV-03</td><td>—</td><td>切三个子 Tab</td><td>URL 与激活态一致</td></tr>
+      <tr><td>OV-04</td><td>—</td><td>F5</td><td>localStorage 恢复（演示）</td></tr>
+      <tr><td>OV-05</td><td>—</td><td>操作全流程</td><td>控制台无致命 Error</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.5 关联代码文件</h3>
+  <ul>
+    <li><code class="mono">src/views/risk/report/RiskReportLayout.vue</code></li>
+    <li><code class="mono">src/router/index.js</code></li>
+    <li><code class="mono">src/views/risk/report/riskReportShared.js</code></li>
+    <li><code class="mono">src/data/riskReportProjectState.js</code></li>
+  </ul>
+</section>
+
+<hr class="sep" />
+
+<section id="s2">
+  <h2>2. 报告模板管理</h2>
+
+  <h3 id="s2-1">2.1 模板列表页</h3>
+  <figure class="fig-ph"><img src=".attachments/report-template-list.png" alt="模板列表页" /><figcaption><code class="mono">report-template-list.png</code></figcaption></figure>
+  <p><strong>界面描述</strong>：说明文案；「新增模板」；表格：名称、类型、来源 Tag、状态 Tag、操作（系统：复制；项目：编辑/删除）。<strong>当前无</strong>：顶栏搜索、导入导出、分页、行内启停。</p>
+
+  <h4>字段定义表（列表行）</h4>
+  <table class="fld"><thead><tr><th>字段名</th><th>类型</th><th>长度</th><th>必填</th><th>默认值</th><th>校验规则</th></tr></thead><tbody>
+    <tr><td>id</td><td>string</td><td>64</td><td>是</td><td>rtpl-*/sys-*</td><td>唯一</td></tr>
+    <tr><td>name</td><td>string</td><td>64</td><td>是</td><td>—</td><td>trim；上线：项目或同类型唯一</td></tr>
+    <tr><td>periodType</td><td>enum</td><td>—</td><td>是</td><td>—</td><td>day/week/month/quarter/year</td></tr>
+    <tr><td>status</td><td>enum</td><td>—</td><td>是</td><td>enabled</td><td>enabled|disabled</td></tr>
+    <tr><td>isSystem</td><td>boolean</td><td>—</td><td>是</td><td>—</td><td>系统模板 true</td></tr>
+    <tr><td>tenant_id</td><td>any</td><td>—</td><td>是</td><td>0/projectId</td><td>—</td></tr>
+    <tr><td>deleted</td><td>boolean</td><td>—</td><td>是</td><td>false</td><td>软删</td></tr>
+    <tr><td>chartTheme/chartSize/showDataLabel/sections</td><td colspan="5">详见 §2.2</td></tr>
+  </tbody></table>
+
+  <h4>交互流程</h4>
+  <ol>
+    <li>进入：<code class="mono">visibleTemplates = allTemplates.filter(!deleted)</code>。</li>
+    <li>新增：<code class="mono">openTemplateCreate()</code>。</li>
+    <li>编辑：非系统 → <code class="mono">openTemplateEdit</code>。</li>
+    <li>复制系统：<code class="mono">copySystemTemplate</code> → 名称加「（项目副本）」。</li>
+    <li>删除项目：Confirm → <code class="mono">deleted=true</code>；上线需 <code class="mono">DELETE /api/report/templates/{id}</code> 409 校验任务引用。</li>
+  </ol>
+
+  <blockquote class="rule"><strong>规则 T-L-1</strong>：<code class="mono">isSystem||tenant_id===0</code> 不可删，仅 Alert。</blockquote>
+  <blockquote class="rule"><strong>规则 T-L-2</strong>：软删，列表与快速生成过滤 <code class="mono">deleted</code>。</blockquote>
+  <blockquote class="rule"><strong>规则 T-L-3</strong>（上线）：删前校验 <code class="mono">schedule_task.template_id</code>。</blockquote>
+
+  <h4>验收标准（≥5）</h4>
+  <table class="fld"><thead><tr><th>ID</th><th>Given</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TL-01</td><td>三条系统模板</td><td>打开页</td><td>系统 Tag，无删除</td></tr>
+    <tr><td>TL-02</td><td>—</td><td>复制为项目</td><td>出现项目副本行</td></tr>
+    <tr><td>TL-03</td><td>项目模板一条</td><td>Confirm 删</td><td><code class="mono">deleted</code></td></tr>
+    <tr><td>TL-04</td><td>上线</td><td>绑任务删模板</td><td>409+X</td></tr>
+    <tr><td>TL-05</td><td>上线</td><td>分页/检索</td><td>API 生效</td></tr>
+  </tbody></table>
+  <p><strong>关联代码</strong>：<code class="mono">RiskReportTemplatesPage.vue</code> · <code class="mono">riskReportShared.js</code> · <code class="mono">riskReportMock.js</code></p>
+
+  <h3 id="s2-2">2.2 新增/编辑模板弹窗</h3>
+  <figure class="fig-ph"><img src=".attachments/report-template-form-dialog.png" alt="模板表单" /><figcaption><code class="mono">report-template-form-dialog.png</code></figcaption></figure>
+  <p>对话框 640px；名称；类型（编辑禁用）；9 项 sections 复选框；图表主题/尺寸/数据标签。</p>
+
+  <h4>字段定义表</h4>
+  <table class="fld"><thead><tr><th>字段</th><th>类型</th><th>必填</th><th>默认值</th><th>校验</th></tr></thead><tbody>
+    <tr><td>name</td><td>string 64</td><td>是</td><td>—</td><td>required blur</td></tr>
+    <tr><td>periodType</td><td>enum</td><td>是</td><td>create:week</td><td>edit 禁用</td></tr>
+    <tr><td>sections.*</td><td>boolean</td><td>建议≥1 true</td><td>DEFAULT</td><td>—</td></tr>
+    <tr><td>chartTheme/size/showDataLabel</td><td>—</td><td>建议</td><td>yuyi/md/true</td><td>枚举</td></tr>
+  </tbody></table>
+  <p><strong>流程</strong>：validate → emit saved；若编辑系统模板则 <code class="mono">onTemplateSaved</code> Warning 不写。</p>
+  <blockquote class="rule"><strong>T-F-1～3</strong>：系统模板不可 Object.assign；<code class="mono">periodType</code> 创建后不可改；保存 <code class="mono">persist()</code>。</blockquote>
+
+  <h4>验收（≥5）</h4>
+  <table class="fld"><thead><tr><th>ID</th><th>简述</th></tr></thead><tbody>
+    <tr><td>TF-01</td><td>空名称 → 校验失败</td></tr>
+    <tr><td>TF-02</td><td>改章节 → preview 联动</td></tr>
+    <tr><td>TF-03</td><td>存系统本体 → Warning</td></tr>
+    <tr><td>TF-04</td><td>类型下拉 disabled</td></tr>
+    <tr><td>TF-05</td><td>上线 POST 重名 → 409</td></tr>
+  </tbody></table>
+  <p><strong>关联代码</strong>：<code class="mono">RiskReportTemplateDialog.vue</code></p>
+
+  <h3 id="s2-3">2.3 报告生成与预览（报告中心）</h3>
+  <figure class="fig-ph"><img src=".attachments/report-center-quick-generate.png" alt="快速生成" /><figcaption><code class="mono">report-center-quick-generate.png</code></figcaption></figure>
+  <figure class="fig-ph"><img src=".attachments/report-center-preview-toolbar.png" alt="预览区" /><figcaption><code class="mono">report-center-preview-toolbar.png</code></figcaption></figure>
+  <p>左卡：周期、只读时间范围、模板、「生成」「导出」。中卡：我的报告。右卡：定时任务摘要。下部：预览+v-loading+PDF/Excel/Word/推送。</p>
+  <blockquote class="rule"><strong>QG-1～3</strong>：<code class="mono">filteredTemplates</code> 过滤；<code class="mono">activeSections</code> 默认兜底；<code class="mono">MAX_REPORT_RANGE_DAYS=90</code> 与 <code class="mono">generateReport</code> 未对齐 → 已知缺口。</blockquote>
+  <p><strong>流程要点</strong>：无模板 → warning；否则 450ms 模拟 → unshift myReports → success Toast；导出现为 Toast。</p>
+
+  <h4>验收（≥5）</h4>
+  <table class="fld"><thead><tr><th>ID</th><th>简述</th></tr></thead><tbody>
+    <tr><td>QG-01</td><td>有启用周报 → 生成成功</td></tr>
+    <tr><td>QG-02</td><td>无模板 → warning</td></tr>
+    <tr><td>QG-03</td><td>换 period → templateId 纠正</td></tr>
+    <tr><td>QG-04</td><td>导出 Word → Toast 后缀 .docx</td></tr>
+    <tr><td>QG-05</td><td>上线真实导出 → 附件流</td></tr>
+  </tbody></table>
+  <p><strong>关联代码</strong>：<code class="mono">RiskReportCenter.vue</code> · <code class="mono">riskReportShared.js</code></p>
+
+  <h3 id="s2-4">2.4 历史报告</h3>
+  <figure class="fig-ph"><img src=".attachments/report-my-reports-panel.png" alt="我的报告" /><figcaption><code class="mono">report-my-reports-panel.png</code></figcaption></figure>
+  <p>点击历史 → <code class="mono">loadHistoryReport</code>；当前无列表内下载/删；字段含 <code class="mono">source/scheduleId</code>（任务执行写入）。</p>
+  <h4>验收（≥5）</h4>
+  <table class="fld"><thead><tr><th>ID</th><th>简述</th></tr></thead><tbody>
+    <tr><td>H-01～H-05</td><td>切换高亮、上线删/OSS、403、过期 URL、source 可查（与 Markdown 正文一致）</td></tr>
+  </tbody></table>
+</section>
+
+<hr class="sep" />
+
+<section id="s3">
+  <h2>3. 定时任务管理</h2>
+
+  <h3>3.1 任务列表</h3>
+  <figure class="fig-ph"><img src=".attachments/report-schedule-list.png" alt="定时任务列表" /><figcaption><code class="mono">report-schedule-list.png</code></figcaption></figure>
+  <p>筛选：名称、状态、周期、最近执行；表格含推送摘要、上次执行、结果链、Switch/编辑/执行/历史/删除；Drawer 840px。</p>
+  <blockquote class="rule"><strong>S-L-1～4</strong>：筛选由 computed；推送 id 映射名；上线唯一指纹+分布式锁。</blockquote>
+
+  <h4>字段表（节选）</h4>
+  <table class="fld"><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody>
+    <tr><td>cycle/runTime/cronExpr</td><td>daily|weekly_mon|monthly_1|cron</td></tr>
+    <tr><td>notifyMethodIds</td><td>≥1</td></tr>
+    <tr><td>recipientsMail/Ding/Wework</td><td>条件必填（mail）</td></tr>
+  </tbody></table>
+
+  <h4>验收（≥5）</h4>
+  <table class="fld"><thead><tr><th>ID</th><th>简述</th></tr></thead><tbody>
+    <tr><td>SL-01～05</td><td>keyword/停用筛选、Toggle、persist、删任务级联日志、无日志点摘要 info</td></tr>
+  </tbody></table>
+  <p><strong>关联代码</strong>：<code class="mono">RiskReportSchedulesPage.vue</code></p>
+
+  <h3>3.2 任务弹窗</h3>
+  <figure class="fig-ph"><img src=".attachments/report-schedule-form-dialog.png" alt="任务表单" /><figcaption><code class="mono">report-schedule-form-dialog.png</code></figcaption></figure>
+  <p>校验：名称、模板、notify≥1、runTime、cronExpr、勾选邮件必填收件人；保存二次校验周期与模板 <code class="mono">periodType</code>（cron 免检）。</p>
+  <blockquote class="rule"><strong>S-F-1～3</strong>：<code class="mono">listMethodsForSchedulePush</code> 排除 fail/sms；<code class="mono">splitEmails</code>；上线邮箱正则。</blockquote>
+  <h4>验收（≥5）</h4>
+  <p><code class="mono">SF-01～SF-05</code>：日与模板下拉、notice 必选、邮件收件、cron、cronExpr（与 Markdown 一致）。</p>
+  <p><strong>关联代码</strong>：<code class="mono">RiskReportScheduleDialog.vue</code></p>
+
+  <h3>3.3 立即执行与历史详情</h3>
+  <figure class="fig-ph"><img src=".attachments/report-schedule-execute-confirm.png" alt="立即执行确认" /><figcaption><code class="mono">report-schedule-execute-confirm.png</code></figcaption></figure>
+  <figure class="fig-ph"><img src=".attachments/report-schedule-execution-history-drawer.png" alt="执行历史抽屉" /><figcaption><code class="mono">report-schedule-execution-history-drawer.png</code></figcaption></figure>
+  <p>Confirm → 全屏 Loading → <code class="mono">executeScheduleTask</code> → Toast success/warning/error；<code class="mono">scheduleExecutionMock.js</code>：无模板、无渠道、SMTP/Webhook、收件校验 → success/partial/fail。</p>
+  <blockquote class="rule"><strong>EX-1～3</strong>：<code class="mono">splitEmails</code>；全失败→fail；部分→partial。</blockquote>
+  <h4>验收（≥5）</h4>
+  <p><code class="mono">EX-01～05</code>（含上线并发 409/423）。</p>
+  <p><strong>关联代码</strong>：<code class="mono">riskReportShared.js</code> · <code class="mono">scheduleExecutionMock.js</code></p>
+</section>
+
+<hr class="sep" />
+
+<section id="s4">
+  <h2>4. 推送方式整合</h2>
+  <figure class="fig-ph"><img src=".attachments/report-schedule-push-integration.png" alt="推送设置" /><figcaption><code class="mono">report-schedule-push-integration.png</code></figcaption></figure>
+  <blockquote class="rule"><strong>P-1</strong>：Webhook SSRF 服务端校验。</blockquote>
+  <blockquote class="rule"><strong>P-2</strong>：密钥不落前端日志明文。</blockquote>
+  <p><strong>验收</strong>：<code class="mono">PSH-01～05</code>（详见 Markdown）。</p>
+</section>
+
+<section id="s5">
+  <h2>5. 权限矩阵</h2>
+  <figure class="fig-ph"><img src=".attachments/report-role-permissions.png" alt="RBAC 占位" /><figcaption><code class="mono">report-role-permissions.png</code></figcaption></figure>
+  <table class="fld"><thead><tr><th>能力</th><th>超管</th><th>项管</th><th>业务用户</th></tr></thead><tbody>
+    <tr><td>模板管理</td><td>✓</td><td>✓</td><td>只读/无按钮</td></tr>
+    <tr><td>系统模板维护</td><td>✓</td><td>✗</td><td>✗</td></tr>
+    <tr><td>快速生成</td><td>✓</td><td>✓</td><td>可收窄</td></tr>
+    <tr><td>定时任务 CRUD/执行</td><td>✓</td><td>✓本项目</td><td>✗</td></tr>
+    <tr><td>历史删除</td><td>✓</td><td>✓</td><td>✗</td></tr>
+  </tbody></table>
+</section>
+
+<section id="s6">
+  <h2>6. 异常与错误码</h2>
+  <figure class="fig-ph"><img src=".attachments/report-errors-toast-overview.png" alt="错误码占位" /><figcaption><code class="mono">report-errors-toast-overview.png</code></figcaption></figure>
+  <table class="fld"><thead><tr><th>码</th><th>场景</th><th>提示</th></tr></thead><tbody>
+    <tr><td>400</td><td>参数/邮箱/Webhook</td><td>参数不合法</td></tr>
+    <tr><td>403</td><td>RBAC</td><td>无权限</td></tr>
+    <tr><td>404</td><td>资源缺失</td><td>不存在</td></tr>
+    <tr><td>409</td><td>重复/引用</td><td>服务端 message</td></tr>
+    <tr><td>423</td><td>执行锁</td><td>请稍后</td></tr>
+    <tr><td>500</td><td>生成异常</td><td>稍后重试</td></tr>
+  </tbody></table>
+</section>
+
+<section id="s7">
+  <h2>7. API 清单</h2>
+  <table class="fld"><thead><tr><th>方法</th><th>路径</th></tr></thead><tbody>
+    <tr><td>GET</td><td>/api/report/templates</td></tr>
+    <tr><td>POST</td><td>/api/report/templates</td></tr>
+    <tr><td>PUT</td><td>/api/report/templates/{id}</td></tr>
+    <tr><td>DELETE</td><td>/api/report/templates/{id}</td></tr>
+    <tr><td>POST</td><td>/api/report/generate</td></tr>
+    <tr><td>GET</td><td>/api/report/history</td></tr>
+    <tr><td>DELETE</td><td>/api/report/history/{id}</td></tr>
+    <tr><td>GET</td><td>/api/report/schedules</td></tr>
+    <tr><td>POST/PUT/DELETE</td><td>/api/report/schedules（及 {id}）</td></tr>
+    <tr><td>POST</td><td>/api/report/schedules/{id}/execute</td></tr>
+    <tr><td>GET</td><td>/api/report/schedules/{id}/history</td></tr>
+  </tbody></table>
+</section>
+
+<section id="s8">
+  <h2>8. DDL 示例（与 Markdown 全文一致）</h2>
+  <pre class="flow">CREATE TABLE report_template (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  type VARCHAR(16) NOT NULL COMMENT 'day/week/month',
+  config JSON NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'enabled',
+  is_system TINYINT(1) NOT NULL DEFAULT 0,
+  project_id BIGINT NULL,
+  create_time DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_time DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+);
+
+CREATE TABLE report_history (
+  id VARCHAR(64) PRIMARY KEY,
+  template_id VARCHAR(64) NOT NULL,
+  file_path VARCHAR(512) NOT NULL,
+  file_size BIGINT,
+  generate_time DATETIME(3) NOT NULL,
+  date_range JSON NOT NULL,
+  project_id BIGINT NOT NULL
+);
+
+CREATE TABLE schedule_task (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(160) NOT NULL,
+  template_id VARCHAR(64) NOT NULL,
+  cron VARCHAR(64) NOT NULL,
+  push_channels JSON NOT NULL,
+  email_receivers VARCHAR(1024),
+  dingtalk_mentions VARCHAR(512),
+  status VARCHAR(16) NOT NULL DEFAULT 'enabled',
+  project_id BIGINT NOT NULL
+);
+
+CREATE TABLE schedule_execution_log (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  task_id VARCHAR(64) NOT NULL,
+  execute_time DATETIME(3) NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  result_message TEXT,
+  file_size BIGINT,
+  push_result JSON
+);
+
+CREATE TABLE notification_channel (
+  id VARCHAR(64) PRIMARY KEY,
+  type VARCHAR(32) NOT NULL COMMENT 'email, dingtalk',
+  name VARCHAR(128) NOT NULL,
+  config JSON NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'enabled'
+);</pre>
+</section>
+
+<section id="s9">
+  <h2>9. 全局业务规则汇总（代码逆向）</h2>
+  <blockquote class="rule"><strong>G-1</strong>：<code class="mono">yuyi-risk-report-proj-{projectId}</code> JSON 四队列。</blockquote>
+  <blockquote class="rule"><strong>G-2</strong>：系统模板不写 projectTemplates 持久化数组。</blockquote>
+  <blockquote class="rule"><strong>G-3～G-10</strong>：seed 注入、generate 450ms、execute 520–900ms、cron 免检一致性、新旧 channel 推断、模板删未校验任务、删任务级联 logs、摘要关键词（详见 Markdown §9）。</blockquote>
+</section>
+
+<section id="s10">
+  <h2>10. 文档变更</h2>
+  <table class="fld"><thead><tr><th>版本</th><th>日期</th><th>说明</th></tr></thead><tbody>
+    <tr><td>V1.0-md</td><td>2026-05-07</td><td>Markdown 首版</td></tr>
+    <tr><td>V1-html</td><td>2026-05-07</td><td>本 HTML（含 Mermaid CDN、占位图）</td></tr>
+  </tbody></table>
+</section>
+
+<footer class="doc-f">
+  <p><strong>同源 Markdown</strong>：<code class="mono">docs/PRD-风险报告中心-详尽附图版-V1.md</code></p>
+  <p><strong>图示目录</strong>：<code class="mono">docs/.attachments/</code></p>
+</footer>
+
+</body>
+</html>

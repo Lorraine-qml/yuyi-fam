@@ -42,7 +42,7 @@
     </div>
 
     <el-tabs
-      :model-value="route.path"
+      :model-value="workbenchTabPath"
       class="workbench-main-tabs"
       type="card"
       @tab-click="onWorkbenchTabClick"
@@ -781,12 +781,14 @@ const route = useRoute()
 const router = useRouter()
 
 const workbenchNav = [
-  { path: '/security/workbench/repair', label: '报修工单' },
+  { path: '/security/workbench/all', label: '报修工单' },
   { path: '/security/workbench/todo', label: '我的待办' },
   { path: '/security/workbench/initiated', label: '我发起的' },
   { path: '/security/workbench/done', label: '我的已办' },
   { path: '/security/workbench/closed', label: '办结事宜' }
 ]
+
+const WORKBENCH_VIEWS = ['all', 'todo', 'initiated', 'done', 'closed']
 const eventDetailStore = useEventDetailStore()
 const tableRef = ref(null)
 const loading = ref(false)
@@ -799,7 +801,13 @@ const pageSize = ref(10)
 const isAdmin = ref(true)
 const isDispatcher = ref(true)
 
-const viewMode = computed(() => route.meta.workOrderView || 'all')
+const viewMode = computed(() => {
+  const p = route.params.view != null ? String(route.params.view) : ''
+  if (WORKBENCH_VIEWS.includes(p)) return p
+  return String(route.meta.workOrderView || 'all')
+})
+
+const workbenchTabPath = computed(() => `/security/workbench/${viewMode.value}`)
 
 const PAGE_COPY = {
   all: {
@@ -924,7 +932,7 @@ function applySearch() {
 function onWorkbenchTabClick(pane) {
   const name = unref(pane.paneName) ?? pane.props?.name
   if (name != null && name !== route.path) {
-    router.push({ path: String(name), query: { ...route.query } }).catch(() => {})
+    router.push({ path: String(name), query: { ...route.query }, hash: route.hash }).catch(() => {})
   }
 }
 
@@ -973,7 +981,7 @@ function tryFocusWoFromQuery() {
   openDetailDrawer(row)
   const q = { ...route.query }
   delete q.focusWo
-  router.replace({ path: route.path, query: q }).catch(() => {})
+  router.replace({ path: route.path, query: q, hash: route.hash }).catch(() => {})
 }
 
 function onDetailDrawerClosed() {

@@ -54,6 +54,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getEventCategoryLabel } from '@/data/eventCategories'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -86,7 +87,7 @@ function eventLabel(rule) {
   if (!rule) return '-'
   if (rule.eventPreview) return rule.eventPreview
   if (rule.name?.includes('晨检')) return '食堂晨检不合格'
-  return `${rule.eventCategory || '预警'}：${rule.name}`
+  return `${getEventCategoryLabel(rule.eventCategory)}：${rule.name}`
 }
 
 function levelWhenTriggered(rule) {

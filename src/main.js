@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { ElInfiniteScroll } from 'element-plus'
 import 'element-plus/dist/index.css'
 import './assets/styles/yw-theme.css'
@@ -12,9 +13,17 @@ import './assets/styles/tailwind.css'
 
 const app = createApp(App)
 
+app.config.errorHandler = (err, instance, info) => {
+  console.error('[Vue error]', err, info)
+}
+
+router.onError((err) => {
+  console.error('[Router error]', err)
+})
+
 app.use(createPinia())
 app.use(router)
-app.use(ElementPlus)
+app.use(ElementPlus, { locale: zhCn })
 app.use(ElInfiniteScroll)
 app.use(Avue)
 app.mount('#app')

@@ -62,7 +62,8 @@ const KPI_BY_RANGE = {
 }
 
 export function getKpiSnapshot(timeRange) {
-  return { ...KPI_BY_RANGE[timeRange] }
+  const base = KPI_BY_RANGE[timeRange] || KPI_BY_RANGE.today
+  return { ...(base || {}) }
 }
 
 /** 近7天趋势：含分级明细供 tooltip */

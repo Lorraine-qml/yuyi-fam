@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="visible"
-    :title="isEdit ? `编辑规则 ${record?.versionLabel || ''}` : '新增规则'"
+    :title="dialogTitleText"
     width="720px"
     destroy-on-close
     @update:model-value="(v) => emit('update:visible', v)"
@@ -111,23 +111,16 @@
         </div>
 
         <h4 class="text-sm font-semibold text-gray-800 mb-3">触发动作</h4>
+        <el-form-item label="事件分类" prop="eventCategory">
+          <EventCategoryField v-model="form.eventCategory" />
+        </el-form-item>
         <el-form-item label="预警等级" prop="level">
           <el-select v-model="form.level" class="w-full">
             <el-option
-              v-for="l in RULE_LEVEL_OPTIONS"
+              v-for="l in levelOptionsForCategory"
               :key="l.value"
               :label="l.label"
               :value="l.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="事件分类">
-          <el-select v-model="form.eventCategory" class="w-full">
-            <el-option
-              v-for="e in EVENT_CATEGORY_OPTIONS"
-              :key="e.value"
-              :label="e.label"
-              :value="e.value"
             />
           </el-select>
         </el-form-item>
@@ -165,14 +158,20 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import EventCategoryField from '@/components/risk/EventCategoryField.vue'
+import {
+  getRuleLevelOptionsForCategory,
+  coerceRuleLevelValueForCategory,
+  isRuleLevelValueAllowedForCategory
+} from '@/utils/eventCategoryRuleLevels'
 import {
   createEmptyRuleForm,
-  EVENT_CATEGORY_OPTIONS,
   formToRulePayload,
+  humanizeRuleVersionLabel,
   OP_OPTIONS,
   ruleToForm,
-  RULE_LEVEL_OPTIONS,
   WORK_ORDER_TYPE_OPTIONS
 } from '@/data/riskRulesMock'
 
@@ -190,10 +189,17 @@ const form = reactive(createEmptyRuleForm())
 
 const isEdit = computed(() => props.mode === 'edit')
 
+const dialogTitleText = computed(() =>
+  isEdit.value
+    ? `编辑规则 ${humanizeRuleVersionLabel(props.record?.versionLabel, props.record?.version)}`
+    : '新增规则'
+)
+
 const rules = {
   name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
   metricCode: [{ required: true, message: '请选择关联指标', trigger: 'change' }],
-  level: [{ required: true, message: '请选择预警等级', trigger: 'change' }]
+  level: [{ required: true, message: '请选择预警等级', trigger: 'change' }],
+  eventCategory: [{ required: true, message: '请选择事件分类', trigger: 'change' }]
 }
 
 const primaryMetricLabel = computed(() => {
@@ -204,6 +210,15 @@ const primaryMetricLabel = computed(() => {
 const previewPayload = computed(() => formToRulePayload(form, props.metricOptions))
 
 const previewExpr = computed(() => previewPayload.value.expressionDisplay)
+
+const levelOptionsForCategory = computed(() => getRuleLevelOptionsForCategory(form.eventCategory))
+
+watch(
+  () => form.eventCategory,
+  (cat) => {
+    form.level = coerceRuleLevelValueForCategory(cat, form.level)
+  }
+)
 
 function onMetricChange() {
   const m = props.metricOptions.find((x) => x.value === form.metricCode)
@@ -231,7 +246,7 @@ function addExtra() {
 
 watch(
   () => props.visible,
-  (v) => {
+  async (v) => {
     if (!v) return
     if (props.record) {
       Object.assign(form, createEmptyRuleForm(), ruleToForm(props.record))
@@ -241,6 +256,17 @@ watch(
         form.metricCode = props.metricOptions[0].value
         onMetricChange()
       }
+    }
+    const levelBeforeCoerce = form.level
+    const categoryId = form.eventCategory
+    form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
+    await nextTick()
+    if (
+      props.record &&
+      props.mode === 'edit' &&
+      !isRuleLevelValueAllowedForCategory(categoryId, levelBeforeCoerce)
+    ) {
+      ElMessage.warning('当前的等级不在分类可用范围内，请重新选择')
     }
   }
 )

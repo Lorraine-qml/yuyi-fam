@@ -54,19 +54,17 @@
           <el-input v-model="form.primaryUnit" class="w-24" placeholder="单位" />
         </div>
       </el-form-item>
+      <el-form-item label="事件分类" prop="eventCategory">
+        <EventCategoryField v-model="form.eventCategory" />
+      </el-form-item>
       <el-form-item label="预警等级" prop="level">
         <el-select v-model="form.level" class="w-full">
           <el-option
-            v-for="l in RULE_LEVEL_OPTIONS"
+            v-for="l in levelOptionsForCategory"
             :key="l.value"
             :label="l.label"
             :value="l.value"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="事件分类" prop="eventCategory">
-        <el-select v-model="form.eventCategory" class="w-full" filterable>
-          <el-option v-for="e in EVENT_CATEGORY_OPTIONS" :key="e.value" :label="e.label" :value="e.value" />
         </el-select>
       </el-form-item>
       <el-form-item v-if="form.valueType === 'string'" label="事件预览">
@@ -92,13 +90,10 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  createEmptyRuleForm,
-  EVENT_CATEGORY_OPTIONS,
-  formToRulePayload,
-  OP_OPTIONS,
-  RULE_LEVEL_OPTIONS
-} from '@/data/riskRulesMock'
+import EventCategoryField from '@/components/risk/EventCategoryField.vue'
+import { normalizeEventCategoryId } from '@/data/eventCategories'
+import { createEmptyRuleForm, formToRulePayload, OP_OPTIONS } from '@/data/riskRulesMock'
+import { getRuleLevelOptionsForCategory, coerceRuleLevelValueForCategory } from '@/utils/eventCategoryRuleLevels'
 
 const TEMPLATE_SECTOR_TABS = ['能耗', '安全', '食堂', '物业', '资产']
 
@@ -135,6 +130,15 @@ const dialogTitle = computed(() => {
   return '新增模板'
 })
 
+const levelOptionsForCategory = computed(() => getRuleLevelOptionsForCategory(form.eventCategory))
+
+watch(
+  () => form.eventCategory,
+  () => {
+    form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
+  }
+)
+
 const exprPreview = computed(() => {
   try {
     return formToRulePayload(form, props.metricOptions).expression
@@ -158,6 +162,7 @@ function applyRecord(t) {
       form.metricCode = props.metricOptions[0].value
       onMetricChange()
     }
+    form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
     return
   }
   Object.assign(form, createEmptyRuleForm(), {
@@ -170,7 +175,7 @@ function applyRecord(t) {
     primaryValue: t.primaryValue ?? 0,
     primaryUnit: t.primaryUnit || '',
     level: t.level ?? 3,
-    eventCategory: t.eventCategory || '能耗异常',
+    eventCategory: normalizeEventCategoryId(t.eventCategory || 'ec-energy-anomaly'),
     eventPreview: t.eventPreview || '',
     category: t.category || '能耗',
     runMode: 'trial',
@@ -180,6 +185,7 @@ function applyRecord(t) {
     silenceMinutes: 30
   })
   onMetricChange()
+  form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
 }
 
 watch(

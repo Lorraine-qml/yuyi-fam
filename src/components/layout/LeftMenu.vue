@@ -72,13 +72,13 @@
     </el-scrollbar>
 
     <div v-if="!collapsed" class="menu-footer">
-      <span class="text-xs" style="color: var(--yw-text-placeholder)">版本 v2.0.0</span>
+      <span class="text-xs" style="color: var(--yw-text-placeholder)">版本 2.0.0</span>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, toRefs } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Box,
@@ -86,6 +86,7 @@ import {
   DataAnalysis,
   CircleCheck,
   FolderOpened,
+  Histogram,
   Promotion,
   TrendCharts,
   Document,
@@ -106,12 +107,19 @@ import {
   Warning
 } from '@element-plus/icons-vue'
 
-const collapsed = defineModel('collapsed', { type: Boolean, default: false })
+import { useSystemAdmin } from '@/composables/useSystemAdmin'
+
+const props = defineProps({
+  collapsed: { type: Boolean, default: false }
+})
+const { collapsed } = toRefs(props)
+const emit = defineEmits(['update:collapsed'])
 
 const route = useRoute()
 const router = useRouter()
+const { isSystemSuperAdmin } = useSystemAdmin()
 
-const menuList = [
+const baseMenuList = [
   { id: 'dashboard', name: '首页', path: '/dashboard', icon: House, children: [] },
   { id: 'asset', name: '资产管理', path: '/asset', icon: Box, children: [] },
   { id: 'property', name: '物业管理', path: '/property', icon: OfficeBuilding, children: [] },
@@ -137,7 +145,7 @@ const menuList = [
         name: '事件工作台',
         icon: List,
         children: [
-          { id: 'sec-wb-repair', name: '报修工单', path: '/security/workbench/repair', icon: Tickets },
+          { id: 'sec-wb-all', name: '报修工单', path: '/security/workbench/all', icon: Tickets },
           { id: 'sec-wb-todo', name: '我的待办', path: '/security/workbench/todo', icon: List },
           { id: 'sec-wb-initiated', name: '我发起的', path: '/security/workbench/initiated', icon: Promotion },
           { id: 'sec-wb-done', name: '我的已办', path: '/security/workbench/done', icon: CircleCheck },
@@ -154,6 +162,12 @@ const menuList = [
       { id: 'risk-dashboard', name: '风险看板', path: '/risk/dashboard', icon: View },
       { id: 'risk-metrics', name: '风险指标', path: '/risk/metrics', icon: TrendCharts },
       { id: 'risk-rules', name: '风险规则', path: '/risk/rules', icon: Setting },
+      {
+        id: 'risk-event-categories',
+        name: '事件分类',
+        path: '/risk/event-categories',
+        icon: Histogram
+      },
       {
         id: 'risk-report',
         name: '风险报告',
@@ -179,6 +193,18 @@ const menuList = [
   }
 ]
 
+const menuList = computed(() =>
+  baseMenuList.map((item) => {
+    if (item.id === 'risk') {
+      const children = isSystemSuperAdmin.value
+        ? item.children
+        : item.children.filter((c) => c.id !== 'risk-event-categories')
+      return { ...item, children }
+    }
+    return item
+  })
+)
+
 const defaultOpeneds = computed(() => {
   const open = []
   if (route.path.startsWith('/risk')) open.push('risk')
@@ -201,7 +227,7 @@ const menuRenderKey = computed(
 )
 
 function toggleCollapse() {
-  collapsed.value = !collapsed.value
+  emit('update:collapsed', !collapsed.value)
 }
 
 function handleMenuSelect(index) {

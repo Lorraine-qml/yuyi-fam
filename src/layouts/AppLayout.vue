@@ -4,10 +4,17 @@
     <AppHeader :collapsed="menuCollapsed" />
 
     <div class="app-main" :class="{ 'is-collapsed': menuCollapsed }">
+      <el-alert
+        v-if="routeViewError"
+        type="error"
+        class="mb-3"
+        :closable="true"
+        show-icon
+        :title="routeViewError"
+        @close="routeViewError = null"
+      />
       <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
+        <component :is="Component" v-if="Component" :key="route.fullPath" />
       </router-view>
     </div>
 
@@ -16,13 +23,30 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onErrorCaptured, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import LeftMenu from '@/components/layout/LeftMenu.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import EventDetailDrawer from '@/components/event/EventDetailDrawer.vue'
 import { startNotificationHub } from '@/composables/useNotificationCenter'
 
+const route = useRoute()
 const menuCollapsed = ref(false)
+const routeViewError = ref(null)
+
+onErrorCaptured((err) => {
+  routeViewError.value = err?.message != null ? String(err.message) : String(err)
+  console.error('[route-view]', err)
+  return false
+})
+
+watch(
+  () => route.fullPath,
+  () => {
+    routeViewError.value = null
+  }
+)
+
 onMounted(() => {
   startNotificationHub()
 })
@@ -42,13 +66,4 @@ onMounted(() => {
   margin-left: 64px;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
 </style>

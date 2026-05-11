@@ -8,7 +8,8 @@ export const REALTIME_EVENTS = [
   {
     id: 'evt-240424001',
     displayCode: 'EVT-20260427001',
-    categoryLabel: '能耗异常',
+    categoryId: 'ec-energy-anomaly',
+    categoryLabel: '用电异常',
     location: '1号楼配电房',
     name: '1号楼用电量突增32%',
     type: '规则预警',
@@ -18,10 +19,11 @@ export const REALTIME_EVENTS = [
     status: 'pending',
     statusLabel: '待处理',
     startTime: '2026-04-27 10:23:00',
+    updatedTime: '2026-04-27 10:25:00',
     endTime: '—',
     pushStatus: '已推送',
     contentText: '当前值 1320 kWh，阈值 1000 kWh，环比 +38%',
-    ruleVersion: 'v2',
+    ruleVersion: '第 2 版',
     triggerValue: '1320 kWh',
     thresholdText: '1000 kWh',
     /** 规则详情（source=rule） */
@@ -48,7 +50,7 @@ export const REALTIME_EVENTS = [
   {
     id: 'evt-240424018',
     displayCode: 'EVT-20260427018',
-    categoryLabel: '监控',
+    categoryId: 'ec-safety-alert',
     location: '1号楼大厅',
     name: '区域入侵告警',
     type: '视频分析',
@@ -58,6 +60,7 @@ export const REALTIME_EVENTS = [
     status: 'pending',
     statusLabel: '待处理',
     startTime: '2026-04-27 10:20:00',
+    updatedTime: '2026-04-27 10:21:00',
     endTime: '—',
     pushStatus: '已推送',
     contentText: '视频分析系统推送入侵告警，置信度 0.92（演示）',
@@ -87,7 +90,8 @@ export const REALTIME_EVENTS = [
   {
     id: 'evt-240425011',
     displayCode: 'EVT-20260425011',
-    categoryLabel: '食堂',
+    categoryId: 'ec-canteen-morning',
+    categoryLabel: '晨检异常',
     location: '食堂后厨',
     name: '食堂晨检不合格',
     type: '晨检',
@@ -97,6 +101,7 @@ export const REALTIME_EVENTS = [
     status: 'pending',
     statusLabel: '待处理',
     startTime: '2026-04-27 09:45:00',
+    updatedTime: '2026-04-27 09:50:00',
     endTime: '—',
     pushStatus: '已推送',
     contentText: '晨检表第 3 项不合格，需复核（演示）',
@@ -123,7 +128,7 @@ export const REALTIME_EVENTS = [
   {
     id: 'evt-240424006',
     displayCode: 'EVT-20260424006',
-    categoryLabel: '电梯',
+    categoryId: 'ec-property-ops',
     location: '3号梯',
     name: '电梯维保超期提醒',
     type: '维保',
@@ -133,6 +138,7 @@ export const REALTIME_EVENTS = [
     status: 'pending',
     statusLabel: '待处理',
     startTime: '2026-04-26 09:15:00',
+    updatedTime: '2026-04-26 09:16:00',
     endTime: '—',
     pushStatus: '已推送',
     contentText: '距下次年检不足 5 个自然日',
@@ -159,7 +165,7 @@ export const REALTIME_EVENTS = [
   {
     id: 'evt-240425002',
     displayCode: 'EVT-20260425002',
-    categoryLabel: '环境',
+    categoryId: 'ec-fire-alarm',
     location: 'B2 车库',
     name: '地下车库CO浓度偏高',
     type: '消防主机',
@@ -169,6 +175,7 @@ export const REALTIME_EVENTS = [
     status: 'processing',
     statusLabel: '处理中',
     startTime: '2026-04-26 08:40:00',
+    updatedTime: '2026-04-26 09:10:00',
     endTime: '—',
     pushStatus: '已推送',
     contentText: '消防主机上报 CO 浓度超阈值（演示）',
@@ -189,7 +196,7 @@ export const REALTIME_EVENTS = [
   {
     id: 'evt-240421003',
     displayCode: 'EVT-20260421003',
-    categoryLabel: '监控',
+    categoryId: 'ec-safety-alert',
     location: 'B1 电梯厅',
     name: '安防摄像头遮挡',
     type: '视频诊断',
@@ -199,6 +206,8 @@ export const REALTIME_EVENTS = [
     status: 'closed',
     statusLabel: '已闭环',
     startTime: '2026-04-22 14:55:00',
+    updatedTime: '2026-04-22 16:00:00',
+    closedTime: '2026-04-22 16:00:00',
     endTime: '2026-04-22 16:00:00',
     pushStatus: '已推送',
     contentText: '摄像头画面异常，疑似遮挡',
@@ -223,6 +232,7 @@ export function buildPlaceholderEvent(id) {
   return {
     id,
     displayCode: id.replace(/^evt-/i, 'EVT-').toUpperCase(),
+    categoryId: '',
     categoryLabel: '—',
     location: '—',
     name: '未找到事件',
@@ -243,4 +253,46 @@ export function buildPlaceholderEvent(id) {
     linkedWorkOrder: null,
     pushLogs: []
   }
+}
+
+/**
+ * KPI「今日新增」演示锚点日与列表 mock 对齐（非同设备本地日时仍稳定可测）
+ */
+export const REALTIME_EVENTS_DEMO_TODAY = '2026-04-27'
+
+/** 会话内事件状态补丁（前端演示：开始处理/闭环等不落库） */
+const runtimeEventOverlay = {}
+
+function defaultUpdatedTime(row) {
+  return row.updatedTime || row.startTime
+}
+
+/** 合并基线事件与运行时补丁 */
+export function mergeRealtimeEvent(row) {
+  if (!row) return row
+  const o = runtimeEventOverlay[row.id] || {}
+  const merged = { ...row, ...o }
+  if (!merged.updatedTime) merged.updatedTime = defaultUpdatedTime(row)
+  if (merged.status === 'closed' && merged.closedTime == null && merged.endTime && merged.endTime !== '—') {
+    merged.closedTime = merged.endTime
+  }
+  return merged
+}
+
+export function patchRealtimeEventOverlay(id, patch) {
+  if (!id) return
+  runtimeEventOverlay[id] = {
+    ...(runtimeEventOverlay[id] || {}),
+    ...patch
+  }
+}
+
+export function listRealtimeEventsMerged() {
+  return REALTIME_EVENTS.map((e) => mergeRealtimeEvent(e))
+}
+
+export function getMergedRealtimeEvent(id) {
+  const base = getRealtimeEventById(id)
+  if (!base) return null
+  return mergeRealtimeEvent(base)
 }

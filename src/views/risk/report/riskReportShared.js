@@ -1,7 +1,11 @@
 import { computed, reactive, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
 import { useCurrentProject } from '@/composables/useCurrentProject'
 import { loadReportState, saveReportState } from '@/data/riskReportProjectState'
+import {
+  executeScheduleTask,
+  formatScheduleExecutionDetail
+} from '@/data/scheduleExecutionMock'
 import {
   buildPieOption,
   buildPreviewMeta,
@@ -16,6 +20,7 @@ const systemTemplates = getSystemReportTemplates()
 const projectTemplates = ref([])
 const schedules = ref([])
 const myReports = ref([])
+const scheduleExecutionLogs = ref([])
 
 const quick = reactive({
   period: 'week',
@@ -134,7 +139,8 @@ function persist() {
   saveReportState(currentProjectId.value, {
     projectTemplates: projectTemplates.value,
     schedules: schedules.value,
-    myReports: myReports.value
+    myReports: myReports.value,
+    scheduleExecutionLogs: scheduleExecutionLogs.value
   })
 }
 
@@ -143,6 +149,7 @@ function loadState() {
   projectTemplates.value = st.projectTemplates
   schedules.value = st.schedules
   myReports.value = st.myReports
+  scheduleExecutionLogs.value = st.scheduleExecutionLogs
   syncQuickTemplate()
   refreshPreview()
 }
@@ -242,27 +249,6 @@ function exportCurrent(fmt) {
     message: `已准备导出：${name}（模拟下载）`,
     duration: 3500
   })
-}
-
-function exportProjectConfig() {
-  const payload = {
-    version: '3.0',
-    tenant_id: currentProjectId.value,
-    project: currentProject.value?.name,
-    exportTime: nowText.value,
-    systemTemplates: getSystemReportTemplates(),
-    projectTemplates: projectTemplates.value,
-    schedules: schedules.value,
-    myReports: myReports.value
-  }
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `risk-report-config-${currentProjectId.value}-${new Date().toISOString().slice(0, 10)}.json`
-  a.click()
-  URL.revokeObjectURL(url)
-  ElMessage.success('配置已导出（含本项目模板与任务）')
 }
 
 function confirmPush() {
@@ -377,17 +363,82 @@ async function removeSchedule(row) {
   }
   const i = schedules.value.indexOf(row)
   if (i !== -1) schedules.value.splice(i, 1)
+  scheduleExecutionLogs.value = scheduleExecutionLogs.value.filter((l) => l.schedule_id !== row.id)
   persist()
   ElMessage.success('已删除')
 }
 
-function runScheduleOnce(row) {
-  row.lastRunAt = nowText.value
-  persist()
-  ElMessage.success({
-    message: '任务已提交，报告生成后将推送至接收人（模拟）',
-    duration: 4000
-  })
+function getLatestScheduleLog(scheduleId) {
+  if (scheduleId == null) return null
+  return (
+    scheduleExecutionLogs.value
+      .filter((l) => l.schedule_id === scheduleId)
+      .sort((a, b) => String(b.execute_time).localeCompare(String(a.execute_time)))[0] ?? null
+  )
+}
+
+async function openScheduleExecutionDetail(row) {
+  const log = getLatestScheduleLog(row.id)
+  if (!log) {
+    ElMessage.info('暂无执行记录')
+    return
+  }
+  try {
+    await ElMessageBox.alert(formatScheduleExecutionDetail(log), `执行详情 · ${row.name}`, {
+      confirmButtonText: '关闭',
+      customClass: 'schedule-exec-detail-msgbox',
+      customStyle: { maxWidth: '560px', width: '560px' }
+    })
+  } catch {
+    /* dismiss */
+  }
+}
+
+async function runScheduleOnce(row) {
+  try {
+    await ElMessageBox.confirm(
+      `确认立即执行任务「${row.name}」吗？\n将根据当前配置生成报告并推送给指定接收人。`,
+      '立即执行',
+      {
+        type: 'warning',
+        confirmButtonText: '确认执行',
+        cancelButtonText: '取消',
+        distinguishCancelAndClose: true
+      }
+    )
+  } catch {
+    return
+  }
+
+  let loadingInst = null
+  try {
+    loadingInst = ElLoading.service({ lock: true, text: '正在生成报告并推送…' })
+  } catch {
+    /* noop */
+  }
+
+  const executeTime = nowText.value
+  try {
+    const { log, toastType, toastMessage, myReportEntry } = await executeScheduleTask(row, executeTime)
+    row.lastRunAt = executeTime
+    scheduleExecutionLogs.value.unshift(log)
+    if (myReportEntry) {
+      myReports.value.unshift({
+        ...myReportEntry,
+        projectId: currentProjectId.value
+      })
+    }
+    persist()
+
+    const duration = 5500
+    if (toastType === 'success') ElMessage.success({ message: toastMessage, duration })
+    else if (toastType === 'warning') ElMessage.warning({ message: toastMessage, duration })
+    else ElMessage.error({ message: toastMessage, duration: 6500 })
+  } catch (e) {
+    ElMessage.error(`执行异常：${e?.message || '未知错误'}`)
+  } finally {
+    loadingInst?.close()
+  }
 }
 
 function onScheduleToggle(row) {
@@ -405,6 +456,7 @@ export function useRiskReportShared() {
     PERIOD_OPTIONS,
     schedules,
     myReports,
+    scheduleExecutionLogs,
     quick,
     previewRefId,
     previewLoading,
@@ -439,7 +491,6 @@ export function useRiskReportShared() {
     generateReport,
     loadHistoryReport,
     exportCurrent,
-    exportProjectConfig,
     confirmPush,
     openTemplateCreate,
     openTemplateEdit,
@@ -451,6 +502,8 @@ export function useRiskReportShared() {
     onScheduleSaved,
     removeSchedule,
     runScheduleOnce,
+    getLatestScheduleLog,
+    openScheduleExecutionDetail,
     onScheduleToggle,
     persist,
     reloadReportState

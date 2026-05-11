@@ -52,10 +52,13 @@
         <el-form-item label="触发条件">
           <el-input :model-value="triggerPreview" type="textarea" :rows="2" readonly class="!text-sm" />
         </el-form-item>
+        <el-form-item label="事件分类" prop="eventCategory">
+          <EventCategoryField v-model="form.eventCategory" />
+        </el-form-item>
         <el-form-item label="预警等级" prop="level">
           <el-select v-model="form.level" class="w-full" placeholder="等级">
             <el-option
-              v-for="l in RULE_LEVEL_OPTIONS"
+              v-for="l in levelOptionsForCategory"
               :key="l.value"
               :label="l.label"
               :value="l.value"
@@ -80,13 +83,18 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
+import EventCategoryField from '@/components/risk/EventCategoryField.vue'
+import { normalizeEventCategoryId } from '@/data/eventCategories'
 import {
   createEmptyRuleForm,
   formToRulePayload,
   levelMeta,
-  RULE_LEVEL_OPTIONS,
   sectorLabelForMetricCode
 } from '@/data/riskRulesMock'
+import {
+  getRuleLevelOptionsForCategory,
+  coerceRuleLevelValueForCategory
+} from '@/utils/eventCategoryRuleLevels'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -105,8 +113,18 @@ const form = reactive(createEmptyRuleForm())
 const formRules = {
   name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
   metricCode: [{ required: true, message: '请选择关联指标', trigger: 'change' }],
-  level: [{ required: true, message: '请选择预警等级', trigger: 'change' }]
+  level: [{ required: true, message: '请选择预警等级', trigger: 'change' }],
+  eventCategory: [{ required: true, message: '请选择事件分类', trigger: 'change' }]
 }
+
+const levelOptionsForCategory = computed(() => getRuleLevelOptionsForCategory(form.eventCategory))
+
+watch(
+  () => form.eventCategory,
+  () => {
+    form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
+  }
+)
 
 const triggerPreview = computed(() => {
   try {
@@ -133,13 +151,14 @@ function mergeTemplate(t) {
     primaryValue: t.primaryValue,
     primaryUnit: t.primaryUnit || '',
     level: t.level,
-    eventCategory: t.eventCategory,
+    eventCategory: normalizeEventCategoryId(t.eventCategory || 'ec-energy-anomaly'),
     runMode: 'trial'
   })
   form.extraConditions = []
   form.conditionLogic = 'AND'
   form.timeWindow = 'none'
   form.silenceMinutes = 30
+  form.level = coerceRuleLevelValueForCategory(form.eventCategory, form.level)
   onMetricChange()
 }
 

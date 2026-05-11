@@ -1,3 +1,4 @@
+import { normalizeEventCategoryId } from '@/data/eventCategories'
 import { sectorCodeForMetricCode } from '@/data/riskRulesMock'
 
 const CODE_TO_CATEGORY = {
@@ -33,7 +34,7 @@ export function pickRuleFieldsForTemplate(row) {
     metricName: row.metricName,
     expression: row.expressionDisplay || row.expression || '',
     level: row.level,
-    eventCategory: row.eventCategory || '能耗异常',
+    eventCategory: normalizeEventCategoryId(row.eventCategory || 'ec-energy-anomaly'),
     description: row.description || '',
     valueType: row.valueType || 'number',
     primaryOp: row.primaryOp || '>',

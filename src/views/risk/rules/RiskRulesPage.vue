@@ -7,21 +7,10 @@
           <el-icon class="mr-1"><Plus /></el-icon>
           新增规则
         </el-button>
-        <el-button @click="triggerImport">
-          <el-icon class="mr-1"><Upload /></el-icon>
-          导入
-        </el-button>
         <el-button @click="exportJson">
           <el-icon class="mr-1"><Download /></el-icon>
           导出
         </el-button>
-        <input
-          ref="fileInputRef"
-          type="file"
-          accept="application/json,.json"
-          class="hidden"
-          @change="onImportFile"
-        />
       </div>
     </div>
 
@@ -43,6 +32,15 @@
           @close="createSuccessTip = ''"
         />
 
+        <el-breadcrumb
+          v-if="filterEventCategory"
+          separator="/"
+          class="mb-3 risk-rules-cat-crumb"
+        >
+          <el-breadcrumb-item :to="{ path: '/risk/event-categories' }">事件分类</el-breadcrumb-item>
+          <el-breadcrumb-item>{{ eventCategoryBreadcrumbLabel }} 关联的规则</el-breadcrumb-item>
+        </el-breadcrumb>
+
         <div
           class="rounded-xl border bg-white p-4 shadow-sm mb-4"
           style="border-color: var(--yw-border)"
@@ -63,7 +61,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="等级" class="!mb-0">
-              <el-select v-model="filterLevel" placeholder="全部" clearable class="w-32" @change="page = 1">
+              <el-select v-model="filterLevel" placeholder="全部" clearable class="w-32" @change="runRuleListSearch">
                 <el-option label="全部" value="" />
                 <el-option
                   v-for="l in RULE_LEVEL_OPTIONS"
@@ -73,15 +71,33 @@
                 />
               </el-select>
             </el-form-item>
+            <el-form-item label="事件分类" class="!mb-0">
+              <el-select
+                v-model="filterEventCategory"
+                placeholder="全部"
+                clearable
+                filterable
+                class="w-40"
+                @change="runRuleListSearch"
+              >
+                <el-option label="全部" value="" />
+                <el-option
+                  v-for="c in eventCategorySelectOptions"
+                  :key="c.value"
+                  :label="c.label"
+                  :value="c.value"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item label="状态" class="!mb-0">
-              <el-select v-model="filterStatus" placeholder="全部" clearable class="w-28" @change="page = 1">
+              <el-select v-model="filterStatus" placeholder="全部" clearable class="w-28" @change="runRuleListSearch">
                 <el-option label="全部" value="" />
                 <el-option label="启用" value="enabled" />
                 <el-option label="停用" value="disabled" />
               </el-select>
             </el-form-item>
             <el-form-item class="!mb-0">
-              <el-button type="primary" @click="page = 1">搜索</el-button>
+              <el-button type="primary" @click="runRuleListSearch">搜索</el-button>
               <el-button @click="resetFilters">重置</el-button>
             </el-form-item>
           </el-form>
@@ -118,6 +134,11 @@
                   inactive-text="停"
                   @change="(v) => onToggleStatus(row, v)"
                 />
+              </template>
+            </el-table-column>
+            <el-table-column label="事件分类" min-width="100" show-overflow-tooltip>
+              <template #default="{ row }">
+                {{ getEventCategoryLabel(row.eventCategory) }}
               </template>
             </el-table-column>
             <el-table-column label="试运行" width="88" align="center">
@@ -520,7 +541,11 @@
         :max-height="400"
         class="w-full"
       >
-        <el-table-column prop="versionLabel" label="版本" width="88" />
+        <el-table-column label="版本" width="104">
+          <template #default="{ row }">{{
+            humanizeRuleVersionLabel(row.versionLabel, row.version)
+          }}</template>
+        </el-table-column>
         <el-table-column label="归档时间" min-width="168">
           <template #default="{ row }">
             <span class="text-xs text-gray-700">{{ formatVersionTime(row.savedAt) }}</span>
@@ -536,7 +561,7 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Download, Plus, Upload } from '@element-plus/icons-vue'
+import { Download, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import RiskRuleFormDialog from '@/components/risk/RiskRuleFormDialog.vue'
 import RiskTemplateFormDialog from '@/components/risk/RiskTemplateFormDialog.vue'
@@ -555,20 +580,30 @@ import {
   RULE_LEVEL_OPTIONS,
   sectorCodeForMetricCode,
   sectorLabelForMetricCode,
-  seedRiskRules
+  humanizeRuleVersionLabel,
+  getSharedRiskRules
 } from '@/data/riskRulesMock'
 import { validateNewRule } from '@/utils/riskRuleCreateValidation'
 import {
   pickRuleFieldsForTemplate,
   templateNameExists
 } from '@/utils/ruleToProjectTemplate'
+import { useSystemAdmin } from '@/composables/useSystemAdmin'
+import {
+  getEventCategoryLabel,
+  hydrateEventCategoriesOnce,
+  listEventCategories,
+  normalizeEventCategoryId
+} from '@/data/eventCategories'
+
+hydrateEventCategoriesOnce()
 
 const TEMPLATE_SECTOR_TABS = ['能耗', '安全', '食堂', '物业', '资产']
 
 /** 演示环境：有模板管理权限。接入权限后可改为角色判断。 */
 const canManageTemplates = true
 
-const list = ref(seedRiskRules())
+const list = ref(getSharedRiskRules())
 const metricOptions = ref(getMetricSelectOptions())
 
 const mainTab = ref('list')
@@ -578,9 +613,9 @@ const filterName = ref('')
 const filterMetric = ref('')
 const filterLevel = ref('')
 const filterStatus = ref('')
+const filterEventCategory = ref('')
 const page = ref(1)
 const pageSize = ref(20)
-const fileInputRef = ref(null)
 const templateApplyRef = ref(null)
 const formDialogRef = ref(null)
 
@@ -642,8 +677,15 @@ const projectTplExportCheckedIds = ref([])
 const projectTemplateManageVisible = ref(false)
 const systemTplAdminDrawerVisible = ref(false)
 const quickSysTplVisible = ref(false)
-/** 演示期：当前账号默认可管理系统模板；上线后改为从用户/Token 角色是否含 system_admin 判断 */
-const isSystemAdmin = ref(true)
+const { isSystemSuperAdmin: isSystemAdmin } = useSystemAdmin()
+
+const eventCategorySelectOptions = computed(() =>
+  listEventCategories({}).map((c) => ({ value: c.id, label: c.name }))
+)
+
+const eventCategoryBreadcrumbLabel = computed(() =>
+  filterEventCategory.value ? getEventCategoryLabel(filterEventCategory.value) : ''
+)
 
 watch(projectTplExportDialogVisible, (v) => {
   if (v) {
@@ -989,7 +1031,7 @@ function onTemplateRuleCreated({ payload, eventPreview }) {
     status: 'enabled',
     lifecycleStatus: payload.runMode === 'trial' ? 'trial' : 'production',
     version: 1,
-    versionLabel: 'v1',
+    versionLabel: '第 1 版',
     versionHistory: [],
     deleted: false,
     eventPreview: eventPreview || ''
@@ -1025,6 +1067,10 @@ const filteredRows = computed(() => {
   if (filterLevel.value !== '' && filterLevel.value != null)
     rows = rows.filter((r) => r.level === filterLevel.value)
   if (filterStatus.value) rows = rows.filter((r) => r.status === filterStatus.value)
+  if (filterEventCategory.value) {
+    const target = normalizeEventCategoryId(filterEventCategory.value)
+    rows = rows.filter((r) => normalizeEventCategoryId(r.eventCategory) === target)
+  }
   if (filterName.value.trim()) {
     const q = filterName.value.trim().toLowerCase()
     rows = rows.filter((r) => r.name.toLowerCase().includes(q))
@@ -1037,12 +1083,50 @@ const pagedRows = computed(() => {
   return filteredRows.value.slice(start, start + pageSize.value)
 })
 
+function runRuleListSearch() {
+  page.value = 1
+}
+
 function resetFilters() {
   filterName.value = ''
   filterMetric.value = ''
   filterLevel.value = ''
   filterStatus.value = ''
+  filterEventCategory.value = ''
   page.value = 1
+}
+
+function resolveEventCategoryIdFromRoute() {
+  const cats = () => listEventCategories({})
+
+  const idQ = route.query.eventCategoryId
+  if (idQ != null && String(idQ).trim() !== '') {
+    const raw = String(idQ).trim()
+    if (cats().some((c) => c.id === raw)) return raw
+    const n = normalizeEventCategoryId(raw)
+    if (cats().some((c) => c.id === n)) return n
+    return ''
+  }
+  const nameQ = route.query.eventCategoryName
+  if (nameQ != null && String(nameQ).trim() !== '') {
+    const name = String(nameQ).trim()
+    const byName = cats().find((c) => c.name === name)
+    if (byName) return byName.id
+    const byId = cats().find((c) => c.id === name)
+    if (byId) return byId.id
+    return ''
+  }
+  return ''
+}
+
+function applyEventCategoryFromQuery() {
+  if (route.query.focusRule) return
+  const id = resolveEventCategoryIdFromRoute()
+  filterEventCategory.value = id || ''
+  if (id) {
+    mainTab.value = 'list'
+    page.value = 1
+  }
 }
 
 function openCreate() {
@@ -1083,7 +1167,7 @@ function finalizeRuleCopy(row, newName) {
     id: `rr-${Date.now()}`,
     name: newName,
     version: 1,
-    versionLabel: 'v1',
+    versionLabel: '第 1 版',
     versionHistory: [],
     status: 'enabled',
     deleted: false
@@ -1118,7 +1202,7 @@ async function copyRule(row) {
 }
 
 async function deleteCurrentVersion(row) {
-  const ver = row.versionLabel || `v${row.version || 1}`
+  const ver = humanizeRuleVersionLabel(row.versionLabel, row.version)
   const msg = `确认删除规则「${row.name}」的当前生效版本（${ver}）？删除后不再参与预警计算。（软删除，可通过导出备份恢复）`
   try {
     await ElMessageBox.confirm(msg, '删除规则', {
@@ -1160,7 +1244,7 @@ function onFormSaved(payload) {
       status: 'enabled',
       lifecycleStatus: payload.runMode === 'trial' ? 'trial' : 'production',
       version: 1,
-      versionLabel: 'v1',
+      versionLabel: '第 1 版',
       versionHistory: [],
       deleted: false
     })
@@ -1173,7 +1257,7 @@ function onFormSaved(payload) {
       const hist = Array.isArray(prev.versionHistory) ? [...prev.versionHistory] : []
       hist.push({
         version: prev.version || 1,
-        versionLabel: prev.versionLabel || 'v1',
+        versionLabel: prev.versionLabel || `第 ${prev.version || 1} 版`,
         savedAt: new Date().toISOString(),
         name: prev.name,
         expressionDisplay: prev.expressionDisplay || prev.expression
@@ -1186,7 +1270,7 @@ function onFormSaved(payload) {
         levelTag: lm.tag,
         id: prev.id,
         version: nextVer,
-        versionLabel: `v${nextVer}`,
+    versionLabel: `第 ${nextVer} 版`,
         versionHistory: hist,
         lifecycleStatus: payload.runMode === 'trial' ? 'trial' : 'production'
       }
@@ -1197,49 +1281,6 @@ function onFormSaved(payload) {
 function onToggleStatus(row, enabled) {
   row.status = enabled ? 'enabled' : 'disabled'
   ElMessage.success(enabled ? '已启用' : '已停用（不再参与计算）')
-}
-
-function triggerImport() {
-  fileInputRef.value?.click()
-}
-
-function onImportFile(e) {
-  const file = e.target.files?.[0]
-  e.target.value = ''
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result)
-      const arr = Array.isArray(data) ? data : data.rules
-      if (!Array.isArray(arr)) throw new Error('invalid')
-      let n = 0
-      arr.forEach((item) => {
-        if (!item.name || !item.metricCode) return
-        const lm = levelMeta(item.level || 3)
-        list.value.unshift({
-          id: `rr-${Date.now()}-${n}`,
-          ...item,
-          sector: item.sector || sectorCodeForMetricCode(item.metricCode),
-          sectorLabel: item.sectorLabel || sectorLabelForMetricCode(item.metricCode),
-          levelLabel: item.levelLabel || lm.labelShort,
-          levelTag: item.levelTag || lm.tag,
-          version: item.version || 1,
-          versionLabel: item.versionLabel || 'v1',
-          versionHistory: Array.isArray(item.versionHistory) ? item.versionHistory : [],
-          status: item.status || 'enabled',
-          deleted: false,
-          expressionDisplay: item.expressionDisplay || item.expression
-        })
-        n += 1
-      })
-      mainTab.value = 'list'
-      ElMessage.success(`已导入 ${n} 条规则`)
-    } catch {
-      ElMessage.error('JSON 格式错误')
-    }
-  }
-  reader.readAsText(file, 'UTF-8')
 }
 
 function exportJson() {
@@ -1286,11 +1327,48 @@ function applyFocusRule(ruleId) {
   })
 }
 
+function stripRuleNameQuery() {
+  if (!route.query.ruleName) return
+  const q = { ...route.query }
+  delete q.ruleName
+  router.replace({ path: route.path, query: q }).catch(() => {})
+}
+
+function applyRuleNameFromQuery(nameRaw) {
+  filterName.value = String(nameRaw || '').trim()
+  mainTab.value = 'list'
+  nextTick(() => runRuleListSearch())
+  nextTick(() => stripRuleNameQuery())
+}
+
+watch(
+  () => route.query.ruleName,
+  (n) => {
+    if (!n) return
+    applyRuleNameFromQuery(n)
+  },
+  { immediate: true }
+)
+
 watch(
   () => route.query.focusRule,
   (id) => {
     if (!id) return
     applyFocusRule(String(id))
+  },
+  { immediate: true }
+)
+
+watch(
+  () => ({
+    cid: route.query.eventCategoryId,
+    cname: route.query.eventCategoryName,
+    fr: route.query.focusRule
+  }),
+  () => {
+    nextTick(() => {
+      applyEventCategoryFromQuery()
+    })
   },
   { immediate: true }
 )

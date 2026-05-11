@@ -3,646 +3,942 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>禹翼机管局平台 · PRD · 功能规格说明书</title>
+  <title>禹翼机管局平台 · PRD V1.0 · 详尽全量（单一 HTML）</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',function(){if(typeof mermaid!=='undefined')mermaid.initialize({startOnLoad:true,theme:'neutral'});});</script>
   <style>
     @page { size: A4; margin: 14mm 12mm; }
     * { box-sizing: border-box; }
     html { font-size: 14px; scroll-behavior: smooth; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
-        "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.6;
-      color: #1f2937;
-      margin: 0 auto;
-      max-width: 980px;
-      padding: 1.75rem 1.25rem 3rem;
-    }
-    header.doc-header {
-      border-bottom: 2px solid #4f46e5;
-      padding-bottom: 1rem;
-      margin-bottom: 1.25rem;
-    }
-    header.doc-header h1 { margin: 0 0 .35rem 0; font-size: 1.55rem; color: #111827; }
-    .meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .35rem .75rem;
-      font-size: .88rem;
-      color: #4b5563;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.6; color: #1f2937; margin: 0 auto; max-width: 1020px; padding: 1.75rem 1.25rem 3rem; }
+    header.doc-header { border-bottom: 2px solid #4f46e5; padding-bottom: 1rem; margin-bottom: 1rem; }
+    header.doc-header h1 { margin: 0 0 .35rem 0; font-size: 1.5rem; color: #111827; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem .75rem; font-size: .88rem; color: #4b5563; }
     @media (max-width: 640px) { .meta-grid { grid-template-columns: 1fr; } }
-
-    nav.toc {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: .85rem 1rem 1rem;
-      margin-bottom: 1.5rem;
-      font-size: .9rem;
-    }
+    nav.toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: .85rem 1rem 1rem; margin-bottom: 1.5rem; font-size: .88rem; }
     nav.toc h2 { margin: 0 0 .5rem 0; font-size: .95rem; color: #334155; }
     nav.toc ol { margin: 0; padding-left: 1.1rem; }
     nav.toc li { margin: .2rem 0; }
+    nav.toc ol ol { padding-left: 1rem; list-style-type: lower-alpha; }
     nav.toc a { color: #4338ca; text-decoration: none; }
     nav.toc a:hover { text-decoration: underline; }
-
-    h2 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #111827;
-      margin: 2rem 0 .6rem;
-      padding: .35rem 0 .35rem .6rem;
-      border-left: 4px solid #6366f1;
-      background: linear-gradient(90deg, #eef2ff 0%, transparent 40%);
-    }
-    h3 {
-      font-size: 1.02rem;
-      font-weight: 650;
-      color: #374151;
-      margin: 1.35rem 0 .45rem;
-    }
-    h4 {
-      font-size: .93rem;
-      font-weight: 600;
-      color: #475569;
-      margin: 1rem 0 .35rem;
-    }
+    h2 { font-size: 1.2rem; font-weight: 700; color: #111827; margin: 2rem 0 .6rem; padding: .35rem 0 .35rem .6rem;
+      border-left: 4px solid #6366f1; background: linear-gradient(90deg, #eef2ff 0%, transparent 40%); }
+    h3 { font-size: 1.02rem; font-weight: 650; color: #374151; margin: 1.35rem 0 .45rem; }
+    h4 { font-size: .93rem; font-weight: 600; color: #475569; margin: 1rem 0 .35rem; }
+    hr.sep { border: none; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
     p { margin: .45rem 0; }
     ul, ol { margin: .35rem 0 .65rem 1.2rem; }
     li { margin: .2rem 0; }
-
-    table.fld {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .86rem;
-      margin: .5rem 0 1rem;
-    }
-    table.fld th, table.fld td {
-      border: 1px solid #e5e7eb;
-      padding: .4rem .5rem;
-      text-align: left;
-      vertical-align: top;
-    }
-    table.fld thead th {
-      background: linear-gradient(#f9fafb, #eef2ff);
-      color: #334155;
-      font-weight: 600;
-      white-space: nowrap;
-    }
+    table.fld { width: 100%; border-collapse: collapse; font-size: .84rem; margin: .5rem 0 1rem; }
+    table.fld th, table.fld td { border: 1px solid #e5e7eb; padding: .4rem .5rem; text-align: left; vertical-align: top; }
+    table.fld thead th { background: linear-gradient(#f9fafb, #eef2ff); font-weight: 600; }
     table.fld tbody tr:nth-child(even) { background: #fafafa; }
-    col.attr { width: 14%; }
-    code, .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: .85em;
-      background: #f1f5f9;
-      padding: .06em .3em;
-      border-radius: 3px;
-    }
-    pre.flow {
-      font-family: ui-monospace, Menlo, Consolas, monospace;
-      font-size: .82rem;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: .75rem .9rem;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-      margin: .5rem 0;
-    }
-    .pill {
-      display: inline-block;
-      font-size: .72rem;
-      font-weight: 600;
-      padding: .1rem .4rem;
-      border-radius: 4px;
-      margin-right: .25rem;
-    }
-    .pill-p0 { background: #fee2e2; color: #991b1b; }
-    .pill-p1 { background: #fef3c7; color: #92400e; }
-    .pill-p2 { background: #e0e7ff; color: #3730a3; }
-    blockquote.note {
-      margin: .65rem 0;
-      padding: .5rem .75rem;
-      border-left: 3px solid #94a3b8;
-      background: #f8fafc;
-      color: #475569;
-      font-size: .9rem;
-    }
-    footer.doc-footer {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e5e7eb;
-      font-size: .85rem;
-      color: #6b7280;
-    }
-    @media print {
-      nav.toc { break-inside: avoid; }
-      h2, h3, h4 { break-after: avoid; }
-      table.fld thead { display: table-header-group; }
-    }
+    code, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em; background: #f1f5f9; padding: .06em .3em; border-radius: 3px; }
+    pre.flow { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: .75rem .9rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; margin: .5rem 0; }
+    pre.mermaid { margin: .75rem 0; padding: .75rem; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 8px; }
+    blockquote.note { margin: .65rem 0; padding: .5rem .75rem; border-left: 3px solid #94a3b8; background: #f8fafc; color: #475569; font-size: .9rem; }
+    blockquote.rule { margin: .5rem 0; padding: .45rem .7rem .45rem .85rem; border-left: 3px solid #4f46e5; background: #eef2ff; color: #334155; font-size: .88rem; }
+    figure.fig-ph { margin: .65rem 0 1rem; padding: 0; }
+    figure.fig-ph img { display: block; width: 100%; max-height: 400px; object-fit: contain; background: #f3f4f6; border: 1px dashed #94a3b8; border-radius: 6px; }
+    figure.fig-ph figcaption { font-size: .8rem; color: #64748b; margin-top: .3rem; }
+    footer.doc-footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; font-size: .85rem; color: #6b7280; }
+    @media print { nav.toc { break-inside: avoid; } h2, h3, h4 { break-after: avoid; } table.fld thead { display: table-header-group; } figure.fig-ph { break-inside: avoid; } }
   </style>
 </head>
 <body>
 
 <header class="doc-header">
-  <h1>禹翼机管局平台 · 产品需求文档（PRD）</h1>
+  <h1>禹翼机管局平台 · 产品需求文档（PRD）V1.0 · 详尽全量</h1>
   <div class="meta-grid">
-    <div><strong>应用工程</strong>：<code class="mono">jiguanju-risk-platform</code></div>
-    <div><strong>文档类型</strong>：功能规格 · 研发团队交付版</div>
-    <div><strong>前端栈</strong>：Vue 3 · Vite · Element Plus · Pinia · Axios</div>
-    <div><strong>说明</strong>：字段与交互与当前前端实现对齐；后端契约以接口文档为准。</div>
+    <div><strong>形态</strong>：<strong>单一 HTML</strong>（整合主 PRD / 工作台与风险详尽规格 / 风险报告极尽详版图示节）</div>
+    <div><strong>图示目录</strong>：<code class="mono">docs/.attachments/*.png</code></div>
+    <div><strong>工程</strong>：<code class="mono">yuyi-fam</code> · Vue3 · Vite · Element Plus</div>
+    <div><strong>更新</strong>：2026-05-08（含 §3.9 风险报告 <strong>V2.0</strong> 极致详版）· 总文档载体 <strong>V2.0-merged-html</strong></div>
   </div>
 </header>
+
+<blockquote class="note">
+  <strong>阅读说明</strong>：本文系<strong>唯一推荐对外评审用 HTML</strong>；与 <code class="mono">PRD-禹翼机管局平台-V1.0-开发测试全量.md</code> 及各分册 Markdown <strong>内容等价合并</strong>。<strong>§3.9</strong> 已含风险报告中心 <strong>V2.0（2026-05-08 待评审）</strong>极致详规。示意图请放入 <code class="mono">docs/.attachments/</code>，路径与 <code class="mono">figure</code> 中文件名一致。<a href="#sec-1-2">文档路径与打开方式见 §1.2</a>。<br>
+  <strong>Mermaid</strong> 状态图依赖 jsDelivr CDN，离线时仅以代码块字面阅读。
+</blockquote>
 
 <nav class="toc" aria-label="目录">
   <h2>目录</h2>
   <ol>
-    <li><a href="#overview">引言与端到端业务流程</a></li>
-    <li><a href="#m-app">应用框架（导航 / 顶栏 / 项目）</a></li>
-    <li><a href="#m-risk-metrics">风险管理 · 风险指标 CRUD</a></li>
-    <li><a href="#m-risk-rules">风险管理 · 风险规则 CRUD</a></li>
-    <li><a href="#m-templates">风险管理 · 规则模板库（项目 / 系统）</a></li>
-    <li><a href="#m-sys-template-admin">系统模板与标准指标（超级管理员）</a></li>
-    <li><a href="#m-security">安全管理 · 实时事件、推送配置与通知方式</a></li>
-    <li><a href="#m-msg">消息中心</a></li>
-    <li><a href="#m-report">风险报告 · 模板 / 导出 / 定时</a></li>
-    <li><a href="#m-workbench">事件工作台 · 工单</a></li>
-    <li><a href="#m-placeholder">占位模块（建设中）</a></li>
-    <li><a href="#m-backend">后端对接（API / JWT / 权限 / 审计）</a></li>
+    <li><a href="#sec-1">文档信息</a>
+      <ol>
+        <li><a href="#sec-1-2">1.2 文档链接与打开方式</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-2">产品概述 · 全局口径</a></li>
+    <li><a href="#sec-3">功能模块（详尽附图结构）</a>
+      <ol>
+        <li><a href="#sec-3-0">3.0 全局壳</a></li>
+        <li><a href="#sec-3-1">3.1 占位模块</a></li>
+        <li><a href="#sec-3-2">3.2 首页</a></li>
+        <li><a href="#sec-3-3">3.3 安全管理 › 事件管理</a></li>
+        <li><a href="#sec-3-4">3.4 事件工作台</a></li>
+        <li><a href="#sec-3-5">3.5 风险看板</a></li>
+        <li><a href="#sec-3-6">3.6 风险指标</a></li>
+        <li><a href="#sec-3-7">3.7 风险规则</a></li>
+        <li><a href="#sec-3-8">3.8 事件分类</a></li>
+        <li><a href="#sec-3-9">3.9 风险报告（V2.0 极致详版）</a></li>
+        <li><a href="#sec-3-10">3.10 试运行日志</a></li>
+        <li><a href="#sec-3-11">3.11 路由深链</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-4">公共服务组件</a></li>
+    <li><a href="#sec-5">数据字典</a></li>
+    <li><a href="#sec-6">非功能性需求</a></li>
+    <li><a href="#sec-7">验收测试标准</a></li>
+    <li><a href="#sec-8">附录 · 图示清单 · 变更</a></li>
   </ol>
 </nav>
 
-<section id="overview">
-  <h2>1 · 引言与端到端业务流程</h2>
-  <h3>1.1 产品目标</h3>
-  <p>
-    为机关/园区物业管理场景提供统一门户：<strong>多项目租户隔离</strong>、<strong>风险指标采集与规则告警</strong>、<strong>实时事件与安全运营</strong>、<strong>消息触达与工作台工单</strong>、<strong>风险报告导出</strong>。本文档拆解各功能的界面、字段、交互、流程与验收，便于开发与测试直接落地。
-  </p>
-  <h3>1.2 主线：指标 → 规则 → 事件 → 消息 → 工单（闭环）</h3>
-  <pre class="flow">在项目上下文中：
-   ① 创建/启用「风险指标」并配置数据源 ──► ② 可选「数据源测试」通过
-                      │
-                      ▼
-   ③ 新建「风险规则」（绑定 metricCode + 阈值表达式），runMode=trial/production
-                      │
-        ├─ 试运行 ──► ④「试运行日志」记录命中/未命中摘要
-        └─ 正式运行 ─.rules 触发后生成「实时事件」source=rule
-                      │
-                      ▼
-   ⑤ 推送策略（事件推送配置）决定通知渠道与工单是否生成 / 工单类型
-                      │
-                      ▼
-   ⑥「消息中心」产生未读，用户跳转「实时事件抽屉」查看规则快照与阈值
-                      │
-                      ▼
-   ⑦ 关联工单进入「工作台」各视图跟进，直至办结（closed）</pre>
+<section id="sec-1">
+  <h2>1 · 文档信息</h2>
+  <table class="fld">
+    <thead><tr><th>项目</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>产品名称</td><td>禹翼机管局平台</td></tr>
+      <tr><td>PRD 版本</td><td><strong>V1.0</strong>（详尽全量 HTML 载体 <strong>V2.0-merged</strong>）</td></tr>
+      <tr><td>前端版本</td><td><code class="mono">package.json 0.1.0</code>；侧栏演示 <code class="mono">2.0.0</code></td></tr>
+      <tr><td>编制</td><td>代码逆向 + 产品设计目标</td></tr>
+      <tr><td>目标用户</td><td>运维、安全值班、风险运营、系统管理员</td></tr>
+      <tr><td>核心价值</td><td>项目维度：指标→规则→事件→工单→通知闭环；看板；可配置报告与定时推送</td></tr>
+    </tbody>
+  </table>
+  <h3>1.1 输入依据与分册索引</h3>
+  <table class="fld">
+    <thead><tr><th>类别</th><th>路径</th></tr></thead>
+    <tbody>
+      <tr><td>主本 Markdown</td><td><code class="mono">docs/PRD-禹翼机管局平台-V1.0-开发测试全量.md</code></td></tr>
+      <tr><td>工作台·风险极尽详（MD）</td><td><code class="mono">docs/PRD-V1.0-详细规格-工作台与风险模块.md</code></td></tr>
+      <tr><td>风险报告（MD / HTML）</td><td><code class="mono">docs/PRD-风险报告中心-V1.0.md</code> · <code class="mono">PRD-风险报告中心-详尽附图版-V1.md</code> · <code class="mono">PRD-风险报告中心-详尽附图版-V1.html</code></td></tr>
+      <tr><td>路由 / 菜单</td><td><code class="mono">src/router/index.js</code> · <code class="mono">LeftMenu.vue</code></td></tr>
+      <tr><td>后端</td><td>本仓库无 Spring Boot；<code class="mono">VITE_API_BASE=/api</code>；大量 mock/localStorage</td></tr>
+    </tbody>
+  </table>
+  <h3 id="sec-1-2">1.2 文档链接与打开方式（全量单一 HTML）</h3>
   <blockquote class="note">
-    <strong>数据依赖</strong>：平台标准指标类型（SM-*）仅存于<strong>系统模板</strong>语义层；映射到<code>本项目指标编码</code>后才参与真实取值与规则计算。
+    <strong>全文所在</strong>：本文件 <code class="mono">PRD-product-requirements.html</code> 即为 <strong>单一 HTML 完整版</strong>（目录 §1–§8、功能模块 §3 全小节、附录与变更记录均已内联，无需再合并其他 HTML）。下方「分册 Markdown」仅作编辑源码或版本对比用。
   </blockquote>
-</section>
-
-<!-- ========== 应用框架 ========== -->
-<section id="m-app">
-  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">应用框架</h2>
-
-  <h3>需求说明</h3>
-  <p>
-    提供统一壳层：<strong>左侧可折叠导航</strong>（多级子菜单）、<strong>顶部状态栏</strong>（北京时间、全局帮助、用户信息）、<strong>当前项目选择器</strong>（全局过滤数据口径）、面包屑由各页自行决定是否展示。<strong>响应式</strong>：窄屏下侧栏收起、表格横向滚动或使用弹性布局保底。
-  </p>
-
-  <h3>界面布局（文字）</h3>
-  <ul>
-    <li><strong>左侧</strong>：Logo + 收起按钮；纵向滚动的 el-menu（一级菜单可展开二/三级）。底部显示版本号（如 v2.0.0）。</li>
-    <li><strong>顶栏</strong>（主内容顶部固定条）：左侧留空或由子页标题填充；右侧依次「系统时间」「项目下拉」「消息铃铛+未读角标」「帮助」「头像+下拉（个人中心/系统设置/退出）」。</li>
-    <li><strong>主内容区</strong>：白色底，内边距统一；子路由 <code>router-view</code> 渲染。</li>
-  </ul>
-
-  <h4>字段定义 — 项目切换（持久化）</h4>
   <table class="fld">
-    <thead>
-      <tr>
-        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
-      </tr>
-    </thead>
+    <thead><tr><th>用途</th><th>路径（相对仓库根目录 <code class="mono">yuyi-fam/</code>）</th><th>说明</th></tr></thead>
     <tbody>
-      <tr>
-        <td><code>currentProjectId</code></td>
-        <td>string</td>
-        <td>是</td>
-        <td>当前选中项目，切换后广播 <code>yuyi-project-changed</code>，各模块按项目拉数</td>
-        <td><code>p-huangpu</code></td>
-      </tr>
-      <tr>
-        <td><code>projectOptions[]</code></td>
-        <td>array</td>
-        <td>是</td>
-        <td>用户有权限的项目列表（后续走接口）</td>
-        <td><code>[{ id, name }]</code></td>
-      </tr>
+      <tr><td><strong>全量 PRD（主文档）</strong></td><td><code class="mono">docs/PRD-product-requirements.html</code></td><td>对外评审与通读全文：<strong>只打开此文件即可</strong>。</td></tr>
+      <tr><td>示意图</td><td><code class="mono">docs/.attachments/</code></td><td>与 HTML 中 <code class="mono">src=".attachments/…"</code> 对应；请从 <code class="mono">docs/</code> 目录打开本 HTML，图片方可正常加载。</td></tr>
+      <tr><td>主本 Markdown</td><td><code class="mono">docs/PRD-禹翼机管局平台-V1.0-开发测试全量.md</code></td><td>与 §1.1 表同；内容与本 HTML 对拍维护。</td></tr>
+      <tr><td>工作台·风险详规（MD）</td><td><code class="mono">docs/PRD-V1.0-详细规格-工作台与风险模块.md</code></td><td>长文分册；已合并入本 HTML 对应章节。</td></tr>
+      <tr><td>风险报告分册</td><td><code class="mono">docs/PRD-风险报告中心-V1.0.md</code> 等</td><td>见 §1.1；§3.9 已在本文展开。</td></tr>
+      <tr><td>风险报告（独立 HTML）</td><td><code class="mono">docs/PRD-风险报告中心-详尽附图版-V1.html</code></td><td>可选单独打开；全文仍以本合并版为准。</td></tr>
     </tbody>
   </table>
-
-  <h4>交互规则</h4>
+  <h4>在本机用浏览器打开</h4>
   <ul>
-    <li><strong>折叠侧栏</strong>：图标按钮切换 collapsed；菜单仅保留图标或 tooltip 全称。</li>
-    <li><strong>项目切换</strong>：变更写入 localStorage，页面内列表/看板应立即刷新或通过事件总线失效缓存。</li>
-    <li><strong>校验</strong>：无（选择器仅展示合法枚举）。</li>
-    <li><strong>反馈</strong>：无全局 toast（避免打扰）；静默更新数据。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 所有一级路由可由侧栏在 3 次点击内可达（当前「建设中」占位仍保留入口）。</li>
-    <li>✓ 刷新页面后<strong>同一项目 persisted</strong>。</li>
-    <li>✓ 视口宽度 &lt; 768px 时侧栏仍可操作（折叠或可抽屉化，不出现样式塌缩）。</li>
+    <li><strong>推荐</strong>：在资源管理器中进入 <code class="mono">…\yuyi-fam\docs\</code>，双击 <code class="mono">PRD-product-requirements.html</code>。</li>
+    <li><strong>地址栏</strong>：使用 <code class="mono">file:///</code> + 绝对路径（盘符与目录用正斜杠 <code class="mono">/</code>；空格写成 <code class="mono">%20</code>）。示例结构：<code class="mono">file:///C:/Users/&lt;用户名&gt;/Documents/yuyi-fam/yuyi-fam/docs/PRD-product-requirements.html</code>。</li>
   </ul>
 </section>
 
-<!-- ========== 风险指标 ========== -->
-<section id="m-risk-metrics">
-  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险管理 · 风险指标 CRUD</h2>
-
-  <h3>需求说明</h3>
-  <p>
-    管理<strong>本项目内可观测度量</strong>：<code>metricCode</code> 由<strong>板块 + 分类 + 三位流水号</strong>自动生成；配置数据源类型（API/JDBC/MQ/Kafka 等占位）、采样频率/Cron；支持<strong>数据源连通性测试</strong>指标拉取试运行；停用指标需提示是否已被规则引用。
-  </p>
-
-  <h3>界面布局</h3>
+<section id="sec-2">
+  <h2>2 · 产品概述与全局口径</h2>
+  <figure class="fig-ph">
+    <img src=".attachments/yuyi-product-flow-overview.png" alt="业务流程总览占位" />
+    <figcaption>.attachments/yuyi-product-flow-overview.png — 选配：端到端业务流程图替换</figcaption>
+  </figure>
+  <h3>2.1 背景与目标</h3>
   <ul>
-    <li><strong>列表页</strong>：表格列含编码、名称、板块、数据源类型、单位、启用状态、被规则引用次数、操作（编辑 / 停用 / 测试）。</li>
-    <li><strong>表单抽屉</strong>：分左右或上下滚动区——基础信息、数据源配置分段（切换 type 动态展示 API / DB / MQ 字段）。底部「保存」「取消」「测试连接」。</li>
-    <li><strong>测试弹窗</strong>：展示最近一次请求耗时、返回值摘要、断言结果（前端 demo）。</li>
+    <li><strong>背景</strong>：园区/机关安防与风险运营需统一配置台、运营台、工作台。</li>
+    <li><strong>目标</strong>：可配置监测与处置；报表生成与多渠道推送；<strong>当前项目</strong>数据隔离。</li>
+    <li><strong>现状</strong>：核心前端可端到端演示；后端与 RBAC 需按本文补齐。</li>
   </ul>
-
-  <h4>核心字段定义（节选）</h4>
+  <h3>2.2 整体业务流程（文字）</h3>
+  <ol>
+    <li>配置：<strong>风险指标</strong> → <strong>风险规则</strong>（试运行）→ <strong>事件分类</strong>（超管）。</li>
+    <li>接入：<strong>实时事件</strong>。</li>
+    <li>推送：<strong>事件推送配置</strong> × <strong>通知方式配置</strong>。</li>
+    <li>处置：<strong>工单工作台</strong>多视图。</li>
+    <li>分析：<strong>风险看板</strong>；<strong>风险报告</strong>（生成/定时/历史）。</li>
+  </ol>
+  <h3>2.3 权限矩阵（当前代码）</h3>
   <table class="fld">
-    <thead>
-      <tr>
-        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
-      </tr>
-    </thead>
+    <thead><tr><th>能力</th><th>演示用户</th><th>项管建议</th><th>超级管理员</th></tr></thead>
     <tbody>
-      <tr><td><code>name</code></td><td>string</td><td>是</td><td>中文名称</td><td>用电实时值</td></tr>
-      <tr><td><code>code</code></td><td>string</td><td>系统自动</td><td>板块-分类-序号</td><td>ENERGY-REALTIME-101</td></tr>
-      <tr><td><code>sector</code></td><td>enum</td><td>是</td><td>能耗/安全/物业/…</td><td><code>ENERGY</code></td></tr>
-      <tr><td><code>metricCategory</code></td><td>enum</td><td>是</td><td>参与编码第二段：REALTIME/RATIO/…</td><td><code>REALTIME</code></td></tr>
-      <tr><td><code>unit</code></td><td>string</td><td>否</td><td>计量单位展示</td><td>kWh</td></tr>
-      <tr><td><code>status</code></td><td>enum</td><td>是</td><td><code>enabled</code>/<code>disabled</code></td><td>enabled</td></tr>
-      <tr><td><code>dataSourceType</code></td><td>enum</td><td>是</td><td>API/DB_MYSQL/DB_DM/MQ_KAFKA …</td><td>API</td></tr>
-      <tr><td><code>apiUrl</code></td><td>url</td><td>条件</td><td>Type=API</td><td>https://api.xxx/kwh</td></tr>
-      <tr><td><code>jdbcUrl</code></td><td>string</td><td>条件</td><td>数据库类</td><td>jdbc:mysql://…</td></tr>
-      <tr><td><code>standardMetricTypeKey</code></td><td>string</td><td>否</td><td>与平台 SM-* 绑定用于模板推荐</td><td><code>SM-ENERGY-RT</code></td></tr>
-      <tr><td><code>collectFreq</code></td><td>string</td><td>否</td><td>30s / 60s / 1m / cron …</td><td>60s</td></tr>
+      <tr><td>菜单「事件分类」</td><td>隐藏</td><td>隐藏</td><td>可见 <code class="mono">/risk/event-categories</code></td></tr>
+      <tr><td>工作台导出</td><td><code class="mono">isAdmin=false</code> disabled</td><td>允许</td><td>允许</td></tr>
+      <tr><td>其余页</td><td colspan="3">未接登录默认可操作；上线须路由守卫 + JWT</td></tr>
     </tbody>
   </table>
+  <blockquote class="note"><code class="mono">useSystemAdmin.js</code> · <code class="mono">isSystemSuperAdmin</code> 默认 true；<code class="mono">requiresSystemAdmin</code> 未在 <code class="mono">beforeEach</code> 强校验——上线必须补。</blockquote>
 
-  <h4>交互规则</h4>
-  <ul>
-    <li>保存前校验：名称非空；数据源字段按类型联动必填。</li>
-    <li>「测试连接」：<strong>不改变</strong>指标正式状态；结果以对话框或结果区 toast。</li>
-    <li>试运行日志页通过时间范围、metricCode、规则 id 检索（参见试运行日志小节）。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 在同一项目内 <code>code</code> 唯一。</li>
-    <li>✓ 停用指标后，已绑定的规则编辑页应展示警告或禁止「仅正式运行」。</li>
-  </ul>
-</section>
-
-<!-- ========== 风险规则 ========== -->
-<section id="m-risk-rules">
-  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险管理 · 风险规则 CRUD</h2>
-
-  <h3>需求说明</h3>
-  <p>
-    将指标与<strong>布尔条件表达式</strong>绑定，支持主条件 + 附加条件（AND/OR）、时间窗、静默期、预警等级、事件分类、是否自动建单及工单类型；<strong>运行模式</strong>试运行/正式；支持<strong>规则测试</strong>（mock 结果）、<strong>版本历史</strong>（至少展示版本号、变更人、时间）、<strong>另存为项目模板</strong>。
-  </p>
-
-  <h3>界面布局</h3>
-  <ul>
-    <li>列表：规则名、指标、等级标签、运行模式、最近触发、操作（编辑/复制/停用/查看版本）。</li>
-    <li>规则抽屉：分区「基础」「条件」「时间窗与静默」「输出与工单」「高级」。</li>
-  </ul>
-
-  <h4>核心字段定义（节选）</h4>
+  <h3 id="sec-2-global">2.4 全局交互与异常（详尽）</h3>
   <table class="fld">
-    <thead>
-      <tr>
-        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
-      </tr>
-    </thead>
+    <thead><tr><th>类别</th><th>约定</th></tr></thead>
     <tbody>
-      <tr><td><code>name</code></td><td>string</td><td>是</td><td>规则名称</td><td>用电量过高</td></tr>
-      <tr><td><code>metricCode</code></td><td>string</td><td>是</td><td>绑定项目指标</td><td>ENERGY-HP-001</td></tr>
-      <tr><td><code>valueType</code></td><td>enum</td><td>是</td><td>number / string</td><td>number</td></tr>
-      <tr><td><code>primaryOp</code></td><td>enum</td><td>是</td><td>&gt; &lt; ≥ ≤ = ≠</td><td>&gt;</td></tr>
-      <tr><td><code>primaryValue</code></td><td>number|string</td><td>是</td><td>阈值</td><td>1500</td></tr>
-      <tr><td><code>primaryUnit</code></td><td>string</td><td>否</td><td>展示单位</td><td>kWh</td></tr>
-      <tr><td><code>expression</code></td><td>string</td><td>系统生成</td><td>引擎使用 <code>{value}</code> 占位</td><td><code>{value} &gt; 1500</code></td></tr>
-      <tr><td><code>level</code></td><td>int</td><td>是</td><td>1红 2橙 3黄 4蓝</td><td>3</td></tr>
-      <tr><td><code>eventCategory</code></td><td>string</td><td>是</td><td>与推送配置分类匹配</td><td>能耗异常</td></tr>
-      <tr><td><code>runMode</code></td><td>enum</td><td>是</td><td>trial / production</td><td>trial</td></tr>
-      <tr><td><code>silenceMinutes</code></td><td>int</td><td>否</td><td>同指标重复告警抑制</td><td>30</td></tr>
-      <tr><td><code>workOrderEnabled</code></td><td>bool</td><td>否</td><td>命中是否自动建单</td><td>true</td></tr>
-    </tbody>
-  </table>
-
-  <h4>交互规则</h4>
-  <ul>
-    <li>表达式由表单拼装，<strong>禁止</strong>用户手写任意函数（防注入）；提交前语法校验。</li>
-    <li>「测试」弹窗：输入模拟 value 或拉最近采样，展示是否命中 + 原因。</li>
-    <li>「版本历史」：侧滑或弹层时间线；支持回滚为草稿（可选 P1）。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 试运行规则仅写入试运行日志，不产生正式事件（或 event 标记 trial）。</li>
-    <li>✓ 正式规则命中后事件 <code>source=rule</code> 且可追溯到 <code>ruleId</code> / <code>metricCode</code>。</li>
-  </ul>
-</section>
-
-<!-- ========== 模板库 ========== -->
-<section id="m-templates">
-  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险管理 · 规则模板库</h2>
-
-  <h3>需求说明</h3>
-  <p>
-    <strong>本项目模板</strong>：用户将规则「另存为模板」，仅当前 <code>projectId</code> 可见，列表展示模板名、适用板块、引用指标（含项目编码）。<strong>系统模板</strong>：<code>tenant_id=0</code>，引用<strong>平台标准指标类型</strong>（SM-*），<strong>不直接带项目指标编码</strong>；用户「使用」时在映射弹窗选择本项目指标；支持「另存为项目模板」生成副本。
-  </p>
-
-  <h3>界面布局</h3>
-  <ul>
-    <li>风险规则页双区域：上「本项目模板」卡片栅格 + 操作；下「系统模板」卡片 + 「管理」入口。</li>
-    <li>映射弹窗：首行展示标准类型（平台预置标签）+ 灰色说明平台编码；第二块「本项目指标」下拉仅候选匹配项；底部规则名/等级/运行模式；主按钮「确认使用」。</li>
-  </ul>
-
-  <h4>字段 — 系统模板映射弹窗</h4>
-  <table class="fld">
-    <thead>
-      <tr>
-        <th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td><code>standardMetricTypeKey</code></td><td>string</td><td>是</td><td>平台字典，只读展示名称</td><td>SM-ENERGY-RT</td></tr>
-      <tr><td><code>selectedMetricCode</code></td><td>string</td><td>是</td><td>本项目指标 value</td><td>ENERGY-HP-001</td></tr>
-      <tr><td><code>ruleName</code></td><td>string</td><td>是</td><td>落地规则名</td><td>用电量过高_副本</td></tr>
-      <tr><td><code>runMode</code></td><td>enum</td><td>是</td><td>默认 trial</td><td>trial</td></tr>
-    </tbody>
-  </table>
-
-  <h4>交互规则</h4>
-  <ul>
-    <li>标准类型下拉：仅展示中文名，悬停 tooltip 显示编码、典型单位、数据源类型。</li>
-    <li>单位/数据源不一致时黄色提示，不强制拦截（P0 提示，P1 可配置强校验）。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 项目 A 的模板不会出现在项目 B。</li>
-    <li>✓ 系统模板落地后 <code>metricCode</code> 必为本项目字段，不得残留 SM-* 作为采集编码。</li>
-  </ul>
-</section>
-
-<section id="m-sys-template-admin">
-  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">系统模板与标准指标（超级管理员）</h2>
-  <p>
-    <strong>标准指标类型字典</strong>：平台级枚举（key、名称、默认单位、预期数据源类型）；由运营/超管维护（当前前端为静态资源 + 后续可接管理 API）。<strong>系统模板 CRUD</strong>：仅角色 <code>super_admin</code>（或等价）可见「新增/编辑/删除」；新建表单内标准类型下拉仅展示名称，附文案说明平台预置与项目无关。
-  </p>
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 非超管无法访问系统模板写接口与 UI 按钮（前后端双重校验）。</li>
-    <li>✓ 修改 SM 字典需评估旧系统模板的兼容与迁移策略。</li>
-  </ul>
-</section>
-
-<!-- ========== 安全管理 ========== -->
-<section id="m-security">
-  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">安全管理 · 实时事件与推送配置</h2>
-
-  <h3>实时事件列表</h3>
-  <p>
-    展示统一事件流水：<strong>来源</strong>（规则预警 / 第三方 / 人工）区分样式；支持多维筛选；行操作打开<strong>右侧抽屉详情</strong>（规则快照、阈值、工单摘要、推送日志）。
-  </p>
-  <h4>字段（列表）</h4>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>displayCode</code></td><td>string</td><td>展示</td><td>可读事件号</td><td>EVT-20260427001</td></tr>
-      <tr><td><code>source</code></td><td>enum</td><td>是</td><td><code>rule</code>/<code>third_party</code>/<code>manual</code></td><td>rule</td></tr>
-      <tr><td><code>level</code></td><td>string</td><td>是</td><td>high/medium/low</td><td>high</td></tr>
-      <tr><td><code>status</code></td><td>string</td><td>是</td><td>待处理/处理中/关闭</td><td>pending</td></tr>
-      <tr><td><code>ruleId</code></td><td>string</td><td>否</td><td>来源为规则时有值</td><td>rule-energy-001</td></tr>
-    </tbody>
-  </table>
-
-  <h3>事件推送配置</h3>
-  <p>
-    按<strong>事件分类 + 等级 + 适用来源</strong>维度配置：通知渠道（钉钉/短信/邮件占位）、工单是否生成、工单类型、生效时间窗、启停开关。
-  </p>
-  <h4>字段（编辑弹窗 — 节选）</h4>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>category</code></td><td>string</td><td>是</td><td>事件分类</td><td>能耗异常</td></tr>
-      <tr><td><code>level</code></td><td>enum</td><td>是</td><td>high/medium/low</td><td>high</td></tr>
-      <tr><td><code>applicableSource</code></td><td>enum</td><td>是</td><td>all / rule_only / third_party_only / manual_only</td><td>rule_only</td></tr>
-      <tr><td><code>method</code></td><td>string</td><td>是</td><td>通知方式描述</td><td>钉钉+短信</td></tr>
-      <tr><td><code>workOrderAction</code></td><td>string</td><td>否</td><td>生成工单 / 仅通知等</td><td>生成标准工单</td></tr>
-      <tr><td><code>enabled</code></td><td>bool</td><td>是</td><td>行内开关</td><td>true</td></tr>
-    </tbody>
-  </table>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 同一 (category, level, applicableSource) 组合在启用状态下不产生冲突覆盖（或由优先级字段决定，产品上需明说）。</li>
-  </ul>
-
-  <h3>通知方式配置（独立页）</h3>
-  <p>
-    维护各渠道（钉钉机器人、短信网关、邮件 SMTP、企业微信等）的<strong>连接参数与连通性测试结果</strong>；与「推送配置」区别：本页管<strong>管道是否可用</strong>，推送配置管<strong>业务路由规则</strong>。
-  </p>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>channelType</code></td><td>enum</td><td>是</td><td>钉钉/邮件/短信/…</td><td>钉钉</td></tr>
-      <tr><td><code>endpoint</code></td><td>string</td><td>条件</td><td>Webhook 或网关地址（脱敏展示）</td><td>https://oapi...</td></tr>
-      <tr><td><code>lastTestStatus</code></td><td>enum</td><td>展示</td><td>success/fail/pending</td><td>success</td></tr>
-    </tbody>
-  </table>
-  <h4>交互规则</h4>
-  <ul>
-    <li>「测试连通」不改变生产流量，返回延迟与简要响应体摘要。</li>
-    <li>密钥类字段仅存服务端，前端回显占位符 ****。</li>
-  </ul>
-</section>
-
-<!-- ========== 消息 ========== -->
-<section id="m-msg">
-  <span class="pill pill-p0">P0</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">消息中心</h2>
-
-  <h3>界面布局</h3>
-  <p>
-    顶栏铃铛展示<strong>未读角标（上限 99+）</strong>；点击右侧抽屉：<strong>筛选条</strong>（全部/未读/处理中/已闭环 × 等级 × 来源 × 搜索）+<strong>无限滚动列表</strong>；每条卡片展示摘要、时间、badge「规则触发」等；右上角「全部标为已读」。
-  </p>
-
-  <h4>字段（消息记录 — 节选）</h4>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>id</code></td><td>string</td><td>是</td><td>消息主键</td><td>n-001</td></tr>
-      <tr><td><code>title</code></td><td>string</td><td>是</td><td>展示标题</td><td>[高]用电超限</td></tr>
-      <tr><td><code>read</code></td><td>bool</td><td>是</td><td>已读标记</td><td>false</td></tr>
-      <tr><td><code>eventId</code></td><td>string</td><td>否</td><td>跳转事件详情</td><td>evt-xxx</td></tr>
-      <tr><td><code>workOrderId</code></td><td>string</td><td>否</td><td>跳转工单</td><td>WO-yyy</td></tr>
-      <tr><td><code>source</code></td><td>string</td><td>否</td><td>与事件来源一致</td><td>rule</td></tr>
-    </tbody>
-  </table>
-
-  <h4>交互规则</h4>
-  <ul>
-    <li>点击条目：标记已读 + 若含 <code>eventId</code> 则打开事件详情（抽屉或路由 <code>/event/detail/:id</code>）。</li>
-    <li>API 失败：toast 错误，角标不扣减。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ Mock 与环境变量切换到真实接口后<strong>语义不变</strong>。</li>
-  </ul>
-</section>
-
-<!-- ========== 报告 ========== -->
-<section id="m-report">
-  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">风险报告</h2>
-
-  <h3>需求说明</h3>
-  <p>
-    支持按项目输出风险运营类报告：<strong>模板</strong>定义章节结构、占位符与导出格式；<strong>报告生成</strong>为一次性任务，产生文件与状态；<strong>定时任务</strong>按 Cron 周期自动触达并可选邮件推送链接。所有数据按当前 <code>projectId</code> 过滤。
-  </p>
-
-  <h3>界面布局</h3>
-  <ul>
-    <li><strong>模板管理</strong>：表格列（模板名、类型、更新人、更新时间、操作）；抽屉表单含「基本信息」「变量声明」「导出设置」。</li>
-    <li><strong>报告中心</strong>：筛选（模板/时间/状态）+ 表格（批次号、模板、生成时间、状态、操作下载/重试）。</li>
-    <li><strong>定时任务</strong>：表格 + 弹窗配置 Cron 表达式、下一次执行预览、失败告警邮箱。</li>
-  </ul>
-
-  <h4>字段 — 报告模板（节选）</h4>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>name</code></td><td>string</td><td>是</td><td>模板名称</td><td>能耗风险月报</td></tr>
-      <tr><td><code>reportType</code></td><td>enum</td><td>是</td><td>统计/明细/混合</td><td>统计</td></tr>
-      <tr><td><code>outputFormat</code></td><td>enum</td><td>是</td><td>PDF/XLSX/DOCX</td><td>PDF</td></tr>
-      <tr><td><code>variableSchema</code></td><td>json</td><td>否</td><td>占位符与绑定字段</td><td><code>{"period":"2026-04"}</code></td></tr>
-    </tbody>
-  </table>
-
-  <h4>字段 — 定时任务（节选）</h4>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>templateId</code></td><td>string</td><td>是</td><td>关联模板</td><td>rtpl-01</td></tr>
-      <tr><td><code>cronExpr</code></td><td>string</td><td>是</td><td>调度表达式</td><td><code>0 8 1 * *</code></td></tr>
-      <tr><td><code>notifyEmails</code></td><td>string[]</td><td>否</td><td>完成通知</td><td>ops@xxx.gov</td></tr>
-      <tr><td><code>enabled</code></td><td>bool</td><td>是</td><td>启停</td><td>true</td></tr>
-    </tbody>
-  </table>
-
-  <h4>业务流程</h4>
-  <pre class="flow">选择模板 → 预览变量 → 触发「立即生成」→ 异步任务写入报告中心 → 成功可下载 / 失败可重试
-定时：Cron 触发 → 同生成链路 → 可选邮件带签名下载链接（短期有效）</pre>
-
-  <h4>交互规则</h4>
-  <ul>
-    <li>长时间生成：按钮 loading + 轮询或 WebSocket 进度（P1）。</li>
-    <li>Cron 合法性：保存前服务端解析，前端展示「下次 5 次执行时间」预览。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 模板删除前检查是否被定时任务引用。</li>
-    <li>✓ 导出文件带水印或机构标识（按安全要求）。</li>
-    <li>✓ 报告仅含当前项目数据，无交叉泄漏。</li>
-  </ul>
-</section>
-
-<!-- ========== 工作台 ========== -->
-<section id="m-workbench">
-  <span class="pill pill-p1">P1</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">事件工作台 · 工单</h2>
-
-  <h3>需求说明</h3>
-  <p>
-    同源组件多路由：<strong>报修工单</strong>（全量）、<strong>我的待办</strong>、<strong>我发起的</strong>、<strong>我的已办</strong>、<strong>办结事宜</strong>。支持筛选、排序、单条「接单/转派/完成」类弹窗、<strong>批量选择 + 批量转派/关闭</strong>（权限控制）；行内打开<strong>工单详情抽屉</strong>（时间线、评论、关联事件跳转）。
-  </p>
-
-  <h4>字段（工单 — 节选）</h4>
-  <table class="fld">
-    <thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr></thead>
-    <tbody>
-      <tr><td><code>id</code></td><td>string</td><td>是</td><td>工单号</td><td>WO-20260427001</td></tr>
-      <tr><td><code>category</code></td><td>enum</td><td>是</td><td>risk/repair/inspection</td><td>risk</td></tr>
-      <tr><td><code>status</code></td><td>enum</td><td>是</td><td>pending/processing/done/closed</td><td>pending</td></tr>
-      <tr><td><code>assigneeId</code></td><td>string|null</td><td>否</td><td>责任人</td><td>u-zhang</td></tr>
-      <tr><td><code>eventId</code></td><td>string|null</td><td>否</td><td>风险类关联事件</td><td>evt-xxx</td></tr>
-    </tbody>
-  </table>
-
-  <h4>业务流程（简）</h4>
-  <pre class="flow">待办打开工单 → 接单 → 处理中上传凭证/备注 → 完成 →（可选复核）→ 办结归档
-批量：勾选多条 → 批量转派（选人弹窗）→ 确认 → 成功/失败分项 toast</pre>
-
-  <h4>交互规则</h4>
-  <ul>
-    <li>单条操作：根据状态机灰显非法操作（如已完成不可再「接单」）。</li>
-    <li>批量：至少选 1 条；部分失败时列表刷新并展示失败原因列。</li>
-    <li>详情抽屉：Tab「概况 / 时间轴 / 关联事件」；关联事件点击跳转事件详情。</li>
-  </ul>
-
-  <h4>验收标准</h4>
-  <ul>
-    <li>✓ 待办视图仅包含「本人为当前责任人」且未完成单据。</li>
-    <li>✓ 批量操作需二次确认并展示影响条数。</li>
-    <li>✓ 「我发起的」含用户手工发起及规则自动生成但需跟踪的工单（与业务定义一致）。</li>
-  </ul>
-</section>
-
-<section id="m-placeholder">
-  <span class="pill pill-p2">P2</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">占位模块（建设中）</h2>
-  <p>
-    资产管理、物业管理、运营管理、能源管理、系统设置（用户/角色/日志）、个人中心、工单详情深链路等：统一采用<strong>模块占位页</strong>——标题 + 副标题说明规划能力 + 图标；禁止空白路由；侧栏保持可进入以体现信息架构完整。
-  </p>
-  <h4>验收标准</h4>
-  <ul><li>✓ 不出现 404；文案明确「建设中」。</li></ul>
-</section>
-
-<section id="m-backend">
-  <span class="pill pill-p2">P2</span><h2 style="display:inline;margin-left:.25rem;vertical-align:middle;border:none;background:none;padding:0;">后端对接</h2>
-  <table class="fld">
-    <thead><tr><th>主题</th><th>要求</th><th>验收</th></tr></thead>
-    <tbody>
-      <tr><td>REST API</td><td>统一前缀、错误码、分页结构 <code>{ code, data, message }</code></td><td>联调清单与 Postman 集合对齐</td></tr>
-      <tr><td>JWT</td><td>Access + Refresh；过期无感刷新或登出重登</td><td>401 统一拦截跳转登录页</td></tr>
-      <tr><td>权限</td><td>RBAC：菜单、按钮、数据范围（项目）</td><td>非授权接口 403 + 前端隐藏入口</td></tr>
-      <tr><td>审计</td><td>关键写操作落库：用户、时间、资源、diff</td><td>支持按资源 id 追溯</td></tr>
+      <tr><td>网络失败</td><td>统一：<strong>操作失败，请稍后重试</strong></td></tr>
+      <tr><td>表单校验</td><td>字段下方红线（Element Plus <code class="mono">rules</code>）</td></tr>
+      <tr><td>业务失败</td><td><code class="mono">ElMessage.error(message)</code>；弹窗默认不关</td></tr>
+      <tr><td>引用/并发冲突</td><td>列出冲突对象；禁止静默；可选 409 / 423</td></tr>
+      <tr><td>分页</td><td>默认 10 · <code class="mono">pageNum/pageSize</code> · sizes 10/20/50</td></tr>
+      <tr><td>三组角色（产品）</td><td><strong>超管 tenant_id=0</strong> 全局字典/模板；<strong>项管</strong> 当前项目配置；<strong>业务用户</strong> 本人相关数据域</td></tr>
     </tbody>
   </table>
 </section>
 
-<section id="trial-logs">
-  <h2>附 · 试运行日志（与指标/规则联动）</h2>
-  <p>
-    独立页：筛选项目、时间、规则、指标、命中结果；支持导出 CSV；与「仅试运行」规则关联，用于上线前压测与误报分析。
-  </p>
-  <h4>验收标准</h4>
-  <ul><li>✓ 至少保留 30 天数据或按产品策略归档（技术故事）。</li></ul>
+<section id="sec-3">
+  <h2>3 · 功能模块详尽（图示 + 字段 + 规则 + 验收）</h2>
+
+  <h3 id="sec-3-0">3.0 全局壳</h3>
+  <figure class="fig-ph"><img src=".attachments/yuyi-app-shell.png" alt="全局壳布局" /><figcaption>.attachments/yuyi-app-shell.png</figcaption></figure>
+  <p><strong>路由</strong>：子路由挂于 <code class="mono">AppLayout.vue</code>。<strong>组成</strong>：<code class="mono">LeftMenu</code>（240px/折叠 64px）· <code class="mono">AppHeader</code>（项目/消息/用户）· <code class="mono">router-view</code>（padding 24px）· <code class="mono">EventDetailDrawer</code>。</p>
+  <blockquote class="rule"><strong>壳-1</strong>：<code class="mono">setCurrentProjectId</code> → <code class="mono">yuyi-current-project-id</code> → 事件 <code class="mono">yuyi-project-changed</code>。</blockquote>
+  <h4>验收（≥5）</h4>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>SH-01</td><td>折叠侧栏后主区偏移正确</td></tr>
+    <tr><td>SH-02</td><td>切换项目后各模块不重载整页且无串数据</td></tr>
+    <tr><td>SH-03</td><td>Axios code≠200 出 Toast</td></tr>
+    <tr><td>SH-04</td><td><code class="mono">onErrorCaptured</code> 子组件异常有 Alert</td></tr>
+    <tr><td>SH-05</td><td>存在 Token 时请求头 Bearer（<code class="mono">request.js</code>）</td></tr>
+  </tbody></table>
+  <p><strong>代码</strong>：<code class="mono">AppLayout.vue</code> · <code class="mono">LeftMenu.vue</code> · <code class="mono">AppHeader.vue</code></p>
+
+  <h3 id="sec-3-1">3.1 占位模块（建设中）</h3>
+  <figure class="fig-ph"><img src=".attachments/module-placeholder.png" alt="占位页" /><figcaption>.attachments/module-placeholder.png</figcaption></figure>
+  <p><strong>路由</strong>：<code class="mono">ModulePlaceholder.vue</code> — 资产/物业/运营/能源/系统用户角色日志/个人中心/<code class="mono">/workorder/detail/:id</code> 等。</p>
+  <table class="fld"><thead><tr><th>ID</th><th>验收</th></tr></thead><tbody>
+    <tr><td>PH-01</td><td>展示 meta.title / subtitle</td></tr><tr><td>PH-02</td><td>无白屏控制台致命错误</td></tr><tr><td>PH-03</td><td>侧栏选中态与路由一致</td></tr><tr><td>PH-04</td><td>（上线）403 占位策略</td></tr><tr><td>PH-05</td><td>深浅色与主壳一致</td></tr>
+  </tbody></table>
+
+  <h3 id="sec-3-2">3.2 首页</h3>
+  <figure class="fig-ph"><img src=".attachments/dashboard-home.png" alt="首页" /><figcaption>.attachments/dashboard-home.png · <code class="mono">/dashboard</code></figcaption></figure>
+  <p>欢迎条 + 时钟 + <strong>模块卡片</strong>跳转 + <strong>近7日工单趋势</strong> + <strong>本月能耗</strong>（ECharts）。</p>
+  <table class="fld"><thead><tr><th>ID</th><th>验收</th></tr></thead><tbody>
+    <tr><td>HM-01</td><td>卡片可达路由</td></tr><tr><td>HM-02</td><td>ECharts 无报错渲染</td></tr><tr><td>HM-03</td><td>F5 后状态正常</td></tr><tr><td>HM-04</td><td>移动端换行可读（可选）</td></tr><tr><td>HM-05</td><td>跳转后面包屑/back 合理（若有）</td></tr>
+  </tbody></table>
+  <p><strong>代码</strong>：<code class="mono">HomeDashboard.vue</code></p>
+  <hr class="sep" />
+<!-- ========== 3.3 事件管理（详尽细化 + 代码对照）========== -->
+  <h3 id="sec-3-3">3.3 安全管理 › 事件管理</h3>
+  <blockquote class="note"><strong>实现对照摘要</strong>：实时事件已在 <code class="mono">RealtimeEventsPage.vue</code> 补足 KPI 下钻、关键词防抖、自定义日期与 URL Query 同步（仅首屏 hydrate，避免循环）、表头排序、关联规则跳转（<code class="mono">focusRule</code> / <code class="mono">ruleName</code>）、导出 CSV≤5000 条（Excel 可读）、详情抽屉宽幅 800px 与<strong>演示态</strong>开始处理/闭环（<code class="mono">patchRealtimeEventOverlay</code>）；事件推送/通知工作台等待后端接口后对齐失败回滚、409 等业务分支。</blockquote>
+
+  <h4 id="sec-3-3-1">3.3.1 实时事件 · 详尽规格</h4>
+  <p><strong>路由</strong>：<code class="mono">/security/events/realtime</code><br><strong>核心组件</strong>：<code class="mono">RealtimeEventsPage.vue</code> · <code class="mono">EventDetailDrawer.vue</code> · 数据：<code class="mono">realtimeEventsMock.js</code> · KPI 演示锚点日与数据：<code class="mono">REALTIME_EVENTS_DEMO_TODAY</code> / <code class="mono">EVENT_STATS_ANCHOR_END</code></p>
+
+  <h5>1.1.1 界面布局（ASCII）</h5>
+  <pre class="flow">┌─────────────────────────────────────────────────┐
+│ 实时事件                                         │
+├──────────┬──────────┬──────────┬────────────────┤
+│今日新增   │ 待处理    │ 处理中    │ 已闭环（本周） │
+│ (可点)   │  (可点)   │  (可点)   │   (可点)       │
+└──────────┴──────────┴──────────┴────────────────┘
+┌ 分类 ▼ │ 等级 ▼ │ 来源 ▼ │ 状态 ○○○ │ 时间 ▼+自定义 │ 关键词 🔍 · [搜索][重置]
+└──────────────────────────────────────────────────
+                                    [导出] [刷新]
+┌ 分类/描述 │ 等级 │ 状态 │ 关联规则 │ 首次时间 │ 更新时间 │ 位置 │ 操作(详情/工单) ┐</pre>
+
+  <h5>1.1.2 KPI（可下钻）</h5>
+  <table class="fld"><thead><tr><th>指标</th><th>点击行为</th><th>口径（演示）</th></tr></thead><tbody>
+    <tr><td>今日新增</td><td>叠加自定义日期 = <code class="mono">REALTIME_EVENTS_DEMO_TODAY</code></td><td>发生日 = 锚点「演示今日」当日条数（非本机日历，保证 mock 可看）</td></tr>
+    <tr><td>待处理</td><td><code class="mono">status=pending</code></td><td>待处理事件数</td></tr>
+    <tr><td>处理中</td><td><code class="mono">status=processing</code></td><td>处理中事件数</td></tr>
+    <tr><td>已闭环（本周）</td><td>闭环 + ISO 周边界（锚点周）</td><td><code class="mono">closedTime/endTime</code> 落入本周区间</td></tr>
+  </tbody></table>
+  <blockquote class="rule"><strong>RE-KPI</strong>：点击 KPI 在现有筛选上叠加口径；同步 URL：<code class="mono">kpi</code>、<code class="mono">ds/de</code>、<code class="mono">status</code> 等。</blockquote>
+
+  <h5>1.1.3 筛选字段</h5>
+  <table class="fld"><thead><tr><th>字段</th><th>控件</th><th>数据源</th><th>默认值</th><th>交互</th></tr></thead><tbody>
+    <tr><td>事件分类</td><td>el-select</td><td><code class="mono">listEventCategories</code></td><td>全部</td><td>变更即写 URL（debounce 批次）</td></tr>
+    <tr><td>事件等级</td><td>el-select</td><td>高/中/低</td><td>全部</td><td>同左</td></tr>
+    <tr><td>来源</td><td>el-select</td><td><code class="mono">EVENT_SOURCE_OPTIONS</code></td><td>全部</td><td>同左</td></tr>
+    <tr><td>状态</td><td>el-radio-group</td><td>—</td><td>全部</td><td>同左（PRD 推荐单选语义）</td></tr>
+    <tr><td>时间范围</td><td>枚举 + daterange</td><td>不限/7d/30d/自定义</td><td>不限</td><td>自定义：结束≥开始校验</td></tr>
+    <tr><td>关键词</td><td>el-input</td><td>名称/描述/位置/分类名</td><td>空</td><td>防抖 500ms 写 Query</td></tr>
+    <tr><td>重置</td><td>按钮</td><td>—</td><td>—</td><td>清空含 KPI</td></tr>
+  </tbody></table>
+
+  <h5>1.1.4 表格列</h5>
+  <table class="fld"><thead><tr><th>列</th><th>说明</th><th>排序</th><th>自定义列（目标）</th></tr></thead><tbody>
+    <tr><td>分类 · 简述</td><td>两行合一展示</td><td>间接（等级等）</td><td>规划中</td></tr>
+    <tr><td>等级/状态</td><td>Tag · 圆点</td><td>支持</td><td>规划中</td></tr>
+    <tr><td>关联规则</td><td>链到规则列表</td><td>规则名字符序</td><td>—</td></tr>
+    <tr><td>首次/更新时间</td><td>完整时间串</td><td>支持</td><td>规划中</td></tr>
+    <tr><td>位置</td><td>文本</td><td>支持</td><td>规划中</td></tr>
+  </tbody></table>
+  <blockquote class="rule"><strong>RE-1</strong>：默认排序按「更新时间」降序。<strong>RE-2</strong>：分页可选 10/20/50/100，记忆 <code class="mono">yuyi-realtime-events-page-size</code>。<strong>RE-3~4</strong>：筛选/分页/排序同步 URL：<code class="mono">category,level,source,status,timeRange,ds,de,keyword,page,size,sort,order,kpi</code></blockquote>
+
+  <h5>1.1.5 详细子功能</h5>
+  <ol>
+    <li><strong>导出</strong>：当前筛选全集；≤5000 下载 UTF-8 CSV（文件名 <code class="mono">实时事件_yyyyMMdd_HHmmss.csv</code>，Excel 可读）；超限阻止。</li>
+    <li><strong>刷新</strong>：保持条件，loading。</li>
+    <li><strong>关联规则</strong>：<code class="mono">ruleId→ /risk/rules?focusRule=</code>；仅名→ <code class="mono">?ruleName=</code>（<code class="mono">RiskRulesPage</code> 已消费）。</li>
+    <li><strong>详情抽屉</strong>：宽 800px；基本信息；<strong>状态操作（演示）</strong>：待处理→开始处理；处理中→闭环（意见必填）；时间线合并 <code class="mono">transitionLogs</code> 与推送记录。</li>
+  </ol>
+
+  <h5>1.1.7 验收（核心）</h5>
+  <table class="fld"><thead><tr><th>ID</th><th>场景</th><th>期望</th></tr></thead><tbody>
+    <tr><td>RE-AC-01</td><td>点「今日新增」</td><td>日期收窄 + 其余条件保留路径由产品核定；已实现锚点日与 URL</td></tr>
+    <tr><td>RE-AC-02</td><td>自定义逆序日期</td><td>提示「结束日期不能早于开始日期」并清空非法 range</td></tr>
+    <tr><td>RE-AC-03</td><td>导出≤5000 / &gt;5000</td><td>CSV 下载 / Toast 阻断</td></tr>
+    <tr><td>RE-AC-04</td><td>关联规则点击</td><td>跳转规则列表并 filtering</td></tr>
+    <tr><td>RE-AC-05~06</td><td>抽屉开始处理/闭环</td><td>列表与抽屉读合并后状态（会话内）</td></tr>
+    <tr><td>RE-AC-07</td><td>URL 复原</td><td>刷新后首屏 <code class="mono">readUrlQuery</code> 恢复（不含浏览器前进后退持续监听）</td></tr>
+  </tbody></table>
+
+  <h4 id="sec-3-3-2">3.3.2 事件推送配置</h4>
+  <p><strong>路由</strong>：<code class="mono">/security/events/push-config</code> · <code class="mono">EventPushConfigPage.vue</code></p>
+  <figure class="fig-ph"><img src=".attachments/security-event-push-config.png" alt="" /><figcaption>.attachments/security-event-push-config.png</figcaption></figure>
+  <p><strong>与 PRD 差异</strong>：适用来源当前实现为必选下拉（可按产品改为可选「全部」）；Switch 暂无接口失败<strong>乐观回滚</strong>演示；幂等校验 / 409 删除待接 API。</p>
+  <blockquote class="rule"><strong>PC-1~3</strong>：三元组唯一 · 停用不推送 · 定时扫描由服务端实现。</blockquote>
+  <table class="fld"><thead><tr><th>ID</th><th>验收要点</th></tr></thead><tbody>
+    <tr><td>PC-AC-01~05</td><td>见需求原文：重复保存拦截、409 文案、表单校验与渠道序列化。</td></tr>
+  </tbody></table>
+
+  <h4 id="sec-3-3-3">3.3.3 通知方式配置</h4>
+  <p><strong>路由</strong>：<code class="mono">/security/events/notify-method</code><br><strong>实际组件</strong>：<code class="mono">NotificationMethodConfigPage.vue</code>（非 NotifyMethodPage）</p>
+  <figure class="fig-ph"><img src=".attachments/security-notify-methods.png" alt="" /><figcaption>.attachments/security-notify-methods.png</figcaption></figure>
+  <p><strong>差异</strong>：类型筛选为单选；表无独立「配置摘要」列（可将 Webhook/发件人摘要作为后续列）；测试流程已存在简化版。</p>
+  <table class="fld"><thead><tr><th>ID</th><th>规则/期望</th></tr></thead><tbody>
+    <tr><td>NM-01~04</td><td>删除 409、密码留空不改、测试错误展示、短信与定时任务组合策略</td></tr>
+  </tbody></table>
+
+  <h3 id="sec-3-4">3.4 安全管理 › 事件工作台（详尽规格）</h3>
+  <p><strong>组件</strong>：<code class="mono">WorkOrderWorkbenchPage.vue</code></p>
+  <figure class="fig-ph"><img src=".attachments/workbench-five-views.png" alt="" /><figcaption>.attachments/workbench-five-views.png</figcaption></figure>
+  <p><strong>路由说明</strong>：实现为单一路由 <code class="mono">/security/workbench/:view</code>（<code class="mono">view</code> ∈ <code class="mono">all|todo|initiated|done|closed</code>），与需求一致；历史 <code class="mono">/security/workbench/repair</code> 重定向至 <code class="mono">/security/workbench/all</code>（保留 query/hash）。</p>
+
+  <h5>2.1 布局 ASCII</h5>
+  <pre class="flow">│ 事件工作台 │ 更多▼ · 自定义列▼ │
+│ Tab: 报修工单 / 我的待办 / … │
+│ 筛选：状态 紧急 类型 日期 关键词 [重置][搜索] │
+│ 批量操作区（依视图）│
+│ 表格（选框/编号/类型/…/操作）│</pre>
+
+  <h5>2.2 五视图与默认状态</h5>
+  <table class="fld"><thead><tr><th>视图</th><th>Path</th><th>meta.workOrderView</th><th>说明</th></tr></thead><tbody>
+    <tr><td>报修工单</td><td><code class="mono">/security/workbench/all</code></td><td>all</td><td>全量</td></tr>
+    <tr><td>我的待办</td><td><code class="mono">.../todo</code></td><td>todo</td><td>责任人=我</td></tr>
+    <tr><td>我发起的</td><td><code class="mono">.../initiated</code></td><td>initiated</td><td>—</td></tr>
+    <tr><td>我的已办</td><td><code class="mono">.../done</code></td><td>done</td><td>—</td></tr>
+    <tr><td>办结事宜</td><td><code class="mono">.../closed</code></td><td>closed</td><td>只读/导出策略依角色</td></tr>
+  </tbody></table>
+  <blockquote class="note"><strong>与工作台代码差异</strong>：状态筛选当前多为<strong>单选</strong> <code class="mono">el-select</code>；批量含接单/催办/转派/误报等；尚无全量<strong>筛选条件 URL Query 持久化</strong>（仅 <code class="mono">focusWo</code>）；自定义列 Checkbox 暂未持久化 LS；未到单独路由 <code class="mono">/security/workorder/handle/:id</code>，处理交互以页内 Drawer/向导为主。路径形态已与 PRD 对齐为 <code class="mono">/security/workbench/:view</code>。</blockquote>
+
+  <h5>2.8 业务规则 WB-1~WB-5（产品）</h5>
+  <blockquote class="rule"><strong>WB-1</strong>：列配置独立；<strong>WB-2</strong>：批量必选 ≥1。<strong>WB-3~5</strong>：时限、状态机、催办频控详见 <code class="mono">PRD-V1.0-详细规格-工作台与风险模块.md</code> §3.4。</blockquote>
+
+  <h5>2.9 验收（节选）</h5>
+  <table class="fld"><thead><tr><th>ID</th><th>期望（目标）</th><th>当前实现备注</th></tr></thead><tbody>
+    <tr><td>WB-AC-01</td><td>Tab 切换 URL 更新并重置筛选</td><td>path 切换 OK；重置策略部分由本地逻辑控制</td></tr>
+    <tr><td>WB-AC-07</td><td>批量催办部分失败分项提示</td><td>示意实现见页面 Toast / 控制台</td></tr>
+    <tr><td>WB-AC-08</td><td>URL 复原 view/page/keywords</td><td>规划中（需与工作台路由器对齐）</td></tr>
+  </tbody></table>
+
+  <h4>附录 · 安全管理通用交互（本 PRD 引用）</h4>
+  <ul>
+    <li>权限：<code class="mono">v-hasPermi</code>（目标）与当前 <code class="mono">isAdmin</code> 演示并存。</li>
+    <li>网络失败：<code class="mono">ElMessage.error</code> + 全局拦截器。</li>
+    <li>Loading：列表/导出应显式 loading（实时事件已加）。</li>
+  </ul>
+
+    <h3 id="sec-3-5">3.5 风险管理 › 风险看板</h3>
+  <p><strong>路由</strong>：<code class="mono">/risk/dashboard</code></p>
+  <figure class="fig-ph"><img src=".attachments/risk-dashboard.png" alt="风险看板" /><figcaption>.attachments/risk-dashboard.png</figcaption></figure>
+  <p>时间：近24h/7日/30日/自定义 daterange；过滤：板块、等级；<strong>刷新</strong> loading。KPI 可下钻占位 <code class="mono">openDrill</code>；ECharts 分布/趋势/TOPN。</p>
+  <blockquote class="rule"><strong>DB-1</strong>：当前 mock 与 <code class="mono">riskDashboardMock</code> 对齐；上线需统一「超时未处置」口径。</blockquote>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>DB-01</td><td>切换时间粒度后图表与 KPI 同步</td></tr>
+    <tr><td>DB-02</td><td>自定义范围合法校验</td></tr>
+    <tr><td>DB-03</td><td>刷新失败走全局网络文案</td></tr>
+    <tr><td>DB-04</td><td>下钻入口可配置关闭/接报表</td></tr>
+    <tr><td>DB-05</td><td>项目切换后数据隔离</td></tr>
+  </tbody></table>
+
+  <h3 id="sec-3-6">3.6 风险管理 › 风险指标</h3>
+  <p><strong>路由</strong>：<code class="mono">/risk/metrics</code> · <code class="mono">RiskMetricsPage.vue</code></p>
+  <figure class="fig-ph"><img src=".attachments/risk-metrics-list.png" alt="风险指标" /><figcaption>.attachments/risk-metrics-list.png</figcaption></figure>
+  <p>工具：新增、导出 JSON。筛选：板块、名称/编码、状态。列：编码、名称、板块、数据源、单位、状态 Switch、操作（查看/编辑/测试/试运行日志/删除）。分页 10/20/50。</p>
+  <blockquote class="rule"><strong>MT-1</strong>：停用指标后，关联<strong>正式</strong>规则不得继续触发新业务事件（或后端级联停用，二选一实现）。</blockquote>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>MT-01</td><td>删除前有确认；引用中 409（上线）</td></tr>
+    <tr><td>MT-02</td><td>Switch 调 API 失败可回滚</td></tr>
+    <tr><td>MT-03</td><td>试运行与正式路径隔离</td></tr>
+    <tr><td>MT-04</td><td>导出 JSON 可再导入或审计</td></tr>
+    <tr><td>MT-05</td><td>表单校验 maxlength 与后端一致</td></tr>
+  </tbody></table>
+
+  <h3 id="sec-3-7">3.7 风险管理 › 风险规则</h3>
+  <p><strong>路由</strong>：<code class="mono">/risk/rules</code> · Tab：规则列表 / 规则模板库。</p>
+  <figure class="fig-ph"><img src=".attachments/risk-rules-list.png" alt="风险规则列表" /><figcaption>.attachments/risk-rules-list.png</figcaption></figure>
+  <figure class="fig-ph"><img src=".attachments/risk-rule-templates-tab.png" alt="规则模板库" /><figcaption>.attachments/risk-rule-templates-tab.png</figcaption></figure>
+  <p>列表：筛选（名称、指标、等级、分类、状态）、导出、冲突弹窗 <code class="mono">ruleBlockerVisible</code>、版本历史、另存为模板、深链 <code class="mono">/risk/rules?eventCategory=</code>。</p>
+  <blockquote class="rule"><strong>RL-1</strong>：<code class="mono">runMode==='trial'</code> 为试运行；<strong>RL-2</strong>：同指标下启用规则唯一性保存拦截。</blockquote>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>RL-01</td><td>搜索+分页+筛选叠加正确</td></tr>
+    <tr><td>RL-02</td><td>启用/停用不破坏版本链</td></tr>
+    <tr><td>RL-03</td><td>冲突弹窗提供建议名称与跳转</td></tr>
+    <tr><td>RL-04</td><td>模板 Tab「使用」预填编辑器</td></tr>
+    <tr><td>RL-05</td><td>系统模板权限与项管一致</td></tr>
+  </tbody></table>
+  <p><strong>代码</strong>：<code class="mono">RiskRulesPage.vue</code> · <code class="mono">RiskRuleFormDialog.vue</code> · 校验 <code class="mono">riskRuleValidators</code></p>
+
+  <h3 id="sec-3-8">3.8 风险管理 › 事件分类</h3>
+  <p><strong>路由</strong>：<code class="mono">/risk/event-categories</code> · <strong>仅超级管理员</strong>：<code class="mono">LeftMenu</code> 过滤 + 页面级 <code class="mono">v-if</code>。</p>
+  <figure class="fig-ph"><img src=".attachments/risk-event-categories.png" alt="事件分类" /><figcaption>.attachments/risk-event-categories.png</figcaption></figure>
+  <p>筛选：板块、状态 on/off、名称关键字。列：序号、名称、板块、关联规则数（可跳规则列表）、关联事件数（跳实时事件）、可用等级摘要、描述、状态、编辑/删除。弹窗：名称、编码、板块、启用、允许等级 Checkbox、标签输入等（以 <code class="mono">EventCategoryManagePage.vue</code> 为准）。</p>
+  <blockquote class="rule"><strong>EC-1</strong>：非超管入口应跳转首页或 403；路由守卫上线须补齐。</blockquote>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>EC-01</td><td>超管可增删改；弱网失败有 Toast</td></tr>
+    <tr><td>EC-02</td><td>删除被规则引用 → 409 或禁用删除（上线）</td></tr>
+    <tr><td>EC-03</td><td>关联规则数字段可深链过滤</td></tr>
+    <tr><td>EC-04</td><td>允许等级与子页面展示一致</td></tr>
+    <tr><td>EC-05</td><td>禁用分类不产生新选配（产品与后端约定）</td></tr>
+  </tbody></table>
+
+  <h3 id="sec-3-9">3.9 风险管理 › 风险报告 · 极致详细 PRD（V2.0）</h3>
+
+  <table class="fld">
+    <thead><tr><th>项</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>版本</td><td><strong>v2.0</strong>（风险报告中心子文档，并入总 PRD）</td></tr>
+      <tr><td>更新日期</td><td>2026-05-08</td></tr>
+      <tr><td>涉及模块</td><td>报告模板管理、报告生成与历史报告、定时任务管理、推送方式整合</td></tr>
+      <tr><td>文档状态</td><td><strong>待评审</strong></td></tr>
+      <tr><td>实际前端路由前缀</td><td><code class="mono">/risk/report/center</code>（报告中心）、<code class="mono">/risk/report/templates</code>、<code class="mono">/risk/report/schedules</code> · 下文若写 <code class="mono">/report/*</code> 均指等价 <strong>API 路径前缀</strong> <code class="mono">/api/report/*</code>，界面 path 以前者为准。</td></tr>
+      <tr><td>代码入口</td><td><code class="mono">RiskReportLayout.vue</code> · localStorage：<code class="mono">yuyi-risk-report-proj-{projectId}</code></td></tr>
+    </tbody>
+  </table>
+
+  <blockquote class="note">
+    <strong>0 · 文档说明</strong><br>
+    · 力求覆盖<strong>每一界面、操作、校验规则</strong>，支撑开发与测试零歧义收口。<br>
+    · 交互流程统一按 <strong>用户动作 → 系统响应 → 页面反馈 → 后端调用</strong> 展开。<br>
+    · 业务规则以下文 <code class="mono">blockquote.rule</code>「规则 N」标出；验收用例为 <strong>Given–When–Then</strong>（GWT）。<br>
+    · 截图占位与 Markdown 等价：<code class="mono">![描述](.attachments/xxx.png)</code>，请以设计稿 PNG 同名替换。
+  </blockquote>
+
+  <h4 id="rr-v21">1 · 模块概述</h4>
+  <p><strong>定位</strong>：风险报告中心为管理层与运营提供<strong>周期性风险数据分析报告</strong>；支持自定义模板、定时生成并推送<strong>钉钉/邮件</strong>，以及手动快速生成与历史归档。</p>
+  <ul>
+    <li><strong>核心价值 A</strong>：按日/周/月自动输出，减轻人工统计。</li>
+    <li><strong>核心价值 B</strong>：PDF / Excel / Word 导出，便于汇报归档。</li>
+    <li><strong>核心价值 C</strong>：与<strong>通知方式配置</strong>的渠道账户打通（Webhook/SMTP 等）。</li>
+  </ul>
+  <figure class="fig-ph"><img src=".attachments/report-layout-tabs.png" alt="风险报告 Tab" /><figcaption>Tab 总览占位：<code class="mono">report-layout-tabs.png</code></figcaption></figure>
+
+  <h4 id="rr-v22">2 · 用户角色与权限矩阵</h4>
+  <figure class="fig-ph"><img src=".attachments/report-role-permissions.png" alt="角色权限" /><figcaption><code class="mono">report-role-permissions.png</code></figcaption></figure>
+  <table class="fld">
+    <thead><tr><th>角色</th><th>模板管理<br>（增/删/改）</th><th>模板查看</th><th>快速生成</th><th>历史下载</th><th>历史删除</th><th>定时任务<br>（增删改执行）</th><th>执行历史</th></tr></thead>
+    <tbody>
+      <tr><td>超级管理员</td><td>✅ 全部项目</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅ 全部项目</td><td>✅</td></tr>
+      <tr><td>项目管理员</td><td>✅ 仅本项目模板</td><td>✅</td><td>✅</td><td>✅</td><td>✅ 仅本项目</td><td>✅ 仅本项目任务</td><td>✅ 本项目</td></tr>
+      <tr><td>业务用户</td><td>❌</td><td>✅（只读，无维护按钮）</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="rr-v23-1">3.1 · 报告模板管理 — 模板列表页</h4>
+  <p><strong>菜单位置</strong>：风险管理 → 风险报告 → <strong>模板管理</strong>。<strong>Path</strong>：<code class="mono">/risk/report/templates</code>（PRD 文字若写 <code class="mono">/report/templates</code>，指同源功能）。</p>
+
+  <h5>3.1.1 界面布局</h5>
+  <ul>
+    <li><strong>顶部筛选</strong>：模板名称（模糊）、模板类型（日报/周报/月报/全部）、状态（启用/停用/全部）；按钮【搜索】【重置】。</li>
+    <li><strong>工具栏</strong>：【+ 新增模板】【导入】【导出】— <strong>仅超管 / 项目管理员</strong>可见。</li>
+    <li><strong>表格列</strong>：模板名称、类型、状态、<strong>最后修改时间</strong>、操作（编辑、复制、删除、启用/停用）。</li>
+    <li><strong>分页</strong>：默认每页 10，可选 10/20/50。</li>
+    <li><strong>演示差距说明</strong>：当前前端可能<strong>暂无</strong>顶栏三重筛选 / 分页 / 行内启停 / 导入导出 — 本节为 <strong>V2.0 目标口径</strong>，开发按本节补齐接口与 UI。</li>
+  </ul>
+  <figure class="fig-ph"><img src=".attachments/report-template-list.png" alt="模板列表" /><figcaption>![界面截图：模板列表](.attachments/report-template-list.png)</figcaption></figure>
+
+  <h5>3.1.2 字段定义</h5>
+  <table class="fld"><thead><tr><th>字段</th><th>类型</th><th>说明</th><th>示例</th></tr></thead><tbody>
+    <tr><td>模板名称</td><td>String</td><td>同项目同类型唯一</td><td>标准日报模板</td></tr>
+    <tr><td>模板类型</td><td>Enum</td><td>日报/周报/月报（产品与后端可扩展季报/年报）</td><td>日报</td></tr>
+    <tr><td>状态</td><td>Enum</td><td>启用/停用</td><td>启用</td></tr>
+    <tr><td>最后修改时间</td><td>DateTime</td><td>服务端维护</td><td>2026-05-07 14:30:00</td></tr>
+    <tr><td>操作</td><td>ButtonGroup</td><td>见下流程</td><td>—</td></tr>
+  </tbody></table>
+
+  <h5>3.1.3 交互流程</h5>
+  <ol>
+    <li><strong>进入页面</strong> — <em>动作</em>：打开模板 Tab。<em>系统</em>：<code class="mono">GET /api/report/templates?page=1&amp;pageSize=10</code> + 筛选 query。<em>反馈</em>：表格渲染 Skeleton → 数据。<em>权限</em>：业务用户隐藏新增/导入/导出及删除按钮。</li>
+    <li><strong>筛选</strong> — <em>动作</em>：填条件点【搜索】。<em>系统</em>：页码复位 1，带参请求。<em>反馈</em>：刷新表格。【重置】清空条件再请求。</li>
+    <li><strong>启用/停用</strong> — <em>动作</em>：点启用/停用。<em>系统</em>：<code class="mono">ElMessageBox.confirm</code> 文案：<em>确认[启用/停用]模板「{name}」？停用后将不能用于生成报告。</em> → <code class="mono">PUT /api/report/templates/{id}</code> 更新 <code class="mono">status</code>。<em>反馈</em>：成功 Toast「操作成功」并刷新；失败 Toast 后端 <code class="mono">message</code>。</li>
+    <li><strong>编辑</strong> — 打开弹窗（§3.2），<code class="mono">GET /api/report/templates/{id}</code> 拉详情，保存后刷新列表。</li>
+    <li><strong>复制</strong> — 弹窗「复制」模式：预填原配置；名称后缀 <code class="mono">_副本</code>，冲突则追加数字。<code class="mono">POST /api/report/templates</code>。</li>
+    <li><strong>删除</strong> — Confirm：<em>确定删除「{name}」？删除后不可恢复。</em> 若<strong>任一启用中的定时任务</strong>引用 → <strong>禁止删除</strong>，Toast/Modal：<em>无法删除，该模板已被 X 个定时任务使用…</em> → <code class="mono">409</code>。否则 <code class="mono">DELETE /api/report/templates/{id}</code>。</li>
+  </ol>
+
+  <h5>3.1.4 业务规则</h5>
+  <blockquote class="rule"><strong>规则 1</strong>：系统预置三个模板（标准日/周/月），<strong>不可物理删除</strong>；界面可停用。</blockquote>
+  <blockquote class="rule"><strong>规则 2</strong>：同一<code class="mono">tenant_id/project_id</code>下，<strong>同类型模板名称唯一</strong>。</blockquote>
+  <blockquote class="rule"><strong>规则 3</strong>：<strong>停用</strong>模板不出现在快速生成下拉，也不可被<strong>新建/启用中的</strong>定时任务选用（已绑定任务的展示策略由产品核定：禁用编辑或告警）。</blockquote>
+  <blockquote class="rule"><strong>规则 4</strong>：<strong>与 3.1.3 删除拦截二选一已定稿：</strong>（A）被引用则 409 禁止删；或（B）删除时级联将任务 <code class="mono">template_id=NULL</code> 并停用任务。本节默认<strong>采纳 A（与 TC-TL-03 一致）</strong>；若选 B，须同步修订验收与 UI 文案。</blockquote>
+
+  <h5>3.1.5 异常处理</h5>
+  <table class="fld"><thead><tr><th>场景</th><th>前端</th><th>后端</th></tr></thead><tbody>
+    <tr><td>网络超时</td><td>Toast「网络异常，请稍后重试」</td><td>—</td></tr>
+    <tr><td>删除冲突</td><td>Modal 提示引用数</td><td><code class="mono">409 Conflict</code> + message</td></tr>
+    <tr><td>名称重复</td><td>表单下红字 / 表格行提示</td><td><code class="mono">400</code></td></tr>
+    <tr><td>无权限</td><td>按钮隐藏或 disabled</td><td><code class="mono">403</code></td></tr>
+  </tbody></table>
+
+  <h5>3.1.6 验收用例（GWT）</h5>
+  <table class="fld"><thead><tr><th>ID</th><th>场景</th><th>Given</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-TL-01</td><td>项管建新模板</td><td>列表页，角色=项管</td><td>新增模板，合法保存</td><td>列表出现新行且状态启用</td></tr>
+    <tr><td>TC-TL-02</td><td>停用系统模板</td><td>标准日报启用中</td><td>停用并确认</td><td>状态停用，仍在列表</td></tr>
+    <tr><td>TC-TL-03</td><td>引用中删除</td><td>模板被启用定时任务占用</td><td>删除并确认</td><td>错误提示，模板未删</td></tr>
+    <tr><td>TC-TL-04</td><td>复制模板</td><td>存在「周报 A」</td><td>复制→改名保存</td><td>生成新模板（默认名含 _副本）</td></tr>
+  </tbody></table>
+
+  <h4 id="rr-v23-2">3.2 · 新增 / 编辑模板弹窗</h4>
+  <h5>3.2.1 界面布局</h5>
+  <p>宽 <strong>640px</strong>；标题「新增模板 / 编辑模板」；表单垂直；底栏【取消】【保存】（Saving 防抖）。</p>
+  <figure class="fig-ph"><img src=".attachments/report-template-form.png" alt="模板编辑弹窗" /><figcaption>![界面截图：模板编辑](.attachments/report-template-form.png) · （现有实现截图亦可命名为 <code class="mono">report-template-form-dialog.png</code>）</figcaption></figure>
+
+  <h5>3.2.2 字段定义</h5>
+  <table class="fld"><thead><tr><th>字段</th><th>组件</th><th>必填</th><th>校验</th><th>默认</th><th>说明</th></tr></thead><tbody>
+    <tr><td>模板名称</td><td>Input</td><td>是</td><td>≤50；同类型唯一</td><td>空</td><td>—</td></tr>
+    <tr><td>模板类型</td><td>Radio</td><td>是</td><td>—</td><td>日报</td><td><strong>编辑不可改</strong></td></tr>
+    <tr><td>包含内容</td><td>Checkbox</td><td>至少 1</td><td>见枚举</td><td>全选</td><td>头部、总览、饼图、趋势、板块、处置效率、TOP 风险区域、未处置明细、尾部…</td></tr>
+    <tr><td>图表主题</td><td>Select</td><td>否</td><td>枚举</td><td>禹翼主题</td><td>可选简约</td></tr>
+    <tr><td>图表尺寸</td><td>Radio</td><td>否</td><td>小/中/大</td><td>中</td><td>影响导出 DPI</td></tr>
+    <tr><td>显示数据标签</td><td>Switch</td><td>否</td><td>—</td><td>开</td><td>图表是否标值</td></tr>
+    <tr><td>状态</td><td>Radio</td><td>是</td><td>启用/停用</td><td>启用</td><td>—</td></tr>
+  </tbody></table>
+
+  <h5>3.2.3 交互流程</h5>
+  <ul>
+    <li><strong>新增打开</strong>：清空→默认类型日报、章节全选→用户编辑→<code class="mono">POST</code>，body 含 <code class="mono">config</code> JSON（章节布尔、图表项）。</li>
+    <li><strong>编辑打开</strong>：<code class="mono">GET .../{id}</code>→回填→类型控件 disabled。</li>
+    <li><strong>保存</strong>：前端校验→<code class="mono">POST/PUT</code>→成功关窗+Toast「保存成功」+刷新列表；失败展示码与文案。</li>
+    <li><strong>取消</strong>：关窗不落库。</li>
+  </ul>
+
+  <h5>3.2.4 业务规则</h5>
+  <blockquote class="rule"><strong>规则 5</strong>：编辑模式下模板类型不可修改。</blockquote>
+  <blockquote class="rule"><strong>规则 6</strong>：至少勾选一项「包含内容」，否则校验「请至少选择一个内容模块」。</blockquote>
+  <blockquote class="rule"><strong>规则 7</strong>：预置模板名称允许改（仍需唯一性）；若只允许改部分内容，以评审结论为准。</blockquote>
+
+  <h5>3.2.5 验收用例</h5>
+  <table class="fld"><thead><tr><th>ID</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-TF-01</td><td>仅勾选趋势图等新模板保存</td><td>列表展示且生成可用</td></tr>
+    <tr><td>TC-TF-02</td><td>名称改为已存在同类型名</td><td>提示存在，保存失败</td></tr>
+    <tr><td>TC-TF-03</td><td>保存为停用</td><td>快速生成下拉无此模板</td></tr>
+  </tbody></table>
+
+  <h4 id="rr-v24">4 · 报告生成与预览（快速生成）</h4>
+  <p><strong>Path</strong>：<code class="mono">/risk/report/center</code>（快速生成区在主内容区）；若独立页则对应 PRD 「<code class="mono">/report/quick</code>」等价能力。</p>
+  <h5>4.1.1 界面布局</h5>
+  <ul>
+    <li>报告周期：日/周/月 + <strong>自定义日期范围</strong>。</li>
+    <li>模板下拉：仅「当前项目 + 启用 + 周期类型匹配」模板。</li>
+    <li>【生成报告】；中区 HTML 预览；底部【导出 PDF/Excel/Word】；无内容时空态：<em>暂无报告，请点击生成</em>。</li>
+  </ul>
+  <figure class="fig-ph"><img src=".attachments/report-quick-generate.png" alt="快速生成" /><figcaption>![界面截图：快速生成](.attachments/report-quick-generate.png) · 可选用 <code class="mono">report-center-quick-generate.png</code> / <code class="mono">report-center-preview-toolbar.png</code> 分拆预览与工具栏</figcaption></figure>
+
+  <h5>4.1.2 交互流程 — 生成</h5>
+  <ol>
+    <li><em>动作</em>：选周期 + 模板 →【生成】。<em>系统</em>：<code class="mono">POST /api/report/generate</code>：</li>
+  </ol>
+  <pre class="flow">{
+  "templateId": "tpl_001",
+  "dateRange": { "start": "2026-05-01", "end": "2026-05-07" },
+  "projectId": "&lt;current&gt;"
+}</pre>
+  <ol start="2">
+    <li><em>响应</em>：<code class="mono">htmlContent</code> 或预览 URL→前端挂载预览；Loading「报告生成中…」禁用按钮。</li>
+    <li><em>失败</em>：Toast「报告生成失败，请稍后重试」+ 可追溯 requestId。</li>
+  </ol>
+
+  <h5>导出</h5>
+  <ul>
+    <li>点击 PDF/Excel/Word→文件流下载；文件名 <code class="mono">{模板名}_{区间}_{timestamp}.{ext}</code>。</li>
+    <li>若预览为空点击导出：<strong>先静默生成</strong>再继续导出（产品与性能须评估缓存）。</li>
+  </ul>
+
+  <h5>4.1.3 业务规则</h5>
+  <blockquote class="rule"><strong>规则 8</strong>：日报 + 自定义时，跨度默认单日；周报建议整自然周（可配置是否强制校准）。</blockquote>
+  <blockquote class="rule"><strong>规则 9</strong>：报告数据<strong>不包含试运行</strong>事件（与正式工单/事件聚合）。</blockquote>
+  <blockquote class="rule"><strong>规则 10</strong>：临时预览/缓存 TTL <strong>1 小时</strong>；归档历史永久策略见 §5（90 天文件保留为存储侧策略）。</blockquote>
+
+  <h5>4.1.4 异常处理</h5>
+  <ul>
+    <li>所选区间无事件→「所选时间范围内无任何事件，无法生成报告」。 </li>
+    <li>模板 config 损坏→「模板配置异常，请联系管理员」。</li>
+  </ul>
+
+  <table class="fld"><thead><tr><th>ID</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-QG-01</td><td>选周报模板生成</td><td>预览含近 7 日趋势等业务块</td></tr>
+    <tr><td>TC-QG-02</td><td>导出 PDF</td><td>下载成功且与预览一致</td></tr>
+    <tr><td>TC-QG-03</td><td>自定义区间无数据</td><td>提示且无脏预览</td></tr>
+  </tbody></table>
+
+  <h4 id="rr-v25">5 · 历史报告管理</h4>
+  <figure class="fig-ph"><img src=".attachments/report-history-list.png" alt="历史报告列表" /><figcaption>![界面截图：历史列表](.attachments/report-history-list.png) · 亦可 <code class="mono">report-my-reports-panel.png</code></figcaption></figure>
+  <table class="fld"><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody>
+    <tr><td>报告名称</td><td>模板名 + 日期范围摘要</td></tr>
+    <tr><td>生成时间</td><td>实际生成时刻</td></tr>
+    <tr><td>周期范围</td><td>如 2026-05-01 ~ 2026-05-07</td></tr>
+    <tr><td>文件大小</td><td>如 1.2 MB</td></tr>
+    <tr><td>操作</td><td>下载；删除（业务用户无权）</td></tr>
+  </tbody></table>
+  <ol>
+    <li><strong>加载</strong>：<code class="mono">GET /api/report/history?page=1&amp;size=10</code> + 可选时间筛选。</li>
+    <li><strong>下载</strong>：<code class="mono">GET /api/report/history/{id}/download</code>（或直链 STS，须鉴权）。</li>
+    <li><strong>删除</strong>：Confirm → <code class="mono">DELETE /api/report/history/{id}</code>。</li>
+  </ol>
+  <blockquote class="rule"><strong>规则 11</strong>：历史文件默认保留 <strong>90 天</strong>，后端清理任务删除对象存储。</blockquote>
+  <blockquote class="rule"><strong>规则 12</strong>：<strong>定时任务</strong>生成的报告<strong>写入同一张历史列表</strong>。</blockquote>
+
+  <table class="fld"><thead><tr><th>ID</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-HS-01</td><td>手工生成成功后</td><td>历史中可下载</td></tr>
+    <tr><td>TC-HS-02</td><td>项管删除确认</td><td>列表无该记录</td></tr>
+    <tr><td>TC-HS-03</td><td>业务用户删</td><td>无按钮或 403</td></tr>
+  </tbody></table>
+
+  <h4 id="rr-v26">6 · 定时任务管理</h4>
+  <p><strong>Path</strong>：<code class="mono">/risk/report/schedules</code>。</p>
+  <figure class="fig-ph"><img src=".attachments/schedule-list.png" alt="定时任务列表" /><figcaption>![界面截图：定时任务列表](.attachments/schedule-list.png) · 兼容 <code class="mono">report-schedule-list.png</code></figcaption></figure>
+
+  <h5>6.1.2 字段</h5>
+  <table class="fld"><thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead><tbody>
+    <tr><td>任务名称</td><td>String</td><td>项目内唯一（规则 13）</td></tr>
+    <tr><td>报告模板</td><td>FK</td><td>绑定启用模板快照</td></tr>
+    <tr><td>执行周期</td><td>String</td><td>Cron / 自然语言展示</td></tr>
+    <tr><td>最近结果</td><td>Enum</td><td>成功/失败/部分/无</td></tr>
+    <tr><td>状态</td><td>Enum</td><td>启用/停用</td></tr>
+  </tbody></table>
+
+  <h5>6.1.3 立即执行</h5>
+  <ol>
+    <li>Confirm：「确认立即执行？将生成报告并推送给接收人」。</li>
+    <li><code class="mono">POST /api/report/schedules/{id}/execute</code>；若执行中：<code class="mono">423/409</code>「任务正在执行」。</li>
+    <li>异步：Toast「任务已开始执行…」。</li>
+  </ol>
+
+  <blockquote class="rule"><strong>规则 13</strong>：同项目任务名唯一。</blockquote>
+  <blockquote class="rule"><strong>规则 14</strong>：一模板可多任务 — 可提供「资源浪费」软提示。</blockquote>
+  <blockquote class="rule"><strong>规则 15</strong>：执行时使用<strong>任务快照配置</strong>（模板段落与图表参数的副本），模板后续变更不改变已排队任务语义。</blockquote>
+  <blockquote class="rule"><strong>规则 16</strong>：失败<strong>自动重试 ≤2 次</strong>，间隔 5 分钟（服务端策略；与推送「不重试钉钉配置错」可按渠道分支）。</blockquote>
+
+  <h5>6.2 新增/编辑弹窗</h5>
+  <figure class="fig-ph"><img src=".attachments/schedule-form.png" alt="定时任务表单" /><figcaption>![界面截图：任务表单](.attachments/schedule-form.png) · 兼容 <code class="mono">report-schedule-form-dialog.png</code></figcaption></figure>
+  <p>600px；三块：<strong>基本信息 / 执行周期 / 推送设置</strong>。动态表单：每日→TimePicker；每周→ weekday；每月→号数；Cron→表达式 + 示例；勾选邮件→收件人必填（正则）；钉钉→可选 @。</p>
+  <p><strong>渠道来源</strong>：<code class="mono">GET /api/notification/channels?status=enabled</code>（与前端 <code class="mono">notify-method</code> 配置对齐）。</p>
+
+  <table class="fld"><thead><tr><th>ID</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-SF-01</td><td>每周一 09:00</td><td>列表文案正确展示</td></tr>
+    <tr><td>TC-SF-02</td><td>非法 Cron</td><td>「Cron 表达式无效」</td></tr>
+    <tr><td>TC-SF-03</td><td>勾选邮件无收件人</td><td>阻止提交</td></tr>
+    <tr><td>TC-SC-01</td><td>新建每日任务</td><td>启用且下次可见</td></tr>
+    <tr><td>TC-SC-02</td><td>手动执行成功</td><td>历史中新增记录</td></tr>
+    <tr><td>TC-SC-03</td><td>邮件服务错误</td><td>历史记失败原因，任务仍启用，重试策略符合规则16</td></tr>
+  </tbody></table>
+
+  <figure class="fig-ph"><img src=".attachments/schedule-history-drawer.png" alt="执行历史抽屉" /><figcaption>![界面截图：执行历史](.attachments/schedule-history-drawer.png) · 兼容 <code class="mono">report-schedule-execution-history-drawer.png</code></figcaption></figure>
+
+  <h5>6.4 执行历史抽屉</h5>
+  <p>宽度 800px；<code class="mono">GET /api/report/schedules/{id}/history?page=…</code>；分页倒序。</p>
+  <blockquote class="rule"><strong>规则 20</strong>：手动触发<strong>不改变</strong> Cron 下期计划。</blockquote>
+  <blockquote class="rule"><strong>规则 21</strong>：执行日志保留建议 <strong>60 天</strong>。</blockquote>
+  <blockquote class="rule"><strong>规则 22</strong>：每次执行落<strong>独立报告文件</strong>快照，不因模板改版影响历史下载。</blockquote>
+
+  <table class="fld"><thead><tr><th>ID</th><th>When</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-SH-01</td><td>成功后开历史</td><td>可下载报告</td></tr>
+    <tr><td>TC-SH-02</td><td>失败</td><td>展示失败原因</td></tr>
+  </tbody></table>
+
+  <figure class="fig-ph"><img src=".attachments/report-schedule-push-integration.png" alt="推送设置" /><figcaption>推送整合 UI：<code class="mono">report-schedule-push-integration.png</code></figcaption></figure>
+
+  <h4 id="rr-v27">7 · 推送方式整合</h4>
+  <ul>
+    <li><strong>7.1 数据来源</strong>：渠道由 <strong>通知方式配置</strong> 统一管理；表单多选调用 <code class="mono">GET /api/notification/channels?status=enabled</code>。</li>
+    <li><strong>7.2 邮件</strong>：SMTP 在渠道 config；定时执行读渠道发带附件邮件；主题 <code class="mono">【风险报告】{任务名} - {区间}</code>；正文摘要 + 链接/附件。</li>
+    <li><strong>7.3 钉钉</strong>：Webhook Markdown；手机号 @。</li>
+    <li><strong>7.4 异常</strong>：推送失败写执行历史；<strong>报告文件仍可生成完成</strong>（partial）。钉钉配置<strong>不重试</strong>（与用户文一致）。</li>
+  </ul>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TC-PS-01</td><td>收件人收到带 PDF（或约定格式）附件/链接</td></tr>
+    <tr><td>TC-PS-02</td><td>Webhook 失效→历史可见原因且不无限重试</td></tr>
+  </tbody></table>
+
+  <h4 id="rr-v28">8 · 非功能性需求（风险报告）</h4>
+  <table class="fld"><thead><tr><th>项</th><th>要求</th></tr></thead><tbody>
+    <tr><td>8.1 性能</td><td>单月粒度预览 HTML ≤5s；PDF ≤10s；执行加<strong>分布式锁</strong>防重入。</td></tr>
+    <tr><td>8.2 安全</td><td>JWT；下载鉴权本项目；收件人可加<strong>域名白名单</strong>。</td></tr>
+    <tr><td>8.3 可维护</td><td>模板/任务支持 JSON <strong>导入导出</strong>；历史日志清理脚本。</td></tr>
+  </tbody></table>
+
+  <h4 id="rr-v29">9 · 数据库表结构参考（V2.0 草案）</h4>
+  <pre class="flow">CREATE TABLE report_template (
+  id VARCHAR(32) PRIMARY KEY,
+  tenant_id VARCHAR(32) NOT NULL,
+  name VARCHAR(64) NOT NULL,
+  type VARCHAR(10) NOT NULL,
+  config JSON NOT NULL,
+  status TINYINT DEFAULT 1,
+  create_time DATETIME,
+  update_time DATETIME
+);
+CREATE TABLE report_history (
+  id VARCHAR(32) PRIMARY KEY,
+  tenant_id VARCHAR(32) NOT NULL,
+  template_id VARCHAR(32),
+  file_path VARCHAR(255),
+  file_size INT,
+  generate_time DATETIME,
+  date_range_start DATE,
+  date_range_end DATE
+);
+CREATE TABLE schedule_task (
+  id VARCHAR(32) PRIMARY KEY,
+  tenant_id VARCHAR(32) NOT NULL,
+  name VARCHAR(64) NOT NULL,
+  template_id VARCHAR(32) NOT NULL,
+  cron VARCHAR(64) NOT NULL,
+  push_channels JSON,
+  email_receivers TEXT,
+  dingtalk_mentions VARCHAR(255),
+  status TINYINT DEFAULT 1,
+  create_time DATETIME,
+  update_time DATETIME
+);
+CREATE TABLE schedule_execution_log (
+  id VARCHAR(32) PRIMARY KEY,
+  task_id VARCHAR(32) NOT NULL,
+  execute_time DATETIME,
+  status VARCHAR(20),
+  result_message TEXT,
+  file_size INT,
+  push_result JSON,
+  INDEX idx_task (task_id)
+);</pre>
+
+  <h4 id="rr-v210">10 · API 样例补充</h4>
+  <p><strong>生成</strong> <code class="mono">POST /api/report/generate</code></p>
+  <pre class="flow">响应 200：
+{
+  "code": 200,
+  "data": {
+    "htmlContent": "&lt;div&gt;...&lt;/div&gt;",
+    "fileName": "标准周报_2026-05-01_2026-05-07"
+  }
+}</pre>
+  <p><strong>立即执行</strong> <code class="mono">POST /api/report/schedules/{id}/execute</code></p>
+  <pre class="flow">{ "code": 200, "message": "任务已开始执行" }</pre>
+
+  <h4 id="rr-v211">11 · 图示占位汇总（含与旧文件名兼容）</h4>
+  <table class="fld"><thead><tr><th>页面/弹窗</th><th>V2.0 主文件名</th><th>可选用历史文件名</th></tr></thead><tbody>
+    <tr><td>模板列表</td><td>report-template-list.png</td><td>—</td></tr>
+    <tr><td>模板编辑弹窗</td><td>report-template-form.png</td><td>report-template-form-dialog.png</td></tr>
+    <tr><td>快速生成</td><td>report-quick-generate.png</td><td>report-center-quick-generate.png / report-center-preview-toolbar.png</td></tr>
+    <tr><td>历史列表</td><td>report-history-list.png</td><td>report-my-reports-panel.png</td></tr>
+    <tr><td>定时任务列表</td><td>schedule-list.png</td><td>report-schedule-list.png</td></tr>
+    <tr><td>任务表单</td><td>schedule-form.png</td><td>report-schedule-form-dialog.png</td></tr>
+    <tr><td>执行历史抽屉</td><td>schedule-history-drawer.png</td><td>report-schedule-execution-history-drawer.png</td></tr>
+    <tr><td>立即执行确认</td><td>—</td><td>report-schedule-execute-confirm.png</td></tr>
+    <tr><td>错误/Toast 示意</td><td>—</td><td>report-errors-toast-overview.png</td></tr>
+  </tbody></table>
+
+  <h4>Mermaid · 模板/任务与执行摘要</h4>
+  <pre class="mermaid">stateDiagram-v2
+    [*] --> enabled: create
+    enabled --> disabled: off
+    disabled --> enabled: on
+    state run {
+      [*] --> Pending: enqueue
+      Pending --> Locked: acquire lock
+      Locked --> Delivering: generate + push
+      Delivering --> success: all ok
+      Delivering --> partial: push fail doc ok
+      Delivering --> fail: abort
+    }</pre>
+
+  <p><strong>与当前前端实现差异对齐区</strong>：本节为产品目标规格；已实现部分见 <code class="mono">RiskReport*</code> 与 Mock，缺口（筛选分页、快照、TTL、真实下载接口等）须在迭代排期逐项关闭并在评审后更新本节「演示差距说明」勾选。</p>
+  <p><strong>代码索引</strong>：<code class="mono">RiskReportLayout.vue</code> · <code class="mono">RiskReportCenter.vue</code> · <code class="mono">RiskReportTemplatesPage.vue</code> · <code class="mono">RiskReportTemplateDialog.vue</code> · <code class="mono">RiskReportSchedulesPage.vue</code> · <code class="mono">RiskReportScheduleDialog.vue</code> · <code class="mono">riskReportShared.js</code> · <code class="mono">riskReportProjectState.js</code> · <code class="mono">scheduleExecutionMock.js</code></p>
+
+  <h3 id="sec-3-10">3.10 风险管理 › 试运行日志</h3>
+  <p><strong>路由</strong>：<code class="mono">/risk/trial-logs</code> · <code class="mono">RiskTrialLogsPage.vue</code></p>
+  <figure class="fig-ph"><img src=".attachments/risk-trial-logs.png" alt="试运行日志" /><figcaption>.attachments/risk-trial-logs.png</figcaption></figure>
+  <p>KPI 四卡片；筛选：日期、板块、指标、是否触发、等级、结果；查询/重置/批量导出；表格与详情抽屉以 mock 结构为准。</p>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>TLG-01</td><td>筛选与分页正确</td></tr>
+    <tr><td>TLG-02</td><td>导出字段含关键审计列</td></tr>
+    <tr><td>TLG-03</td><td>详情与列表 id 对齐</td></tr>
+    <tr><td>TLG-04</td><td>项目上下文隔离</td></tr>
+    <tr><td>TLG-05</td><td>大批量导出限流或异步（上线）</td></tr>
+  </tbody></table>
+
+  <h3 id="sec-3-11">3.11 路由深链与其它</h3>
+  <figure class="fig-ph"><img src=".attachments/yuyi-deep-links.png" alt="深链示意" /><figcaption>.attachments/yuyi-deep-links.png（选配）</figcaption></figure>
+  <table class="fld"><thead><tr><th>路由</th><th>行为</th></tr></thead><tbody>
+    <tr><td><code class="mono">/event/detail/:id</code></td><td><code class="mono">EventDetailDeepLink</code> 打开 Drawer</td></tr>
+    <tr><td><code class="mono">/risk-rules</code></td><td>重定向 <code class="mono">/risk/rules</code></td></tr>
+    <tr><td><code class="mono">/workorder/detail/:id</code></td><td>占位</td></tr>
+    <tr><td><code class="mono">/risk/rules?eventCategory=</code></td><td>自事件分类回链过滤</td></tr>
+  </tbody></table>
+  <table class="fld"><thead><tr><th>ID</th><th>Then</th></tr></thead><tbody>
+    <tr><td>DL-01</td><td>深链在新开标签可独立恢复上下文或提示选项目</td></tr>
+    <tr><td>DL-02</td><td>非法 id 友好空态</td></tr>
+    <tr><td>DL-03</td><td>重定向不丢 query</td></tr>
+    <tr><td>DL-04</td><td>Drawer 与列表实例不重复</td></tr>
+    <tr><td>DL-05</td><td>分享 URL 可文档化</td></tr>
+  </tbody></table>
+</section>
+
+<section id="sec-4">
+  <h2>4 · 公共服务组件</h2>
+  <h3>4.1 通知方式与报告推送复用</h3>
+  <p><code class="mono">listMethodsForSchedulePush</code> · <code class="mono">getNotificationMethod</code>；定时任务排除 fail 渠道与（按产品）短信；与 §3.3.3、<strong>§3.9「推送整合」</strong>一致。</p>
+  <h3>4.2 事件详情 Drawer</h3>
+  <p>全局挂载；与实时事件、消息中心联动；<code class="mono">EventDetailDrawer.vue</code>。</p>
+  <h3>4.3 消息中心</h3>
+  <p><code class="mono">MessageCenterDrawer</code> · <code class="mono">src/api/notification.js</code> · <code class="mono">VITE_MOCK_NOTIFICATIONS</code>。</p>
+  <h3>4.4 文件上传与导出</h3>
+  <p>报告导出当前多模拟；上线：PDF/Excel 临时 URL、STS、大小限制。</p>
+  <h3>4.5 导入导出规范</h3>
+  <p>规则 JSON、本项目模板 JSON；字段以各页 export 实现为准。</p>
+  <h3>4.6 定时执行引擎（目标架构）</h3>
+  <p>调度器 → 报告服务 → 通知网关 → <code class="mono">schedule_execution_log</code>；详规与 DDL 参见 <strong>§3.9</strong> 与 §5.3。</p>
+</section>
+
+<section id="sec-5">
+  <h2>5 · 数据字典</h2>
+  <table class="fld"><thead><tr><th>枚举/常量</th><th>说明</th></tr></thead><tbody>
+    <tr><td>事件等级</td><td>high / medium / low / urgent…</td></tr>
+    <tr><td>规则等级</td><td><code class="mono">RULE_LEVEL_OPTIONS</code></td></tr>
+    <tr><td>报告周期</td><td><code class="mono">PERIOD_OPTIONS</code></td></tr>
+    <tr><td>任务 cycle</td><td>daily / weekly_mon / monthly_1 / cron</td></tr>
+    <tr><td>执行 status</td><td>success / fail / partial</td></tr>
+    <tr><td>通知类型</td><td>ding / mail / wework / sms</td></tr>
+  </tbody></table>
+  <table class="fld"><thead><tr><th>localStorage Key</th><th>用途</th></tr></thead><tbody>
+    <tr><td><code class="mono">yuyi-current-project-id</code></td><td>当前项目</td></tr>
+    <tr><td><code class="mono">yuyi-risk-report-proj-{id}</code></td><td>报告四队列</td></tr>
+    <tr><td><code class="mono">yuyi-notification-methods-v2</code></td><td>通知方式</td></tr>
+  </tbody></table>
+  <blockquote class="note"><strong>与 §3.9 关系</strong>：§3.9「9 · 数据库表结构参考」为风险报告 PRD <strong>V2.0（2026-05-08）草案</strong>（<code class="mono">tenant_id</code>、拆分日期域等）；下表为另一套工程示例字段，以实现选型评审为准，可择优合并建模。</blockquote>
+  <h3>5.3 目标表 DDL（报告域，示例）</h3>
+  <pre class="flow">CREATE TABLE report_template (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  type VARCHAR(16) NOT NULL COMMENT 'day/week/month',
+  config JSON NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'enabled',
+  is_system TINYINT(1) NOT NULL DEFAULT 0,
+  project_id BIGINT NULL,
+  create_time DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_time DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+);
+CREATE TABLE report_history (
+  id VARCHAR(64) PRIMARY KEY,
+  template_id VARCHAR(64) NOT NULL,
+  file_path VARCHAR(512) NOT NULL,
+  file_size BIGINT,
+  generate_time DATETIME(3) NOT NULL,
+  date_range JSON NOT NULL,
+  project_id BIGINT NOT NULL
+);
+CREATE TABLE schedule_task (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(160) NOT NULL,
+  template_id VARCHAR(64) NOT NULL,
+  cron VARCHAR(64) NOT NULL,
+  push_channels JSON NOT NULL,
+  email_receivers VARCHAR(1024),
+  dingtalk_mentions VARCHAR(512),
+  status VARCHAR(16) NOT NULL DEFAULT 'enabled',
+  project_id BIGINT NOT NULL
+);
+CREATE TABLE schedule_execution_log (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  task_id VARCHAR(64) NOT NULL,
+  execute_time DATETIME(3) NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  result_message TEXT,
+  file_size BIGINT,
+  push_result JSON
+);
+CREATE TABLE notification_channel (
+  id VARCHAR(64) PRIMARY KEY,
+  type VARCHAR(32) NOT NULL,
+  name VARCHAR(128) NOT NULL,
+  config JSON NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'enabled'
+);</pre>
+</section>
+
+<section id="sec-6">
+  <h2>6 · 非功能性需求</h2>
+  <table class="fld"><thead><tr><th>维度</th><th>要求</th></tr></thead><tbody>
+    <tr><td>性能</td><td>Axios timeout 15s；长列表分页；看板 Lazy tab；<strong>报告域</strong>补充见 §3.9「风险报告 · 非功能性需求」。</td></tr>
+    <tr><td>安全</td><td>Bearer Token；RBAC 后端兜底；敏感配置不明文日志</td></tr>
+    <tr><td>可维护</td><td><code class="mono">Vue.config.errorHandler</code> · <code class="mono">router.onError</code></td></tr>
+    <tr><td>兼容</td><td>Chromium/Edge/Firefox 最新两大版本；≥1280×720</td></tr>
+  </tbody></table>
+</section>
+
+<section id="sec-7">
+  <h2>7 · 验收测试标准（节选）</h2>
+  <pre class="flow">场景：项目上下文隔离
+  假设 用户在顶栏切换项目
+  那么 报告任务与执行日志存储键切换且无交叉数据
+
+场景：定时任务执行-邮件未配置
+  假设 邮件 SMTP 或收件人为空
+  当 立即执行
+  那么 toast 与历史状态为 fail 或 partial 且文案准确
+
+场景：非超管访问事件分类
+  给定 isSystemSuperAdmin 为 false
+  当 打开 /risk/event-categories
+  那么 页面阻止维护并提示
+
+场景：工作台导出权限
+  给定 isAdmin 为 false
+  那么 「导出当前列表」disabled</pre>
+  <p><strong>回归提示</strong>：改动 <code class="mono">request.js</code>、<code class="mono">useCurrentProject</code>、<code class="mono">riskReportShared</code>、<code class="mono">scheduleExecutionMock</code>、<code class="mono">LeftMenu</code>、规则保存冲突等，须跑 §3 冒烟与报告全流程。</p>
+</section>
+
+<section id="sec-8">
+  <h2>8 · 附录</h2>
+  <h3>8.1 菜单树（摘要）</h3>
+  <p>首页；资产/物业/运营/能源（占位）；<strong>安全管理</strong>（实时事件、推送配置、通知方式）；<strong>工作台</strong>五视图；<strong>风险管理</strong>（看板、指标、规则、事件分类、报告三子页、试运行日志）；系统设置（占位）。</p>
+  <h3>8.2 API 快速参考（前端已声明）</h3>
+  <table class="fld"><thead><tr><th>方法</th><th>URL</th><th>说明</th></tr></thead><tbody>
+    <tr><td>GET</td><td><code class="mono">/risk/dashboard</code></td><td>看板</td></tr>
+    <tr><td>GET/POST…</td><td><code class="mono">/risk/rules</code> 等</td><td>规则 CRUD（以代码为准）</td></tr>
+    <tr><td>POST</td><td><code class="mono">/workorder/create-from-event/{eventId}</code></td><td>事件转工单</td></tr>
+    <tr><td>GET/PUT</td><td><code class="mono">/notifications/*</code></td><td>消息</td></tr>
+  </tbody></table>
+  <h3>8.3 图示占位文件清单（本 HTML 引用）</h3>
+  <table class="fld"><thead><tr><th>文件名</th><th>章节</th></tr></thead><tbody>
+    <tr><td>yuyi-product-flow-overview.png</td><td>§2</td></tr>
+    <tr><td>yuyi-app-shell.png</td><td>§3.0</td></tr>
+    <tr><td>module-placeholder.png</td><td>§3.1</td></tr>
+    <tr><td>dashboard-home.png</td><td>§3.2</td></tr>
+    <tr><td>security-realtime-events.png … notify-methods.png</td><td>§3.3</td></tr>
+    <tr><td>workbench-five-views.png</td><td>§3.4</td></tr>
+    <tr><td>risk-dashboard.png … risk-rule-templates-tab.png</td><td>§3.5–3.7</td></tr>
+    <tr><td>risk-event-categories.png</td><td>§3.8</td></tr>
+    <tr><td>report-* / schedule-* / report-template-form.png / report-quick-generate.png / report-history-list.png 等（V2.0 主文件名与旧名兼容）</td><td>§3.9</td></tr>
+    <tr><td>risk-trial-logs.png · yuyi-deep-links.png</td><td>§3.10–3.11</td></tr>
+  </tbody></table>
+  <h3>8.4 变更记录</h3>
+  <table class="fld"><thead><tr><th>版本</th><th>日期</th><th>说明</th></tr></thead><tbody>
+    <tr><td>V1.0</td><td>2026-05-07</td><td>主 Markdown 全量逆向</td></tr>
+    <tr><td>V1.0-patch3</td><td>2026-05-07</td><td>风险报告极尽详版分册</td></tr>
+    <tr><td><strong>V2.0-merged-html</strong></td><td>2026-05-07</td><td><strong>总 PRD 单一 HTML</strong>：合并 §3 全模块详尽附图 + §4–§8；评审入口 <code class="mono">PRD-product-requirements.html</code></td></tr>
+    <tr><td><strong>EVT-PRD-2026</strong></td><td>2026-05-08</td><td><strong>事件管理 §3.3–§3.4 详尽化</strong>；实时事件前端能力补强（KPI/URL/导出/抽屉状态机/<code class="mono">ruleName</code> 深链）；工作台与推送/通知写明与代码差异</td></tr>
+  </tbody></table>
 </section>
 
 <footer class="doc-footer">
-  <p><strong>文档版本</strong>：V2.0（功能规格增强版）· 结构面向研发拆分任务与测试用例。</p>
-  <p><strong>维护</strong>：产品负责人 · 若与实现不一致，以评审会结论更新本页并升版号。</p>
+  <p><strong>本文件</strong>：<code class="mono">docs/PRD-product-requirements.html</code>（详尽全量合并版）</p>
+  <p><strong>维护</strong>：优先改 Markdown 分册后对拍本节；或直接维护本 HTML 时回写主本。</p>
 </footer>
 
 </body>

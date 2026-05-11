@@ -49,7 +49,7 @@
                 {{ eventSourceLabel(ev.source) }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="事件分类">{{ ev.categoryLabel }}</el-descriptions-item>
+            <el-descriptions-item label="事件分类">{{ categoryDisplayName }}</el-descriptions-item>
             <el-descriptions-item label="事件等级">
               <el-tag :type="levelTagType(ev.level)" size="small">{{ ev.levelLabel }}</el-tag>
             </el-descriptions-item>
@@ -110,17 +110,33 @@
           <el-button type="primary" size="small" class="mt-3" @click="openLinkedWorkOrder">查看工单</el-button>
         </el-card>
 
+        <el-card v-if="showStateActions" shadow="never" class="event-detail-card">
+          <template #header>
+            <span class="text-sm font-semibold text-gray-800">状态操作（演示）</span>
+          </template>
+          <div v-if="ev.status === 'pending'" class="space-y-3">
+            <p class="text-sm text-gray-600 m-0">可将事件置为「处理中」，并生成演示用关联工单。</p>
+            <el-button type="primary" size="small" @click="onStartProcessing">开始处理</el-button>
+          </div>
+          <div v-else-if="ev.status === 'processing'" class="space-y-3">
+            <el-button type="success" size="small" @click="onCloseEvent">闭环</el-button>
+            <p class="text-xs text-gray-500 m-0">闭环需填写处理意见</p>
+          </div>
+          <p v-else class="text-sm text-gray-500 m-0">已闭环事件无状态按钮。</p>
+        </el-card>
+
         <el-card shadow="never" class="event-detail-card">
           <template #header>
-            <span class="text-sm font-semibold text-gray-800">推送记录</span>
+            <span class="text-sm font-semibold text-gray-800">处理记录 · 推送记录</span>
           </template>
-          <ul v-if="pushLogList.length" class="m-0 pl-0 list-none space-y-2 text-sm text-gray-700">
-            <li v-for="(log, idx) in pushLogList" :key="idx">
+          <ul v-if="timelineItems.length" class="m-0 pl-0 list-none space-y-2 text-sm text-gray-700">
+            <li v-for="(log, idx) in timelineItems" :key="idx" class="border-l-2 border-slate-200 pl-2">
               <span class="text-gray-400 text-xs mr-2">{{ log.time }}</span>
+              <el-tag v-if="log.tag" size="small" class="mr-1" type="info">{{ log.tag }}</el-tag>
               {{ log.text }}
             </li>
           </ul>
-          <p v-else class="m-0 text-sm text-gray-500">暂无推送记录</p>
+          <p v-else class="m-0 text-sm text-gray-500">暂无记录</p>
         </el-card>
       </div>
 
@@ -138,21 +154,22 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { eventSourceLabel } from '@/constants/eventSource'
-import { getRealtimeEventById, buildPlaceholderEvent } from '@/data/realtimeEventsMock'
+import { getMergedRealtimeEvent, buildPlaceholderEvent, patchRealtimeEventOverlay } from '@/data/realtimeEventsMock'
+import { getEventCategoryLabel } from '@/data/eventCategories'
 import { useEventDetailStore } from '@/stores/eventDetail'
 
 const router = useRouter()
 const store = useEventDetailStore()
 const { visible, eventId } = storeToRefs(store)
 
-const drawerSize = ref('520px')
+const drawerSize = ref('800px')
 
 if (typeof window !== 'undefined') {
   const mq = window.matchMedia('(max-width: 768px)')
   const apply = () => {
-    drawerSize.value = mq.matches ? '100%' : '520px'
+    drawerSize.value = mq.matches ? '100%' : '800px'
   }
   apply()
   mq.addEventListener('change', apply)
@@ -162,7 +179,21 @@ if (typeof window !== 'undefined') {
 const ev = computed(() => {
   const id = eventId.value
   if (!id || !visible.value) return null
-  return getRealtimeEventById(id) || buildPlaceholderEvent(id)
+  return getMergedRealtimeEvent(id) || buildPlaceholderEvent(id)
+})
+
+const timelineItems = computed(() => {
+  const e = ev.value
+  if (!e) return []
+  const tl = [...(e.transitionLogs || [])]
+  const pl = [...(e.pushLogs || []).map((p) => ({ time: p.time, text: p.text, tag: '推送' }))]
+  const all = [...tl.map((x) => ({ ...x, tag: x.tag || '处理' })), ...pl]
+  return all.sort((a, b) => String(a.time).localeCompare(String(b.time)))
+})
+
+const showStateActions = computed(() => {
+  const e = ev.value
+  return Boolean(e && e.name !== '未找到事件')
 })
 
 const displayCode = computed(() => {
@@ -181,7 +212,11 @@ const assigneeDisplay = computed(() => {
   return e.currentAssigneeName || '—'
 })
 
-const pushLogList = computed(() => ev.value?.pushLogs || [])
+const categoryDisplayName = computed(() => {
+  const e = ev.value
+  if (!e) return '—'
+  return getEventCategoryLabel(e.categoryId ?? e.categoryLabel)
+})
 
 function onDrawerUpdate(v) {
   if (!v) store.close()
@@ -205,10 +240,75 @@ function sourceTagClass(s) {
   return 'bg-gray-100 !text-gray-700'
 }
 
+function formatNowLocal() {
+  const d = new Date()
+  const p = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
+}
+
+function onStartProcessing() {
+  const e = ev.value
+  if (!e?.id) return
+  ElMessageBox.confirm('确认开始处理该事件？（演示：将置为处理中并绑定演示工单）', '开始处理', {
+    type: 'warning'
+  })
+    .then(() => {
+      const t = formatNowLocal()
+      const woId = e.linkedWorkOrder?.id || `WO-DEMO-${String(Date.now()).slice(-6)}`
+      const prev = [...(e.transitionLogs || [])]
+      patchRealtimeEventOverlay(e.id, {
+        status: 'processing',
+        statusLabel: '处理中',
+        updatedTime: t,
+        linkedWorkOrder: {
+          id: woId,
+          statusLabel: '处理中',
+          assigneeName: e.linkedWorkOrder?.assigneeName || e.currentAssigneeName || '—'
+        },
+        transitionLogs: [...prev, { time: t, text: `已开始处理，关联工单 ${woId}（演示）` }]
+      })
+      ElMessage.success('状态已更新为处理中')
+    })
+    .catch(() => {})
+}
+
+function onCloseEvent() {
+  const e = ev.value
+  if (!e?.id) return
+  ElMessageBox.prompt('请填写闭环处理意见（必填）', '闭环', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /\S+/,
+    inputErrorMessage: '处理意见不能为空'
+  })
+    .then(({ value }) => {
+      const t = formatNowLocal()
+      const prev = [...(e.transitionLogs || [])]
+      const wo = e.linkedWorkOrder
+        ? { ...e.linkedWorkOrder, statusLabel: '已关闭' }
+        : null
+      patchRealtimeEventOverlay(e.id, {
+        status: 'closed',
+        statusLabel: '已闭环',
+        endTime: t,
+        closedTime: t,
+        updatedTime: t,
+        linkedWorkOrder: wo,
+        transitionLogs: [...prev, { time: t, text: `闭环完成：${value}` }]
+      })
+      ElMessage.success('事件已闭环（演示）')
+    })
+    .catch(() => {})
+}
+
 function openRuleDetail() {
   const id = ev.value?.ruleId
+  const name = ev.value?.ruleName
   if (id) {
     router.push({ name: 'RiskRules', query: { focusRule: id } }).catch(() => {})
+    store.close()
+  } else if (name) {
+    router.push({ name: 'RiskRules', query: { ruleName: name } }).catch(() => {})
     store.close()
   } else {
     ElMessage.info('当前事件无规则 ID（演示）')
@@ -222,7 +322,7 @@ function openLinkedWorkOrder() {
     return
   }
   router
-    .push({ path: '/security/workbench/repair', query: { focusWo: wo.id } })
+    .push({ path: '/security/workbench/all', query: { focusWo: wo.id } })
     .catch(() => {})
   store.close()
 }

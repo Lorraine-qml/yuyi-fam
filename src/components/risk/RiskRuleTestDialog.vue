@@ -48,7 +48,7 @@
             <span class="font-medium" :style="{ color: result.levelColor }">{{ result.levelText }}</span>
           </div>
           <div><span class="text-gray-500">触发详情：</span>{{ result.detail }}</div>
-          <div><span class="text-gray-500">事件分类：</span>{{ rule.eventCategory }}</div>
+          <div><span class="text-gray-500">事件分类：</span>{{ getEventCategoryLabel(rule.eventCategory) }}</div>
           <div v-if="rule.workOrderEnabled">
             <span class="text-gray-500">将生成工单：</span>{{ rule.workOrderType }}
           </div>
@@ -66,6 +66,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { getEventCategoryLabel } from '@/data/eventCategories'
 import { RULE_LEVEL_OPTIONS } from '@/data/riskRulesMock'
 
 const props = defineProps({

@@ -54,7 +54,11 @@
           <el-tag size="small" effect="plain">{{ levelMeta(row.level).labelShort }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="eventCategory" label="事件分类" min-width="108" show-overflow-tooltip />
+      <el-table-column label="事件分类" min-width="108" show-overflow-tooltip>
+        <template #default="{ row }">
+          {{ getEventCategoryLabel(row.eventCategory) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="120" fixed="right" align="center">
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
@@ -90,6 +94,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import RiskSystemTemplateFormDialog from '@/components/risk/RiskSystemTemplateFormDialog.vue'
 import { getSystemTemplates, deleteSystemTemplateById, systemTemplateCategoryDisplay } from '@/data/riskSystemTemplates'
+import { getEventCategoryLabel } from '@/data/eventCategories'
 import { levelMeta } from '@/data/riskRulesMock'
 
 const CATEGORY_FILTER = ['能耗', '安全', '食堂', '物业', '资产']
