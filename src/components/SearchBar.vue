@@ -1,18 +1,19 @@
 <template>
-  <div
-    class="flex flex-wrap items-center gap-3 mb-6 rounded-xl border bg-white p-4 shadow-sm"
-    style="border-color: var(--yw-border)"
-  >
-    <slot name="filters"></slot>
-    <avue-input v-model="searchKeyword" placeholder="请输入关键词" size="small" class="w-48" />
-    <avue-select v-model="searchType" :dic="typeOptions" placeholder="全部板块" size="small" clearable />
-    <avue-date v-model="dateRange" type="daterange" placeholder="选择日期范围" size="small" />
-    <el-button type="primary" size="small" @click="handleSearch">查询</el-button>
-    <el-button size="small" @click="handleReset">重置</el-button>
-    <el-button size="small" class="ml-auto" @click="handleExport">
-      <el-icon><Download /></el-icon>
-      导出
-    </el-button>
+  <div class="mb-6 rounded-xl border bg-white p-4 shadow-sm space-y-3" style="border-color: var(--yw-border)">
+    <div class="flex flex-wrap items-center gap-3">
+      <slot name="filters"></slot>
+      <avue-input v-model="searchKeyword" placeholder="请输入关键词" size="small" class="w-48" />
+      <avue-select v-model="searchType" :dic="typeOptions" placeholder="全部板块" size="small" clearable />
+      <avue-date v-model="dateRange" type="daterange" placeholder="选择日期范围" size="small" />
+      <el-button type="primary" size="small" @click="handleSearch">查询</el-button>
+      <el-button size="small" @click="handleReset">重置</el-button>
+    </div>
+    <div class="yw-list-toolbar">
+      <el-button size="small" @click="handleExport">
+        <el-icon><Download /></el-icon>
+        导出
+      </el-button>
+    </div>
   </div>
 </template>
 

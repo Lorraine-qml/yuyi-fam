@@ -1,44 +1,7 @@
 <template>
   <div class="workbench-page flex flex-col min-h-0 flex-1">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-1">
+    <div class="flex flex-col lg:flex-row lg:items-start gap-4 mb-1">
       <h1 class="text-2xl font-bold text-gray-800 m-0">事件工作台</h1>
-      <div class="flex flex-wrap items-center gap-2">
-        <el-dropdown trigger="click" placement="bottom-end" @command="onMoreCommand">
-          <el-button>
-            更多
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="export-filtered" :disabled="!isAdmin">
-                导出当前列表（与筛选结果）
-              </el-dropdown-item>
-              <el-dropdown-item command="reset-filters">重置筛选条件</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <el-dropdown v-if="viewMode !== 'closed'" trigger="click" @command="onColCommand">
-          <el-button>
-            自定义列
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="reset">恢复默认</el-dropdown-item>
-              <el-dropdown-item divided disabled>显示字段</el-dropdown-item>
-              <el-dropdown-item>
-                <el-checkbox v-model="cols.woType">工单类型</el-checkbox>
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <el-checkbox v-model="cols.deadline">处理时限</el-checkbox>
-              </el-dropdown-item>
-              <el-dropdown-item v-if="viewMode === 'initiated'">
-                <el-checkbox v-model="cols.initiator">发起人</el-checkbox>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
     </div>
 
     <el-tabs
@@ -140,6 +103,44 @@
           <el-button @click="resetFilters">重置</el-button>
         </el-form-item>
       </el-form>
+
+      <div class="yw-list-toolbar pt-3 mt-3 border-t" style="border-color: var(--yw-border)">
+        <el-dropdown trigger="click" placement="bottom-end" @command="onMoreCommand">
+          <el-button>
+            更多
+            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="export-filtered" :disabled="!isAdmin">
+                导出当前列表（与筛选结果）
+              </el-dropdown-item>
+              <el-dropdown-item command="reset-filters">重置筛选条件</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <el-dropdown v-if="viewMode !== 'closed'" trigger="click" @command="onColCommand">
+          <el-button>
+            自定义列
+            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="reset">恢复默认</el-dropdown-item>
+              <el-dropdown-item divided disabled>显示字段</el-dropdown-item>
+              <el-dropdown-item>
+                <el-checkbox v-model="cols.woType">工单类型</el-checkbox>
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <el-checkbox v-model="cols.deadline">处理时限</el-checkbox>
+              </el-dropdown-item>
+              <el-dropdown-item v-if="viewMode === 'initiated'">
+                <el-checkbox v-model="cols.initiator">发起人</el-checkbox>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
 
       <div
         v-if="viewMode === 'all'"

@@ -3,7 +3,7 @@
     <p class="text-sm text-gray-500 mb-4">
       系统预置模板（tenant_id=0）全项目可见；可复制为「本项目模板」后修改。项目模板仅当前项目可用。
     </p>
-    <div class="flex justify-end mb-4">
+    <div class="yw-list-toolbar mb-4">
       <el-button type="primary" @click="openTemplateCreate">
         <el-icon class="mr-1"><Plus /></el-icon>
         新增模板

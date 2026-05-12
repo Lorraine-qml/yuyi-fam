@@ -87,15 +87,18 @@
             </el-select>
           </el-form-item>
         </div>
-        <div class="flex flex-wrap justify-end gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <el-button type="primary" @click="runQuery">查询</el-button>
           <el-button @click="resetFilters">重置</el-button>
-          <el-button type="primary" plain @click="batchExport">
-            <el-icon class="mr-1"><Download /></el-icon>
-            批量导出
-          </el-button>
         </div>
       </div>
+    </div>
+
+    <div class="yw-list-toolbar mb-4">
+      <el-button type="primary" plain @click="batchExport">
+        <el-icon class="mr-1"><Download /></el-icon>
+        批量导出
+      </el-button>
     </div>
 
     <div

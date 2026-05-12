@@ -4,13 +4,7 @@
     <el-button type="primary" text @click="$router.push('/dashboard')">返回首页</el-button>
   </div>
   <div v-else class="event-cat-page space-y-4">
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-xl font-bold text-gray-800 m-0">事件分类管理</h1>
-      <el-button type="primary" @click="openCreate">
-        <el-icon class="mr-1"><Plus /></el-icon>
-        新增分类
-      </el-button>
-    </div>
+    <h1 class="text-xl font-bold text-gray-800 m-0">事件分类管理</h1>
 
     <div
       class="rounded-xl border bg-white p-4 shadow-sm"
@@ -38,6 +32,13 @@
           <el-button @click="onReset">重置</el-button>
         </el-form-item>
       </el-form>
+    </div>
+
+    <div class="yw-list-toolbar">
+      <el-button type="primary" @click="openCreate">
+        <el-icon class="mr-1"><Plus /></el-icon>
+        新增分类
+      </el-button>
     </div>
 
     <div

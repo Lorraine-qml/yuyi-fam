@@ -1,18 +1,6 @@
 <template>
   <div class="risk-metrics-page">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">风险指标管理</h1>
-      <div class="flex flex-wrap gap-2">
-        <el-button type="primary" @click="openCreate">
-          <el-icon class="mr-1"><Plus /></el-icon>
-          新增指标
-        </el-button>
-        <el-button @click="exportJson">
-          <el-icon class="mr-1"><Download /></el-icon>
-          导出
-        </el-button>
-      </div>
-    </div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">风险指标管理</h1>
 
     <div
       class="rounded-xl border bg-white p-4 shadow-sm mb-4"
@@ -51,6 +39,17 @@
           <el-button @click="resetFilters">重置</el-button>
         </el-form-item>
       </el-form>
+    </div>
+
+    <div class="yw-list-toolbar mb-4">
+      <el-button type="primary" @click="openCreate">
+        <el-icon class="mr-1"><Plus /></el-icon>
+        新增指标
+      </el-button>
+      <el-button @click="exportJson">
+        <el-icon class="mr-1"><Download /></el-icon>
+        导出
+      </el-button>
     </div>
 
     <div

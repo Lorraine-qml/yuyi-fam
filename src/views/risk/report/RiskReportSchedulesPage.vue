@@ -1,11 +1,10 @@
 <template>
   <div>
-    <div class="flex flex-col lg:flex-row gap-4 mb-4 lg:items-start">
-      <div
-        class="rounded-xl border bg-white p-4 shadow-sm flex-1 min-w-0"
-        style="border-color: var(--yw-border)"
-      >
-        <el-form :inline="true" class="flex flex-wrap items-end gap-x-4 gap-y-2 m-0" @submit.prevent="applyFilters">
+    <div
+      class="rounded-xl border bg-white p-4 shadow-sm mb-4"
+      style="border-color: var(--yw-border)"
+    >
+      <el-form :inline="true" class="flex flex-wrap items-end gap-x-4 gap-y-2 m-0" @submit.prevent="applyFilters">
           <el-form-item label="任务名称" class="!mb-0">
             <el-input
               v-model="filters.name"
@@ -42,13 +41,12 @@
             <el-button @click="resetFilters">重置</el-button>
           </el-form-item>
         </el-form>
-      </div>
-      <div class="shrink-0 flex justify-end lg:pt-[2px]">
-        <el-button type="primary" @click="openScheduleCreate">
-          <el-icon class="mr-1"><Plus /></el-icon>
-          新增任务
-        </el-button>
-      </div>
+    </div>
+    <div class="yw-list-toolbar mb-4">
+      <el-button type="primary" @click="openScheduleCreate">
+        <el-icon class="mr-1"><Plus /></el-icon>
+        新增任务
+      </el-button>
     </div>
     <div
       class="rounded-xl border bg-white shadow-sm overflow-hidden"

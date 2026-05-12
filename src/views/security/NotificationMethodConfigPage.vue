@@ -39,7 +39,7 @@
       style="border-color: var(--yw-border)"
     >
       <div
-        class="flex items-center justify-between gap-2 px-4 py-3 border-b"
+        class="yw-list-toolbar gap-2 px-4 py-3 border-b"
         style="border-color: var(--yw-border)"
       >
         <el-dropdown trigger="click" @command="onCreateCommand">

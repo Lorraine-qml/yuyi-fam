@@ -94,16 +94,16 @@
       class="rounded-xl border bg-white p-5 shadow-sm mb-4 min-h-[120px]"
       style="border-color: var(--yw-border)"
     >
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold text-gray-800 m-0">
           【{{ periodTitle }}预览】{{ previewMeta.subtitle }}
         </h2>
-        <div class="flex flex-wrap gap-2">
-          <el-button size="small" @click="exportCurrent('pdf')">导出 PDF</el-button>
-          <el-button size="small" @click="exportCurrent('excel')">导出 Excel</el-button>
-          <el-button size="small" @click="exportCurrent('word')">导出 Word</el-button>
-          <el-button size="small" type="primary" @click="pushDialog = true">推送</el-button>
-        </div>
+      </div>
+      <div class="yw-list-toolbar mb-4">
+        <el-button size="small" @click="exportCurrent('pdf')">导出 PDF</el-button>
+        <el-button size="small" @click="exportCurrent('excel')">导出 Excel</el-button>
+        <el-button size="small" @click="exportCurrent('word')">导出 Word</el-button>
+        <el-button size="small" type="primary" @click="pushDialog = true">推送</el-button>
       </div>
 
       <div v-if="activeSections.header" class="text-sm text-gray-500 mb-4 pb-3 border-b" style="border-color: var(--yw-border)">

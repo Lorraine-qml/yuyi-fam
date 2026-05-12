@@ -14,7 +14,7 @@
       <code class="text-xs">GET/POST/PUT/DELETE /templates/system</code>。线上由权限服务鉴权（如仅 system_admin 可写）。
     </p>
 
-    <div class="flex flex-wrap items-end gap-2 mb-4">
+    <div class="mb-4">
       <el-form :inline="true" class="flex flex-wrap items-end gap-2 !mb-0" @submit.prevent>
         <el-form-item label="模板名称" class="!mb-0">
           <el-input v-model="nameQ" clearable size="small" placeholder="关键字" class="w-40" />
@@ -30,7 +30,9 @@
           <el-button size="small" @click="resetFilters">重置</el-button>
         </el-form-item>
       </el-form>
-      <el-button type="primary" size="small" class="ml-auto max-sm:ml-0" @click="openCreate">
+    </div>
+    <div class="yw-list-toolbar mb-4">
+      <el-button type="primary" size="small" @click="openCreate">
         <el-icon class="mr-1"><Plus /></el-icon>
         新增系统模板
       </el-button>

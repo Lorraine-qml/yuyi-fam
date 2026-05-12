@@ -1,17 +1,7 @@
 <template>
   <div class="risk-rules-page">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+    <div class="mb-4">
       <h1 class="text-2xl font-bold text-gray-800">风险规则配置</h1>
-      <div v-if="mainTab === 'list'" class="flex flex-wrap gap-2">
-        <el-button type="primary" @click="openCreate">
-          <el-icon class="mr-1"><Plus /></el-icon>
-          新增规则
-        </el-button>
-        <el-button @click="exportJson">
-          <el-icon class="mr-1"><Download /></el-icon>
-          导出
-        </el-button>
-      </div>
     </div>
 
     <el-tabs v-model="mainTab" class="risk-rule-main-tabs" type="card">
@@ -101,6 +91,17 @@
               <el-button @click="resetFilters">重置</el-button>
             </el-form-item>
           </el-form>
+        </div>
+
+        <div class="yw-list-toolbar mb-3">
+          <el-button type="primary" @click="openCreate">
+            <el-icon class="mr-1"><Plus /></el-icon>
+            新增规则
+          </el-button>
+          <el-button @click="exportJson">
+            <el-icon class="mr-1"><Download /></el-icon>
+            导出
+          </el-button>
         </div>
 
         <div
@@ -202,7 +203,7 @@
           class="rounded-xl border bg-white p-4 shadow-sm mb-6 scroll-mt-4"
           style="border-color: var(--yw-border)"
         >
-          <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-3">
+          <div class="mb-3">
             <div>
               <h3 class="text-base font-semibold text-gray-800 m-0 flex items-center gap-2">
                 <span class="text-lg" aria-hidden="true">📁</span>
@@ -211,19 +212,6 @@
               <p class="text-xs text-gray-500 mt-1.5 mb-0 max-w-3xl">
                 与当前项目绑定；保存后可在下方卡片中「使用 / 编辑」。规则列表中「另存为模板」也会写入此处。
               </p>
-            </div>
-            <div v-if="canManageTemplates" class="flex flex-wrap gap-2 shrink-0 justify-end">
-              <el-button type="primary" size="small" @click="openCreateProjectTemplate">
-                <el-icon class="mr-1"><Plus /></el-icon>
-                新增模板
-              </el-button>
-              <el-button size="small" @click="openProjectTemplateExportDialog">
-                <el-icon class="mr-1"><Download /></el-icon>
-                导出
-              </el-button>
-              <el-button size="small" @click="projectTemplateManageVisible = true">
-                模板管理
-              </el-button>
             </div>
           </div>
 
@@ -253,6 +241,20 @@
               <el-button size="small" @click="resetTemplateFilters">重置</el-button>
             </el-form-item>
           </el-form>
+
+          <div v-if="canManageTemplates" class="yw-list-toolbar mb-4">
+            <el-button type="primary" size="small" @click="openCreateProjectTemplate">
+              <el-icon class="mr-1"><Plus /></el-icon>
+              新增模板
+            </el-button>
+            <el-button size="small" @click="openProjectTemplateExportDialog">
+              <el-icon class="mr-1"><Download /></el-icon>
+              导出
+            </el-button>
+            <el-button size="small" @click="projectTemplateManageVisible = true">
+              模板管理
+            </el-button>
+          </div>
 
           <div
             class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4"
@@ -294,7 +296,7 @@
 
         <!-- 系统模板（次之） -->
         <div class="rounded-xl border bg-white p-4 shadow-sm" style="border-color: var(--yw-border)">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div class="mb-3">
             <div>
               <h3 class="text-base font-semibold text-gray-800 m-0 flex items-center gap-2">
                 <span class="text-lg" aria-hidden="true">🛡</span>
@@ -304,18 +306,15 @@
                 使用标准指标类型；「使用 / 另存为模板」时需映射到本项目实际指标。
               </p>
             </div>
-            <div
-              v-if="isSystemAdmin"
-              class="flex flex-wrap gap-2 shrink-0 justify-end items-center"
-            >
-              <el-button type="primary" size="small" @click="openQuickCreateSystemTemplate">
-                <el-icon class="mr-1"><Plus /></el-icon>
-                新增系统模板
-              </el-button>
-              <el-button size="small" @click="systemTplAdminDrawerVisible = true">
-                管理系统模板
-              </el-button>
-            </div>
+          </div>
+          <div v-if="isSystemAdmin" class="yw-list-toolbar mb-4">
+            <el-button type="primary" size="small" @click="openQuickCreateSystemTemplate">
+              <el-icon class="mr-1"><Plus /></el-icon>
+              新增系统模板
+            </el-button>
+            <el-button size="small" @click="systemTplAdminDrawerVisible = true">
+              管理系统模板
+            </el-button>
           </div>
           <div
             class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4"

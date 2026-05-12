@@ -80,7 +80,7 @@
     </div>
 
     <div class="rounded-xl border bg-white p-0 shadow-sm overflow-hidden" style="border-color: var(--yw-border)">
-      <div class="flex flex-wrap items-center justify-end gap-2 px-4 py-3 border-b" style="border-color: var(--yw-border)">
+      <div class="yw-list-toolbar gap-2 px-4 py-3 border-b" style="border-color: var(--yw-border)">
         <el-button :icon="Download" :loading="exporting" @click="onExport">导出</el-button>
         <el-button :icon="Refresh" :loading="loading" @click="onRefresh">刷新</el-button>
       </div>

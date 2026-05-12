@@ -45,14 +45,12 @@
       class="rounded-xl border bg-white p-0 shadow-sm overflow-hidden"
       style="border-color: var(--yw-border)"
     >
-      <div class="flex items-center justify-between gap-2 px-4 py-3 border-b" style="border-color: var(--yw-border)">
+      <div class="yw-list-toolbar gap-2 px-4 py-3 border-b" style="border-color: var(--yw-border)">
         <el-button type="primary" @click="openCreate">
           <el-icon class="mr-1"><Plus /></el-icon>
           新增
         </el-button>
-        <div class="flex items-center gap-1">
-          <el-button :icon="Refresh" text @click="onSearch" />
-        </div>
+        <el-button :icon="Refresh" text @click="onSearch" />
       </div>
 
       <el-table :data="pagedRows" border stripe>
